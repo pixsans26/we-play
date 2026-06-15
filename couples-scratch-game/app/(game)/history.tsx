@@ -44,7 +44,7 @@ function getTaskLabel(entry: HistoryEntry): string {
   }
   if (entry.taskType === "image") {
     const imageTask = store.imageTasks.find((t) => t.id === entry.taskId);
-    return imageTask ? `Image: ${imageTask.caption}` : `Image ${entry.taskId}`;
+    return imageTask ? `Image: ${imageTask.title}` : `Image ${entry.taskId}`;
   }
   if (entry.taskType === "lottery") {
     const parts = entry.taskId.split("_");
@@ -429,17 +429,7 @@ export default function HistoryScreen() {
                       marginBottom: 12,
                     }}
                   >
-                    {imageTask.caption}
-                  </Text>
-                  <Text
-                    style={{
-                      color: theme.card.subtext,
-                      fontSize: 16,
-                      lineHeight: 24,
-                      marginBottom: 16,
-                    }}
-                  >
-                    {imageTask.reactionPrompt}
+                    {imageTask.title}
                   </Text>
                 </View>
               )}
