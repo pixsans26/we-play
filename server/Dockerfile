@@ -16,4 +16,4 @@ RUN npx tsc
 EXPOSE 4000
 
 # Start the server
-CMD ["node", "dist/index.js"]
+CMD ["npm", "start"]
