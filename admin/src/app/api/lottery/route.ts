@@ -1,39 +1,69 @@
-import { db } from "@/lib/db";
-import { lotteryCards } from "@/lib/schema";
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
-async function requireAuth() {
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+async function getBackendToken() {
   const session = await auth();
-  if (!session?.user) return false;
-  return true;
+  return session?.user ? (session.user as any).backendToken : null;
 }
 
 export async function GET() {
-  const cards = await db.select().from(lotteryCards).orderBy(lotteryCards.level);
-  return NextResponse.json(cards);
+  const token = await getBackendToken();
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const res = await fetch(`${BACKEND_URL}/api/tasks/lottery`, {
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if (!res.ok) return NextResponse.json({ error: "Failed to fetch" }, { status: res.status });
+  const data = await res.json();
+  return NextResponse.json(data);
 }
 
 export async function POST(req: Request) {
-  if (!await requireAuth()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { message, category, icon, level } = await req.json();
-  if (!message) return NextResponse.json({ error: "Message is required" }, { status: 400 });
-  const [card] = await db.insert(lotteryCards).values({ message, category: category || "romantic", icon: icon || "❤️", level: level || 1 }).returning();
-  return NextResponse.json(card, { status: 201 });
+  const token = await getBackendToken();
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await req.json();
+  const res = await fetch(`${BACKEND_URL}/api/tasks/lottery`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) return NextResponse.json({ error: "Failed to create" }, { status: res.status });
+  const data = await res.json();
+  return NextResponse.json(data, { status: 201 });
 }
 
 export async function PUT(req: Request) {
-  if (!await requireAuth()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { id, message, category, icon, level, active } = await req.json();
-  const [updated] = await db.update(lotteryCards).set({ message, category, icon, level, active }).where(eq(lotteryCards.id, id)).returning();
-  return NextResponse.json(updated);
+  const token = await getBackendToken();
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await req.json();
+  // Backend handles upsert on POST
+  const res = await fetch(`${BACKEND_URL}/api/tasks/lottery`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) return NextResponse.json({ error: "Failed to update" }, { status: res.status });
+  const data = await res.json();
+  return NextResponse.json(data);
 }
 
 export async function DELETE(req: Request) {
-  if (!await requireAuth()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const token = await getBackendToken();
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { searchParams } = new URL(req.url);
-  const id = parseInt(searchParams.get("id") || "0");
-  await db.delete(lotteryCards).where(eq(lotteryCards.id, id));
-  return NextResponse.json({ success: true });
+  const id = searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  const res = await fetch(`${BACKEND_URL}/api/tasks/lottery/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
+  if (!res.ok) return NextResponse.json({ error: "Failed to delete" }, { status: res.status });
+  const data = await res.json();
+  return NextResponse.json(data);
 }
