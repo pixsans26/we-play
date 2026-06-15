@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 // Backend handles actual DB operations now
@@ -18,7 +19,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          const res = await fetch("http://localhost:4000/api/auth/admin/login", {
+          const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/auth/admin/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

@@ -1,13 +1,15 @@
+import { env } from "@/lib/env";
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Pressable, ScrollView, Animated, Easing, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, Easing, ActivityIndicator, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
+import RenderHtml from 'react-native-render-html';
 import { apiFetch } from "@/lib/apiClient";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
 const TITLES: Record<string, string> = {
   faq: "FAQ",
@@ -22,6 +24,7 @@ export default function ContentScreen() {
   const router = useRouter();
   const isDark = useThemeStore((s) => s.isDark);
   const theme = getTheme(isDark);
+  const { width } = useWindowDimensions();
 
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -40,12 +43,12 @@ export default function ContentScreen() {
         const res = await apiFetch(`${BASE_URL}/api/config/${key}`);
         if (res.ok) {
           const data = await res.json();
-          setContent(data.value || `No content available for ${TITLES[key || ""] || key}`);
+          setContent(data.value || `<p>No content available for ${TITLES[key || ""] || key}</p>`);
         } else {
-          setContent(`No content available for ${TITLES[key || ""] || key}`);
+          setContent(`<p>No content available for ${TITLES[key || ""] || key}</p>`);
         }
       } catch (e) {
-        setContent("Failed to load content.");
+        setContent("<p>Failed to load content.</p>");
       } finally {
         setLoading(false);
       }
@@ -91,13 +94,18 @@ export default function ContentScreen() {
           {loading ? (
             <ActivityIndicator size="large" color={theme.accent} style={{ marginTop: 40 }} />
           ) : (
-            <Text style={{ 
-              color: isDark ? "#ffffff" : "#0f172a", 
-              fontSize: 16, 
-              lineHeight: 26,
-            }}>
-              {content}
-            </Text>
+            <RenderHtml
+              contentWidth={width - 92}
+              source={{ html: content }}
+              baseStyle={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 16, lineHeight: 26 }}
+              tagsStyles={{
+                a: { color: isDark ? '#818cf8' : '#4f46e5', textDecorationLine: 'underline' },
+                h1: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+                h2: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
+                h3: { fontSize: 18, fontWeight: 'bold', marginBottom: 6 },
+                p: { marginBottom: 12 }
+              }}
+            />
           )}
         </View>
       </ScrollView>

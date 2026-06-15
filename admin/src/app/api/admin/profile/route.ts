@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
@@ -10,7 +11,7 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json();
-    const res = await fetch("http://localhost:4000/api/auth/admin/profile", {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/auth/admin/profile`, {
       method: "PUT",
       headers: { 
         "Content-Type": "application/json",

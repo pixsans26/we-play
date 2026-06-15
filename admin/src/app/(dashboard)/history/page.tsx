@@ -1,4 +1,5 @@
 "use client";
+import { env } from "@/lib/env";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -16,7 +17,7 @@ interface TaskHistory {
   timeTaken: number | null;
 }
 
-const API = "http://localhost:4000/api/admin/history";
+const API = `${env.NEXT_PUBLIC_API_URL}/api/admin/history`;
 
 export default function HistoryPage() {
   const { data: session } = useSession();
@@ -59,8 +60,8 @@ export default function HistoryPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-extrabold text-slate-800 flex items-center gap-3">
-          Task History <span className="text-2xl">⏳</span>
+        <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+          Task History
         </h1>
         <div className="flex bg-white rounded-full p-1 shadow-sm border border-slate-100 hidden sm:flex">
           <div className="px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-800">

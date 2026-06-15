@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, Animated, Image, Easing, ActivityIndicator } from "react-native";
@@ -162,7 +163,7 @@ export default function ImageScratchScreen() {
         ? coupleProfile.partnerAUid ?? user.email!
         : coupleProfile.partnerBUid ?? user.email!;
 
-      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+      const BASE_URL = env.EXPO_PUBLIC_API_URL;
       const res = await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}`);
       if (res.ok) {
         const data = await res.json();
@@ -340,7 +341,7 @@ export default function ImageScratchScreen() {
       : coupleProfile.partnerBUid ?? user.email!;
 
     const result = await safeDbWrite(async () => {
-      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+      const BASE_URL = env.EXPO_PUBLIC_API_URL;
       await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}/increment-completed`, {
         method: "PATCH"
       });
@@ -438,7 +439,7 @@ export default function ImageScratchScreen() {
               style={{ flex: 1 }}
             >
               <Image
-                source={{ uri: `${process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000"}${prevTask.imageSource}` }}
+                source={{ uri: `${env.EXPO_PUBLIC_API_URL}${prevTask.imageSource}` }}
                 style={{ width: "100%", height: "100%" }}
                 resizeMode="cover"
               />
@@ -621,7 +622,7 @@ export default function ImageScratchScreen() {
                   style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 24, overflow: "hidden" }}
                 >
                   <Image
-                    source={{ uri: `${process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000"}${imageTask.imageSource}` }}
+                    source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
                     style={{ width: "100%", height: "100%" }}
                     resizeMode="cover"
                   />
@@ -655,7 +656,7 @@ export default function ImageScratchScreen() {
                 style={{ flex: 1 }}
               >
                 <Image
-                  source={{ uri: `${process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000"}${imageTask.imageSource}` }}
+                  source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
                   style={{ width: "100%", height: "100%" }}
                   resizeMode="cover"
                 />

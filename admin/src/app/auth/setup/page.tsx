@@ -84,7 +84,7 @@ export default function SetupPage() {
             style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}>
             <ShieldCheck className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight text-center">First-Time Setup</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight text-center">First-Time Setup</h1>
           <p className="text-slate-400 mt-1 text-sm text-center">Create your admin account to get started</p>
         </div>
 

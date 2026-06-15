@@ -66,7 +66,7 @@ export default function LoginPage() {
             style={{ background: "linear-gradient(135deg, #ec4899, #ef4444)" }}>
             <Heart className="w-8 h-8 text-white fill-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight text-center">WePlay</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight text-center">WePlay</h1>
           <p className="text-slate-400 mt-1 text-sm text-center">Admin Dashboard · Sign in</p>
         </div>
 
@@ -130,7 +130,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-10 px-4 rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-50 mt-2"
+              className="w-full flex items-center justify-center gap-2 py-4 px-4 rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-50 mt-2"
               style={{ background: "linear-gradient(135deg, #ec4899, #ef4444)", boxShadow: "0 8px 32px rgba(236,72,153,0.3)" }}
             >
               {loading ? (

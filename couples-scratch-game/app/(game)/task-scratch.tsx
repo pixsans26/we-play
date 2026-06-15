@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, Animated, Easing, ActivityIndicator } from "react-native";
@@ -218,7 +219,7 @@ export default function TaskScratchScreen() {
         ? coupleProfile.partnerAUid ?? user.email!
         : coupleProfile.partnerBUid ?? user.email!;
 
-      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+      const BASE_URL = env.EXPO_PUBLIC_API_URL;
       const res = await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}`);
       if (res.ok) {
         const data = await res.json();
@@ -367,7 +368,7 @@ export default function TaskScratchScreen() {
 
     if (result !== null) {
       try {
-        const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+        const BASE_URL = env.EXPO_PUBLIC_API_URL;
         await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}/increment-completed`, {
           method: "PATCH"
         });

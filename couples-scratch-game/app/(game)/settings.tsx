@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import React, { useState, useEffect, useRef } from "react";
 import {
@@ -17,7 +18,7 @@ import { useHistoryStore } from "@/store/historyStore";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
 interface SettingRowProps {
   icon: any;

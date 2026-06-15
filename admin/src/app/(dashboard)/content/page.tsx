@@ -1,10 +1,11 @@
 "use client";
+import { env } from "@/lib/env";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Save, Loader2, FileText } from "lucide-react";
 
-const API = "http://localhost:4000/api/config";
+const API = `${env.NEXT_PUBLIC_API_URL}/api/config`;
 
 const CONFIG_KEYS = [
   { key: "faq", label: "FAQ" },
@@ -72,8 +73,8 @@ export default function AppContentPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-extrabold text-slate-800 flex items-center gap-3">
-          App Content <span className="text-2xl">📝</span>
+        <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+          App Content
         </h1>
         <button onClick={handleSave} disabled={saving || loading}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-sm transition-all disabled:opacity-70">

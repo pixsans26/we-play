@@ -1,7 +1,8 @@
+import { env } from "@/lib/env";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const BACKEND_URL = env.NEXT_PUBLIC_API_URL;
 
 async function getBackendToken() {
   const session = await auth();

@@ -1,9 +1,10 @@
+import { env } from "@/lib/env";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const res = await fetch("http://localhost:4000/api/auth/admin/register", {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/auth/admin/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)

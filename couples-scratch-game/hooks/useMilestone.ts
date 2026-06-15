@@ -1,9 +1,10 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import { useCallback } from "react";
 import { UserProgress } from "@/types";
 
 const TASKS_PER_LEVEL = 10;
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
 export function calculateLevel(completedCount: number): number {
   return Math.floor(completedCount / TASKS_PER_LEVEL) + 1;

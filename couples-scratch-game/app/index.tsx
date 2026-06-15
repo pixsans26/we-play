@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import { useEffect, useState, useCallback } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -49,7 +50,7 @@ export default function EntryScreen() {
     // 3. User authenticated — check couple profile from API
     setCheckingProfile(true);
     try {
-      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+      const BASE_URL = env.EXPO_PUBLIC_API_URL;
       const res = await apiFetch(`${BASE_URL}/api/couple/${encodeURIComponent(user.email || "")}`);
       if (!res.ok) {
         setCoupleProfile(null);

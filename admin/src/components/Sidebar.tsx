@@ -21,6 +21,7 @@ const navItems = [
 const secondaryNav = [
   { href: "/history", label: "Task History", icon: History },
   { href: "/content", label: "App Content", icon: FileEdit },
+  { href: "/settings/branding", label: "App Branding", icon: Settings },
 ];
 
 export default function Sidebar() {
@@ -36,7 +37,7 @@ export default function Sidebar() {
         <div className="w-8 h-8 bg-gradient-to-tr from-[#5e51d9] to-indigo-400 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-500/30">
           <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
         </div>
-        <h1 className="font-extrabold text-slate-800 text-xl tracking-tight">untlip</h1>
+        <h1 className="font-extrabold text-slate-800 text-xl tracking-tight">WePlay Admin</h1>
       </div>
 
       {/* ── Navigation ────────────────────────────────── */}
@@ -48,11 +49,10 @@ export default function Sidebar() {
               <Link
                 key={href}
                 href={href}
-                className={`group flex items-center gap-4 py-3 px-4 mx-4 transition-all duration-300 rounded-xl ${
-                  active
+                className={`group flex items-center gap-4 py-3 px-4 mx-4 transition-all duration-300 rounded-xl ${active
                     ? "bg-[#5e51d9] text-white font-semibold shadow-lg shadow-indigo-500/20"
                     : "text-slate-500 hover:text-[#5e51d9] hover:bg-indigo-50/50 font-medium"
-                }`}
+                  }`}
               >
                 <Icon className={`w-5 h-5 shrink-0 transition-colors ${active ? "text-white" : "text-slate-400 group-hover:text-[#5e51d9]"}`} />
                 <span className="text-sm">{label}</span>
@@ -71,11 +71,10 @@ export default function Sidebar() {
               <Link
                 key={href}
                 href={href}
-                className={`group flex items-center gap-4 py-3 px-4 mx-4 transition-all duration-300 rounded-xl ${
-                  active
+                className={`group flex items-center gap-4 py-3 px-4 mx-4 transition-all duration-300 rounded-xl ${active
                     ? "bg-[#5e51d9] text-white font-semibold shadow-lg shadow-indigo-500/20"
                     : "text-slate-500 hover:text-[#5e51d9] hover:bg-indigo-50/50 font-medium"
-                }`}
+                  }`}
               >
                 <Icon className={`w-5 h-5 shrink-0 transition-colors ${active ? "text-white" : "text-slate-400 group-hover:text-[#5e51d9]"}`} />
                 <span className="text-sm">{label}</span>

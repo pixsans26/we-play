@@ -1,4 +1,5 @@
 "use client";
+import { env } from "@/lib/env";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -10,7 +11,7 @@ interface AdminProfile {
   role: string; createdAt: string;
 }
 
-const API = "http://localhost:4000/api/profile";
+const API = `${env.NEXT_PUBLIC_API_URL}/api/profile`;
 
 export default function ProfilePage() {
   const [profiles, setProfiles] = useState<AdminProfile[]>([]);
@@ -38,8 +39,8 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
          <div className="flex items-center gap-6">
-           <h1 className="text-2xl font-normal text-slate-800 tracking-tight flex items-center gap-3">
-             Admin Profiles <span className="text-[28px]">⚙️</span>
+           <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+             Admin Profile
            </h1>
            <div className="flex bg-white rounded-full p-1 shadow-sm border border-slate-100 hidden sm:flex">
              <div className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-800">

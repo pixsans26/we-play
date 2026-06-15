@@ -1,4 +1,5 @@
 "use client";
+import { env } from "@/lib/env";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -10,7 +11,7 @@ interface LotteryItem {
   columnType: string; level: number; active: boolean;
 }
 
-const API = "http://localhost:4000/api/tasks/lottery";
+const API = `${env.NEXT_PUBLIC_API_URL}/api/tasks/lottery`;
 
 const emptyForm = { id: 0, label: "", actionType: "any", columnType: "action", level: 1, active: true };
 
@@ -86,8 +87,8 @@ export default function LotteryPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
          <div className="flex items-center gap-6">
-           <h1 className="text-2xl font-normal text-slate-800 tracking-tight flex items-center gap-3">
-             Lottery Items <span className="text-[28px]">🎟️</span>
+           <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+             Lottery System
            </h1>
            <div className="flex bg-white rounded-full p-1 shadow-sm border border-slate-100 hidden sm:flex">
              <div className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-800">

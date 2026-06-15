@@ -1,4 +1,5 @@
 "use client";
+import { env } from "@/lib/env";
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -19,7 +20,7 @@ interface Couple {
   createdAt: string;
 }
 
-const API = "http://localhost:4000/api/couples";
+const API = `${env.NEXT_PUBLIC_API_URL}/api/couples`;
 
 export default function UsersPage() {
   const [couples, setCouples] = useState<Couple[]>([]);
@@ -69,8 +70,8 @@ export default function UsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
          <div className="flex items-center gap-6">
-           <h1 className="text-2xl font-normal text-slate-800 tracking-tight flex items-center gap-3">
-             Couples <span className="text-[28px]">👥</span>
+           <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+             App Users
            </h1>
            <div className="flex bg-white rounded-full p-1 shadow-sm border border-slate-100 hidden sm:flex">
              <div className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-800">

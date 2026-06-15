@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import { useState } from "react";
 import {
@@ -180,7 +181,7 @@ export default function ProfileSetupScreen() {
       const userEmail = user.email;
       const pEmail = partnerEmail.trim().toLowerCase();
 
-      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+      const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
       // Create couple profile via API
       const coupleRes = await apiFetch(`${BASE_URL}/api/couple`, {

@@ -1,9 +1,10 @@
+import { env } from "@/lib/env";
 import { auth } from "@/lib/auth";
 import DashboardClient from "./DashboardClient";
 
 async function getStats(token: string) {
   try {
-    const res = await fetch("http://localhost:4000/api/stats", {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/stats`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store" 
     });
@@ -25,7 +26,7 @@ async function getStats(token: string) {
 
 async function getRecentUsers(token: string) {
   try {
-    const res = await fetch("http://localhost:4000/api/couples", {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/couples`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store"
     });

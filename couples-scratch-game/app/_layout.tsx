@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text } from "react-native";
 import { Slot } from "expo-router";
@@ -70,7 +71,7 @@ export default function RootLayout() {
         
         if (user) {
           try {
-            const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+            const API_URL = env.EXPO_PUBLIC_API_URL;
             const res = await fetch(`${API_URL}/api/auth/token`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },

@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Animated, Easing } from "react-native";
@@ -43,7 +44,7 @@ export default function ProfileScreen() {
   async function loadProgress() {
     if (!coupleProfile) return;
     try {
-      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+      const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
       const resA = await apiFetch(`${BASE_URL}/api/progress/${coupleProfile.partnerAUid}`);
       let pA = { currentLevel: 1, scratchCount: 0, completedCount: 0 };

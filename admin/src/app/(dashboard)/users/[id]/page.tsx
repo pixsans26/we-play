@@ -1,13 +1,14 @@
 "use client";
+import { env } from "@/lib/env";
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
-import { Loader2, Save, ArrowLeft } from "lucide-react";
+import { Loader2, Save, ArrowLeft, User } from "lucide-react";
 import Link from "next/link";
 
-const API_COUPLE_BY_ID = "http://localhost:4000/api/couples";
-const API_COUPLE_SAVE = "http://localhost:4000/api/couple";
+const API_COUPLE_BY_ID = `${env.NEXT_PUBLIC_API_URL}/api/couples`;
+const API_COUPLE_SAVE = `${env.NEXT_PUBLIC_API_URL}/api/couple`;
 
 export default function EditCouplePage() {
   const params = useParams();
@@ -94,8 +95,9 @@ export default function EditCouplePage() {
           <Link href="/users" className="text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-2 mb-4">
             <ArrowLeft className="w-4 h-4" /> Back to Users
           </Link>
-          <h1 className="text-2xl font-normal text-slate-800 tracking-tight flex items-center gap-3">
-            Edit Couple Profile <span className="text-[28px]">💑</span>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+            <User className="w-8 h-8 text-indigo-500" />
+            Edit Couple Profile
           </h1>
         </div>
         <button

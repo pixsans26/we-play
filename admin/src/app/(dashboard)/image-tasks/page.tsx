@@ -1,4 +1,5 @@
 "use client";
+import { env } from "@/lib/env";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -9,8 +10,8 @@ interface ImageTask {
   level: number;
 }
 
-const API = "http://localhost:4000/api/tasks/image";
-const ASSETS = "http://localhost:4000";
+const API = `${env.NEXT_PUBLIC_API_URL}/api/tasks/image`;
+const ASSETS = `${env.NEXT_PUBLIC_API_URL}`;
 
 export default function ImageTasksPage() {
   const [tasks, setTasks] = useState<ImageTask[]>([]);
@@ -96,8 +97,8 @@ export default function ImageTasksPage() {
       {/* Header section matching reference image style */}
       <div className="flex items-center justify-between">
          <div className="flex items-center gap-6">
-           <h1 className="text-4xl font-extrabold text-slate-800 flex items-center gap-3">
-             Image Tasks <span className="text-2xl">📸</span>
+           <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+             Image Tasks
            </h1>
            <div className="flex bg-white rounded-full p-1 shadow-sm border border-slate-100 hidden sm:flex">
              <div className="px-4 py-1.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-800">

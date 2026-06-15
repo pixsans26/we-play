@@ -1,10 +1,11 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import { useCallback } from "react";
 import { selectNextTask, getCategoriesForLevel } from "@/lib/taskSelection";
 import { useGameStore } from "@/store/gameStore";
 import { HistoryEntry, Task, ImageTask } from "@/types";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+const API_URL = env.EXPO_PUBLIC_API_URL;
 
 export interface LogScratchParams {
   userUid: string;

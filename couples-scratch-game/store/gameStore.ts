@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { create } from "zustand";
 import { Task, ImageTask } from "@/types";
 import { apiFetch } from "@/lib/apiClient";
@@ -79,7 +80,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   fetchData: async () => {
     try {
-      const BASE_URL = (process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000") + "/api";
+      const BASE_URL = (env.EXPO_PUBLIC_API_URL) + "/api";
       const ts = Date.now();
       const [txt, img, spin, lot] = await Promise.all([
         apiFetch(`${BASE_URL}/tasks/text?_t=${ts}`).then(r => { if (!r.ok) throw new Error(`Text tasks failed: ${r.status}`); return r.json(); }),

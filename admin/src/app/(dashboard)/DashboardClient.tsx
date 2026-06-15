@@ -34,8 +34,8 @@ export default function DashboardClient({ stats, recentUsers }: { stats: any, re
       
       {/* ── Header ─────────────────────────────────────── */}
       <div className="flex items-center gap-8">
-        <h1 className="text-2xl font-normal text-slate-800 flex items-center gap-3">
-          Dashboard <span className="text-[28px]">😍</span>
+        <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+          Dashboard
         </h1>
         <div className="flex bg-white rounded-full shadow-sm border border-slate-100 p-1">
           <button className="px-5 py-1.5 rounded-full text-xs font-bold bg-[#5e51d9] text-white shadow-sm border border-[#5e51d9]">All Time</button>

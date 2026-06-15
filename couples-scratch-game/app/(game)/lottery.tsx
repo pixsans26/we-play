@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { apiFetch } from "@/lib/apiClient";
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, StyleSheet, Animated, Easing, Alert, Dimensions } from "react-native";
@@ -111,9 +112,9 @@ export default function LotteryScreen() {
         text: "Reset", style: "destructive", onPress: async () => {
           if (!coupleProfile) return;
           try {
-            await apiFetch(`http://localhost:4000/api/history/reset?uid=${coupleProfile.partnerAUid}`, { method: "DELETE" });
+            await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/history/reset?uid=${coupleProfile.partnerAUid}`, { method: "DELETE" });
             if (coupleProfile.partnerBUid) {
-              await apiFetch(`http://localhost:4000/api/history/reset?uid=${coupleProfile.partnerBUid}`, { method: "DELETE" });
+              await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/history/reset?uid=${coupleProfile.partnerBUid}`, { method: "DELETE" });
             }
             setLvl1Count(0);
             setLvl2Count(0);

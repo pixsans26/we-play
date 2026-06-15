@@ -1,4 +1,5 @@
 "use client";
+import { env } from "@/lib/env";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -10,7 +11,7 @@ interface SpinWheelItem {
   color: string; level: number; active: boolean;
 }
 
-const API = "http://localhost:4000/api/tasks/spin";
+const API = `${env.NEXT_PUBLIC_API_URL}/api/tasks/spin`;
 
 const emptyForm = { id: 0, label: "", emoji: "🎯", color: "#FF6B9D", level: 1, active: true };
 
@@ -80,8 +81,8 @@ export default function SpinWheelPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
          <div className="flex items-center gap-6">
-           <h1 className="text-2xl font-normal text-slate-800 tracking-tight flex items-center gap-3">
-             Spin Wheel <span className="text-[28px]">🎡</span>
+           <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+             Spin Wheel
            </h1>
            <div className="flex bg-white rounded-full p-1 shadow-sm border border-slate-100 hidden sm:flex">
              <div className="px-4 py-1.5 rounded-full text-xs font-bold text-slate-800">

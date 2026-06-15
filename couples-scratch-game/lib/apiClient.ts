@@ -1,6 +1,7 @@
+import { env } from "@/lib/env";
 import { useAuthStore } from "@/store/authStore";
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
+const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
 export const apiFetch = async (url: string, options: RequestInit = {}) => {
   const token = useAuthStore.getState().sessionToken;
