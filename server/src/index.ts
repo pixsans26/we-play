@@ -821,10 +821,10 @@ app.post("/api/upload", authenticateToken, upload.single("file"), async (req: Re
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`\n🚀 Express server running on http://localhost:${PORT}`);
-  console.log(`   Health check: http://localhost:${PORT}/health`);
-  console.log(`   Text tasks:   http://localhost:${PORT}/api/tasks/text`);
-  console.log(`   Image tasks:  http://localhost:${PORT}/api/tasks/image\n`);
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`\n🚀 Express server running on http://0.0.0.0:${PORT}`);
+  console.log(`   Health check: http://0.0.0.0:${PORT}/health`);
+  console.log(`   Text tasks:   http://0.0.0.0:${PORT}/api/tasks/text`);
+  console.log(`   Image tasks:  http://0.0.0.0:${PORT}/api/tasks/image\n`);
 });
