@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 // Backend handles actual DB operations now
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/login",
