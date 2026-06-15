@@ -1,0 +1,185 @@
+import { useState } from "react";
+import {
+  View, Text, TextInput, TouchableOpacity,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter, Link } from "expo-router";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { useThemeStore, getTheme } from "@/store/themeStore";
+import { auth } from "@/lib/firebase";
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  general?: string;
+}
+
+export function validateSignupForm(fields: { name: string; email: string; password: string; confirmPassword: string }): { isValid: boolean; errors: FormErrors } {
+  const errors: FormErrors = {};
+  if (!fields.name.trim()) errors.name = "Name is required";
+  else if (fields.name.trim().length > 50) errors.name = "Name must be 50 characters or less";
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!fields.email.trim()) errors.email = "Email is required";
+  else if (!emailRegex.test(fields.email.trim())) errors.email = "Enter a valid email address";
+  if (!fields.password) errors.password = "Password is required";
+  else if (fields.password.length < 8) errors.password = "Password must be at least 8 characters";
+  if (!fields.confirmPassword) errors.confirmPassword = "Please confirm your password";
+  else if (fields.password !== fields.confirmPassword) errors.confirmPassword = "Passwords do not match";
+  return { isValid: Object.keys(errors).length === 0, errors };
+}
+
+export default function SignupScreen() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignup = async () => {
+    const { isValid, errors: ve } = validateSignupForm({ name, email, password, confirmPassword });
+    if (!isValid) { setErrors(ve); return; }
+    setErrors({});
+    setIsLoading(true);
+    try {
+      await createUserWithEmailAndPassword(auth, email.trim(), password);
+      router.replace("/(onboarding)/profile-setup");
+    } catch (error: any) {
+      if (error?.code === "auth/email-already-in-use") setErrors({ email: "Email already in use" });
+      else if (error?.code === "auth/invalid-email") setErrors({ email: "Invalid email address" });
+      else if (error?.code === "auth/weak-password") setErrors({ password: "Password is too weak" });
+      else setErrors({ general: "Something went wrong. Please try again." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const isDark = useThemeStore((s) => s.isDark);
+  const theme = getTheme(isDark);
+
+  const fieldBorder = (err?: string) => err ? theme.error : "transparent";
+
+  return (
+    <LinearGradient colors={theme.background} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 28, paddingVertical: 48 }} keyboardShouldPersistTaps="handled">
+
+          {/* Hero */}
+          <View style={{ alignItems: "center", marginBottom: 36 }}>
+            <LinearGradient
+              colors={["#f953c6", "#7c3aed"]}
+              style={{ width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center", marginBottom: 18 }}
+            >
+              <Ionicons name="heart" size={36} color="#ffffff" />
+            </LinearGradient>
+            <Text style={{ fontSize: 30, color: theme.card.text, fontWeight: "900", marginBottom: 6, fontFamily: "DynaPuff_700Bold" }}>Create Account</Text>
+            <Text style={{ fontSize: 14, color: theme.card.subtext }}>Start your journey together ❤️</Text>
+          </View>
+
+          {/* Card */}
+          <View style={{ borderRadius: 28, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 15, elevation: 12 }}>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ padding: 24 }}>
+
+            {errors.general && (
+              <View style={{ backgroundColor: "rgba(239,68,68,0.15)", borderRadius: 12, padding: 12, marginBottom: 16 }}>
+                <Text style={{ color: "#fca5a5", textAlign: "center", fontSize: 13 }}>{errors.general}</Text>
+              </View>
+            )}
+
+            {/* Name */}
+            <View style={{ marginBottom: 14 }}>
+              <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7 }}>NAME</Text>
+              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.name), borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
+                <Ionicons name="person-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
+                <TextInput
+                  style={{ flex: 1, color: theme.card.text, fontSize: 15, paddingVertical: 13 }}
+                  placeholder="Your name" placeholderTextColor={theme.input.placeholder}
+                  value={name} onChangeText={setName} autoCapitalize="words" maxLength={50}
+                />
+              </View>
+              {errors.name && <Text style={{ color: "#fca5a5", fontSize: 11, marginTop: 4, marginLeft: 4 }}>{errors.name}</Text>}
+            </View>
+
+            {/* Email */}
+            <View style={{ marginBottom: 14 }}>
+              <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7 }}>EMAIL</Text>
+              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.email), borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
+                <Ionicons name="mail-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
+                <TextInput
+                  style={{ flex: 1, color: theme.card.text, fontSize: 15, paddingVertical: 13 }}
+                  placeholder="your@email.com" placeholderTextColor={theme.input.placeholder}
+                  value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false}
+                />
+              </View>
+              {errors.email && <Text style={{ color: "#fca5a5", fontSize: 11, marginTop: 4, marginLeft: 4 }}>{errors.email}</Text>}
+            </View>
+
+            {/* Password */}
+            <View style={{ marginBottom: 14 }}>
+              <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7 }}>PASSWORD</Text>
+              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.password), borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
+                <Ionicons name="lock-closed-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
+                <TextInput
+                  style={{ flex: 1, color: theme.card.text, fontSize: 15, paddingVertical: 13 }}
+                  placeholder="Min. 8 characters" placeholderTextColor={theme.input.placeholder}
+                  value={password} onChangeText={setPassword} secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+                  <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={17} color={theme.card.subtext} />
+                </TouchableOpacity>
+              </View>
+              {errors.password && <Text style={{ color: "#fca5a5", fontSize: 11, marginTop: 4, marginLeft: 4 }}>{errors.password}</Text>}
+            </View>
+
+            {/* Confirm Password */}
+            <View style={{ marginBottom: 26 }}>
+              <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7 }}>CONFIRM PASSWORD</Text>
+              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.confirmPassword), borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
+                <Ionicons name="shield-checkmark-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
+                <TextInput
+                  style={{ flex: 1, color: theme.card.text, fontSize: 15, paddingVertical: 13 }}
+                  placeholder="Re-enter password" placeholderTextColor={theme.input.placeholder}
+                  value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry
+                />
+              </View>
+              {errors.confirmPassword && <Text style={{ color: "#fca5a5", fontSize: 11, marginTop: 4, marginLeft: 4 }}>{errors.confirmPassword}</Text>}
+            </View>
+
+            {/* Button */}
+            <TouchableOpacity onPress={handleSignup} disabled={isLoading} activeOpacity={0.85}>
+              <LinearGradient
+                colors={["#f953c6", "#7c3aed"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={{ borderRadius: 999, paddingVertical: 17, alignItems: "center" }}
+              >
+                {isLoading
+                  ? <ActivityIndicator color="#ffffff" />
+                  : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800" }}>Create Account</Text>
+                }
+              </LinearGradient>
+            </TouchableOpacity>
+            </BlurView>
+          </View>
+
+          {/* Login link */}
+          <View style={{ marginTop: 24, alignItems: "center" }}>
+            <Text style={{ color: theme.card.subtext, fontSize: 14 }}>
+              Already have an account?{" "}</Text>
+            <Link href="/(auth)/login" asChild>
+              <TouchableOpacity>
+                <Text style={{ color: "#f953c6", fontSize: 14, fontWeight: "800" }}>Log In</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
+  );
+}
