@@ -209,7 +209,7 @@ export default function ProfileScreen() {
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
-                    {true && (
+                    {coupleProfile?.partnerAGender?.trim().toLowerCase() === "female" && (
                       <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
                         <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
                       </View>
@@ -227,7 +227,7 @@ export default function ProfileScreen() {
                   </View>
                 )}
               </View>
-              {true && (
+              {coupleProfile?.partnerAGender?.trim().toLowerCase() === "female" && (
                 <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
                   <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
                     <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
@@ -260,7 +260,7 @@ export default function ProfileScreen() {
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
-                    {true && (
+                    {coupleProfile?.partnerBGender?.trim().toLowerCase() === "female" && (
                       <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
                         <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
                       </View>
@@ -278,7 +278,7 @@ export default function ProfileScreen() {
                   </View>
                 )}
               </View>
-              {true && (
+              {coupleProfile?.partnerBGender?.trim().toLowerCase() === "female" && (
                 <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
                   <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
                     <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
