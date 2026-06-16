@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import DataTable from "@/components/DataTable";
+import EditCoupleModal from "@/components/EditCoupleModal";
 import { Users, Loader2, Search, XCircle, Heart, User, Activity } from "lucide-react";
 
 interface Couple {
@@ -299,6 +300,18 @@ export default function UsersPage() {
           </div>
         </div>
       )}
+
+      {/* Edit User Modal */}
+      <EditCoupleModal
+        isOpen={selectedUser !== null}
+        couple={selectedUser}
+        token={(session?.user as any)?.backendToken || ""}
+        onClose={() => setSelectedUser(null)}
+        onSuccess={() => {
+          setSelectedUser(null);
+          load();
+        }}
+      />
     </div>
   );
 }

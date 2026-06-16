@@ -205,9 +205,20 @@ export default function ProfileSetupScreen() {
     <View style={{ height: 250, marginVertical: 20 }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: 100 }}
+        contentContainerStyle={{ paddingVertical: 97 }}
         snapToInterval={56}
         decelerationRate="fast"
+        contentOffset={{ x: 0, y: (selectedAge - 18) * 56 }}
+        onScrollEndDrag={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const index = Math.max(0, Math.min(AGES.length - 1, Math.round(y / 56)));
+          if (AGES[index]) setAgeValue(AGES[index]);
+        }}
+        onMomentumScrollEnd={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const index = Math.max(0, Math.min(AGES.length - 1, Math.round(y / 56)));
+          if (AGES[index]) setAgeValue(AGES[index]);
+        }}
       >
         {AGES.map((item) => {
           const isSelected = item === selectedAge;
