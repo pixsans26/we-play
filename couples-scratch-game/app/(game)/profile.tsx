@@ -207,7 +207,14 @@ export default function ProfileScreen() {
                     )}
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
+                      {coupleProfile?.partnerAGender?.toLowerCase() === "female" && (
+                        <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                          <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
+                        </View>
+                      )}
+                    </View>
                     <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
                       {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
                       {coupleProfile?.partnerAAge && coupleProfile?.partnerAGender ? " · " : ""}
@@ -251,7 +258,14 @@ export default function ProfileScreen() {
                     )}
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
+                      {coupleProfile?.partnerBGender?.toLowerCase() === "female" && (
+                        <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                          <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
+                        </View>
+                      )}
+                    </View>
                     <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
                       {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
                       {coupleProfile?.partnerBAge && coupleProfile?.partnerBGender ? " · " : ""}
