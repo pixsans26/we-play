@@ -29,7 +29,7 @@ export function useSound() {
         const { sound: s3 } = await Audio.Sound.createAsync(require("@/assets/sounds/level-up.mp3"));
         levelUpSound.current = s3;
       } catch (e) {
-        console.warn("Failed to load sounds", e);
+        // Silently fail if sounds cannot be loaded (e.g. invalid files or missing audio hardware)
       }
     }
     loadSounds();

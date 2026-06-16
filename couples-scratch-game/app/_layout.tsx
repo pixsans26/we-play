@@ -1,7 +1,10 @@
 import { env } from "@/lib/env";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text } from "react-native";
+import { ActivityIndicator, View, Text, LogBox } from "react-native";
 import { Slot } from "expo-router";
+
+// Ignore all log warnings to keep the UI and terminal clean
+LogBox.ignoreAllLogs();
 import {
   useFonts,
   PlayfairDisplay_400Regular,
