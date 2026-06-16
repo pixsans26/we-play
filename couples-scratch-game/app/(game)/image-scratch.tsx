@@ -278,7 +278,7 @@ export default function ImageScratchScreen() {
     }
   }, [isFinished]);
 
-  const canSkip = !!currentTask && !isScratched && !isCompleted;
+  const canSkip = !!currentTask && !timerStarted && !isCompleted;
   const canComplete = !!currentTask && isScratched && !isCompleted;
 
   const handleSkip = useCallback(async () => {

@@ -296,7 +296,7 @@ export default function TaskScratchScreen() {
     };
   }, []);
 
-  const canSkip = !!currentTask && !isScratched && !isCompleted;
+  const canSkip = !!currentTask && !timerStarted && !isCompleted;
   const canComplete = !!currentTask && isScratched && !isCompleted;
 
   function handleScratchComplete() {
