@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
+import { apiFetch, getAvatarSource } from "@/lib/apiClient";
 import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, Pressable, Alert, Switch,
@@ -522,7 +522,7 @@ export default function SettingsScreen() {
                   <View style={{ alignItems: "center", marginBottom: 12 }}>
                     <Pressable onPress={() => { setActivePartnerAvatar("A"); setAvatarPickerVisible(true); }} style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                       {avatarA ? (
-                        <Image source={{ uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%" }} />
+                        <Image source={getAvatarSource(avatarA) as any} style={{ width: "100%", height: "100%" }} />
                       ) : (
                         <Ionicons name="camera-outline" size={24} color={isDark ? "rgba(255,255,255,0.5)" : "#9333ea"} />
                       )}
@@ -602,7 +602,7 @@ export default function SettingsScreen() {
                   <View style={{ alignItems: "center", marginBottom: 12 }}>
                     <Pressable onPress={() => { setActivePartnerAvatar("B"); setAvatarPickerVisible(true); }} style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                       {avatarB ? (
-                        <Image source={{ uri: getAvatarUrl(avatarB) || undefined }} style={{ width: "100%", height: "100%" }} />
+                        <Image source={getAvatarSource(avatarB) as any} style={{ width: "100%", height: "100%" }} />
                       ) : (
                         <Ionicons name="camera-outline" size={24} color={isDark ? "rgba(255,255,255,0.5)" : "#9333ea"} />
                       )}
@@ -703,7 +703,7 @@ export default function SettingsScreen() {
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
               {PRESET_AVATARS.map((url, i) => (
                 <Pressable key={i} onPress={() => selectPreset(url)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
-                  <Image source={{ uri: getAvatarUrl(url) || undefined }} style={{ width: "100%", height: "100%" }} />
+                  <Image source={getAvatarSource(url) as any} style={{ width: "100%", height: "100%" }} />
                 </Pressable>
               ))}
             </View>

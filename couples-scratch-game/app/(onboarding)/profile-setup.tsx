@@ -1,10 +1,10 @@
 import { env } from "@/lib/env";
-import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
+import { apiFetch, getAvatarSource } from "@/lib/apiClient";
 import { useState, useRef, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView,
   Platform, ScrollView, ActivityIndicator, Image, Modal, Pressable,
-  FlatList, Animated
+  Animated
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -201,17 +201,17 @@ export default function ProfileSetupScreen() {
 
   const renderAgeList = (selectedAge: number, setAgeValue: (a: number) => void) => (
     <View style={{ height: 250, marginVertical: 20 }}>
-      <FlatList
-        data={AGES}
-        keyExtractor={item => item.toString()}
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingVertical: 100 }}
         snapToInterval={56}
         decelerationRate="fast"
-        renderItem={({ item }) => {
+      >
+        {AGES.map((item) => {
           const isSelected = item === selectedAge;
           return (
             <TouchableOpacity
+              key={item.toString()}
               onPress={() => setAgeValue(item)}
               activeOpacity={0.7}
               style={{
@@ -230,8 +230,8 @@ export default function ProfileSetupScreen() {
               </Text>
             </TouchableOpacity>
           );
-        }}
-      />
+        })}
+      </ScrollView>
       {/* Selection overlay */}
       <View style={{
         position: "absolute", top: "50%", left: 0, right: 0,
@@ -305,7 +305,7 @@ export default function ProfileSetupScreen() {
               <View style={{ alignItems: "center", marginVertical: 40 }}>
                 <TouchableOpacity onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.8} style={{ width: 140, height: 140, borderRadius: 70, backgroundColor: theme.input.bg, borderWidth: 3, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {avatarA ? (
-                    <Image source={{ uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%" }} />
+                    <Image source={getAvatarSource(avatarA) as any} style={{ width: "100%", height: "100%" }} />
                   ) : (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                       <Ionicons name="camera-outline" size={48} color={theme.input.placeholder} />
@@ -405,7 +405,7 @@ export default function ProfileSetupScreen() {
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
               {PRESET_AVATARS.map((url, i) => (
                 <Pressable key={i} onPress={() => selectPreset(url)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
-                  <Image source={{ uri: getAvatarUrl(url) || undefined }} style={{ width: "100%", height: "100%" }} />
+                  <Image source={getAvatarSource(url) as any} style={{ width: "100%", height: "100%" }} />
                 </Pressable>
               ))}
             </View>

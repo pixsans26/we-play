@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
+import { apiFetch, getAvatarSource } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Animated, Easing, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -134,8 +134,8 @@ export default function ProfileScreen() {
             {/* Avatars */}
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 14 }}>
               <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
-                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                {getAvatarSource(coupleProfile?.partnerAAvatar) ? (
+                  <Image source={getAvatarSource(coupleProfile?.partnerAAvatar) as any} style={{ width: "100%", height: "100%" }} />
                 ) : (
                   <Text style={{ fontSize: 26 }}>👤</Text>
                 )}
@@ -144,8 +144,8 @@ export default function ProfileScreen() {
                 <Ionicons name="heart" size={18} color="#e11d48" />
               </View>
               <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
-                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                {getAvatarSource(coupleProfile?.partnerBAvatar) ? (
+                  <Image source={getAvatarSource(coupleProfile?.partnerBAvatar) as any} style={{ width: "100%", height: "100%" }} />
                 ) : (
                   <Text style={{ fontSize: 26 }}>👤</Text>
                 )}
@@ -201,8 +201,8 @@ export default function ProfileScreen() {
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "rgba(233,30,140,0.1)", alignItems: "center", justifyContent: "center" }}>
-                {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
-                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                {getAvatarSource(coupleProfile?.partnerAAvatar) ? (
+                  <Image source={getAvatarSource(coupleProfile?.partnerAAvatar) as any} style={{ width: "100%", height: "100%" }} />
                 ) : (
                   <Ionicons name="person" size={24} color={isDark ? "#fbcfe8" : "#db2777"} />
                 )}
@@ -231,8 +231,8 @@ export default function ProfileScreen() {
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "rgba(168,85,247,0.1)", alignItems: "center", justifyContent: "center" }}>
-                {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
-                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                {getAvatarSource(coupleProfile?.partnerBAvatar) ? (
+                  <Image source={getAvatarSource(coupleProfile?.partnerBAvatar) as any} style={{ width: "100%", height: "100%" }} />
                 ) : (
                   <Ionicons name="person" size={24} color={isDark ? "#e9d5ff" : "#9333ea"} />
                 )}
