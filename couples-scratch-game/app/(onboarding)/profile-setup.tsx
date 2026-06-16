@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { Asset } from "expo-asset";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useAuthStore } from "@/store/authStore";
@@ -85,9 +86,14 @@ export default function ProfileSetupScreen() {
     }
   };
 
-  const selectPreset = (url: string) => {
-    setAvatarA(url);
-    setAvatarPickerVisible(false);
+  const selectPreset = async (source: any) => {
+    try {
+      const [asset] = await Asset.loadAsync(source);
+      setAvatarA(asset.localUri || asset.uri);
+      setAvatarPickerVisible(false);
+    } catch (e) {
+      console.warn("Failed to load preset asset", e);
+    }
   };
 
   const toggleChip = (chip: string) => {
@@ -141,16 +147,12 @@ export default function ProfileSetupScreen() {
       if (prefsStr) formData.append("whatALikes", prefsStr);
 
       if (avatarA) {
-        if (avatarA.startsWith("/uploads/presets/")) {
-          formData.append("partnerAAvatarStr", avatarA);
-        } else {
-          const ext = avatarA.substring(avatarA.lastIndexOf(".") + 1) || "jpg";
-          formData.append("partnerAAvatar", {
-            uri: avatarA,
-            name: `avatar_A.${ext}`,
-            type: `image/${ext}`
-          } as any);
-        }
+        const ext = avatarA.substring(avatarA.lastIndexOf(".") + 1) || "jpg";
+        formData.append("partnerAAvatar", {
+          uri: avatarA,
+          name: `avatar_A.${ext}`,
+          type: `image/${ext}`
+        } as any);
       }
 
       // Create couple profile
@@ -404,7 +406,7 @@ export default function ProfileSetupScreen() {
             <Text style={{ color: theme.card.text, fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
               {PRESET_AVATARS_LOCAL.map((preset, i) => (
-                <Pressable key={i} onPress={() => selectPreset(preset.url)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
+                <Pressable key={i} onPress={() => selectPreset(preset.source)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
                   <Image source={preset.source} style={{ width: "100%", height: "100%" }} />
                 </Pressable>
               ))}

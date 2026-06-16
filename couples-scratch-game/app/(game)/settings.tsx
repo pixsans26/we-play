@@ -6,9 +6,11 @@ import {
   Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform, Animated, Easing
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView as ExpoBlurView } from "expo-blur";
 import { BlurView } from "@/components/CustomBlurView";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { Asset } from "expo-asset";
 import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { signOut } from "firebase/auth";
@@ -21,6 +23,13 @@ import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 
 const BASE_URL = env.EXPO_PUBLIC_API_URL;
+
+const PRESET_AVATARS_LOCAL = [
+  { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.png") },
+  { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.png") },
+  { url: "/uploads/presets/avatar_cat.png", source: require("@/assets/images/avatars/avatar_cat.png") },
+  { url: "/uploads/presets/avatar_dog.png", source: require("@/assets/images/avatars/avatar_dog.png") },
+];
 
 interface SettingRowProps {
   icon: any;
@@ -89,6 +98,10 @@ export default function SettingsScreen() {
   const [avatarB, setAvatarB] = useState(coupleProfile?.partnerBAvatar ?? null);
   const [savingProfile, setSavingProfile] = useState(false);
 
+  // Avatar picker modal state
+  const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
+  const [activePartnerAvatar, setActivePartnerAvatar] = useState<"A" | "B" | null>(null);
+
   const pickImage = async (setAvatar: (uri: string) => void) => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -98,6 +111,19 @@ export default function SettingsScreen() {
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
       setAvatar(result.assets[0].uri);
+      setAvatarPickerVisible(false);
+    }
+  };
+
+  const selectPreset = async (source: any) => {
+    try {
+      const [asset] = await Asset.loadAsync(source);
+      const uri = asset.localUri || asset.uri;
+      if (activePartnerAvatar === "A") setAvatarA(uri);
+      if (activePartnerAvatar === "B") setAvatarB(uri);
+      setAvatarPickerVisible(false);
+    } catch (e) {
+      console.warn("Failed to load preset asset", e);
     }
   };
 
@@ -493,7 +519,7 @@ export default function SettingsScreen() {
                 <View style={{ gap: 10 }}>
                   {/* Avatar A Selection */}
                   <View style={{ alignItems: "center", marginBottom: 12 }}>
-                    <Pressable onPress={() => pickImage(setAvatarA)} style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                    <Pressable onPress={() => { setActivePartnerAvatar("A"); setAvatarPickerVisible(true); }} style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                       {avatarA ? (
                         <Image source={{ uri: avatarA }} style={{ width: "100%", height: "100%" }} />
                       ) : (
@@ -573,7 +599,7 @@ export default function SettingsScreen() {
                 <View style={{ gap: 10 }}>
                   {/* Avatar B Selection */}
                   <View style={{ alignItems: "center", marginBottom: 12 }}>
-                    <Pressable onPress={() => pickImage(setAvatarB)} style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                    <Pressable onPress={() => { setActivePartnerAvatar("B"); setAvatarPickerVisible(true); }} style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                       {avatarB ? (
                         <Image source={{ uri: avatarB }} style={{ width: "100%", height: "100%" }} />
                       ) : (
@@ -666,6 +692,29 @@ export default function SettingsScreen() {
           </LinearGradient>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* ── Avatar Picker Modal ── */}
+      <Modal visible={avatarPickerVisible} animationType="fade" transparent onRequestClose={() => setAvatarPickerVisible(false)}>
+        <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }} onPress={() => setAvatarPickerVisible(false)}>
+          <Pressable style={{ width: "100%", backgroundColor: isDark ? "#1e293b" : "#ffffff", borderRadius: 24, padding: 24, alignItems: "center" }}>
+            <Text style={{ color: isDark ? "#fff" : "#0f172a", fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
+            
+            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
+              {PRESET_AVATARS_LOCAL.map((preset, i) => (
+                <Pressable key={i} onPress={() => selectPreset(preset.source)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
+                  <Image source={preset.source} style={{ width: "100%", height: "100%" }} />
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable onPress={() => pickImage(activePartnerAvatar === "A" ? setAvatarA : setAvatarB)} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#f1f5f9" }}>
+              <Ionicons name="image-outline" size={20} color={isDark ? "#fff" : "#3b82f6"} />
+              <Text style={{ color: isDark ? "#fff" : "#3b82f6", fontWeight: "700" }}>Upload from Gallery</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
     </LinearGradient>
   );
 }
