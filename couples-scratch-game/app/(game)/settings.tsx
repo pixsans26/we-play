@@ -163,6 +163,43 @@ export default function SettingsScreen() {
     );
   }
 
+  function handleDeleteAccount() {
+    if (!user?.email) return;
+    const userEmailStr = user.email;
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? This will permanently delete your couple profile and all your progress. This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const res = await apiFetch(`${BASE_URL}/api/couple/uid/${userEmailStr}`, {
+                method: "DELETE"
+              });
+              if (res.ok) {
+                // Wipe local state
+                await resetHistory(userEmailStr);
+                if (coupleProfile?.partnerBUid) await resetHistory(coupleProfile.partnerBUid);
+                setHistoryAll([]);
+                setCoupleProfile(null);
+                await signOut(auth);
+                Alert.alert("Account Deleted", "Your account has been successfully deleted.");
+              } else {
+                Alert.alert("Error", "Failed to delete account. Please try again.");
+              }
+            } catch (err) {
+              console.warn("Delete account error:", err);
+              Alert.alert("Error", "Could not delete account. Please try again later.");
+            }
+          }
+        }
+      ]
+    );
+  }
+
   async function handleSaveProfile() {
     if (!coupleProfile) return;
     const trimA = nameA.trim();
@@ -182,7 +219,7 @@ export default function SettingsScreen() {
       if (likesB.trim()) formData.append("whatBLikes", likesB.trim());
 
       if (avatarA && avatarA !== coupleProfile.partnerAAvatar) {
-        const ext = avatarA.substring(avatarA.lastIndexOf(".") + 1) || "jpg";
+        const ext = (avatarA as string).substring((avatarA as string).lastIndexOf(".") + 1) || "jpg";
         formData.append("partnerAAvatar", {
           uri: avatarA,
           name: `avatar_A.${ext}`,
@@ -191,7 +228,7 @@ export default function SettingsScreen() {
       }
       
       if (avatarB && avatarB !== coupleProfile.partnerBAvatar) {
-        const ext = avatarB.substring(avatarB.lastIndexOf(".") + 1) || "jpg";
+        const ext = (avatarB as string).substring((avatarB as string).lastIndexOf(".") + 1) || "jpg";
         formData.append("partnerBAvatar", {
           uri: avatarB,
           name: `avatar_B.${ext}`,
@@ -408,10 +445,14 @@ export default function SettingsScreen() {
             <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 11 }}>Version 1.0.0</Text>
           </View>
 
-          {/* Logout Button */}
-          <View style={{ alignItems: "center", marginTop: 32 }}>
-            <Pressable onPress={handleLogout} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)" })}>
-              <Text style={{ color: "#ef4444", fontSize: 13, fontWeight: "700" }}>Log Out</Text>
+          {/* Logout & Delete Buttons */}
+          <View style={{ alignItems: "center", marginTop: 32, gap: 16 }}>
+            <Pressable onPress={handleLogout} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" })}>
+              <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 13, fontWeight: "700" }}>Log Out</Text>
+            </Pressable>
+            
+            <Pressable onPress={handleDeleteAccount} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)" })}>
+              <Text style={{ color: "#ef4444", fontSize: 13, fontWeight: "700" }}>Delete Account</Text>
             </Pressable>
           </View>
         </ScrollView>

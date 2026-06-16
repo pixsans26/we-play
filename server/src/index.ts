@@ -776,6 +776,66 @@ app.patch("/api/couple/:uid", authenticateToken, async (req: Request, res: Respo
   }
 });
 
+app.delete("/api/couple/uid/:uid", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const uid = String(req.params.uid);
+    const [existing] = await db.select().from(couple).where(
+      sql`${couple.partnerAUid} = ${uid} OR ${couple.partnerBUid} = ${uid}`
+    );
+
+    if (!existing) {
+      return res.status(404).json({ error: "Couple profile not found" });
+    }
+
+    const uids = [existing.partnerAUid, existing.partnerBUid].filter(Boolean) as string[];
+
+    // Delete task history and progress
+    if (uids.length > 0) {
+      await db.delete(taskHistory).where(inArray(taskHistory.userUid, uids));
+      await db.delete(userProgress).where(inArray(userProgress.userUid, uids));
+    }
+
+    // Delete couple
+    await db.delete(couple).where(eq(couple.id, existing.id));
+
+    broadcastAdminEvent({ type: "USER_DELETED", message: `A user deleted their account: ${existing.partnerAName}` });
+    
+    res.json({ success: true, deleted: true });
+  } catch (err) {
+    console.error("[DELETE /api/couple/uid/:uid]", err);
+    res.status(500).json({ error: "Failed to delete couple profile" });
+  }
+});
+
+app.delete("/api/couple/id/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const [existing] = await db.select().from(couple).where(eq(couple.id, id));
+
+    if (!existing) {
+      return res.status(404).json({ error: "Couple profile not found" });
+    }
+
+    const uids = [existing.partnerAUid, existing.partnerBUid].filter(Boolean) as string[];
+
+    // Delete task history and progress
+    if (uids.length > 0) {
+      await db.delete(taskHistory).where(inArray(taskHistory.userUid, uids));
+      await db.delete(userProgress).where(inArray(userProgress.userUid, uids));
+    }
+
+    // Delete couple
+    await db.delete(couple).where(eq(couple.id, id));
+
+    broadcastAdminEvent({ type: "USER_DELETED", message: `Admin deleted an account: ${existing.partnerAName}` });
+    
+    res.json({ success: true, deleted: true });
+  } catch (err) {
+    console.error("[DELETE /api/couple/id/:id]", err);
+    res.status(500).json({ error: "Failed to delete couple profile" });
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // USER PROGRESS
 // ─────────────────────────────────────────────────────────────────────────────

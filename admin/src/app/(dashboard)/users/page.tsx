@@ -103,7 +103,27 @@ export default function UsersPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <DataTable
             data={paginated}
-            onDelete={async () => { alert("Cannot delete couples from dashboard yet."); }}
+            onDelete={async (id) => {
+              if (window.confirm(`Are you sure you want to completely delete this account? This cannot be undone.`)) {
+                try {
+                  const token = (session?.user as any)?.backendToken;
+                  const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/couple/id/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                      'Authorization': `Bearer ${token}`
+                    }
+                  });
+                  if (res.ok) {
+                    await load();
+                  } else {
+                    alert("Failed to delete user account.");
+                  }
+                } catch (e) {
+                  console.error(e);
+                  alert("Error deleting user account.");
+                }
+              }
+            }}
             onEdit={(couple) => { setSelectedUser(couple as Couple); }}
             emptyMessage="No couples found."
             columns={[
