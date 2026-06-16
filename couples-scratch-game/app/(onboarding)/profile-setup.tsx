@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { apiFetch, getAvatarSource } from "@/lib/apiClient";
+import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
 import { useState, useRef, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView,
@@ -14,11 +14,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 
-const PRESET_AVATARS = [
-  "/uploads/presets/avatar_boy.png",
-  "/uploads/presets/avatar_girl.png",
-  "/uploads/presets/avatar_cat.png",
-  "/uploads/presets/avatar_dog.png",
+const PRESET_AVATARS_LOCAL = [
+  { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.png") },
+  { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.png") },
+  { url: "/uploads/presets/avatar_cat.png", source: require("@/assets/images/avatars/avatar_cat.png") },
+  { url: "/uploads/presets/avatar_dog.png", source: require("@/assets/images/avatars/avatar_dog.png") },
 ];
 
 const PREFERENCE_CHIPS = [
@@ -305,7 +305,7 @@ export default function ProfileSetupScreen() {
               <View style={{ alignItems: "center", marginVertical: 40 }}>
                 <TouchableOpacity onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.8} style={{ width: 140, height: 140, borderRadius: 70, backgroundColor: theme.input.bg, borderWidth: 3, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {avatarA ? (
-                    <Image source={getAvatarSource(avatarA) as any} style={{ width: "100%", height: "100%" }} />
+                    <Image source={PRESET_AVATARS_LOCAL.find(p => p.url === avatarA)?.source || { uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%" }} />
                   ) : (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                       <Ionicons name="camera-outline" size={48} color={theme.input.placeholder} />
@@ -403,9 +403,9 @@ export default function ProfileSetupScreen() {
           <Pressable style={{ width: "100%", backgroundColor: theme.card.bg, borderRadius: 24, padding: 24, alignItems: "center", borderWidth: 1, borderColor: theme.card.border }}>
             <Text style={{ color: theme.card.text, fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
-              {PRESET_AVATARS.map((url, i) => (
-                <Pressable key={i} onPress={() => selectPreset(url)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
-                  <Image source={getAvatarSource(url) as any} style={{ width: "100%", height: "100%" }} />
+              {PRESET_AVATARS_LOCAL.map((preset, i) => (
+                <Pressable key={i} onPress={() => selectPreset(preset.url)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
+                  <Image source={preset.source} style={{ width: "100%", height: "100%" }} />
                 </Pressable>
               ))}
             </View>

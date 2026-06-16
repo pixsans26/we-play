@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { apiFetch, getAvatarSource } from "@/lib/apiClient";
+import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { View, Text, Pressable, ScrollView, Image, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -126,8 +126,8 @@ export default function MainGameScreen() {
         </View>
         <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden" }}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-            {getAvatarSource(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) ? (
-              <Image source={getAvatarSource(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) as any} style={{ width: "100%", height: "100%" }} />
+            {getAvatarUrl(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) ? (
+              <Image source={{ uri: getAvatarUrl(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
             ) : (
               <Ionicons name="person" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
             )}
