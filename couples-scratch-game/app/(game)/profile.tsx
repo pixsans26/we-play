@@ -197,104 +197,104 @@ export default function ProfileScreen() {
 
           {/* Partner A card */}
           <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 12 }}>
-              <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-                  <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "rgba(233,30,140,0.1)", alignItems: "center", justifyContent: "center" }}>
-                    {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
-                      <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
-                    ) : (
-                      <Ionicons name="person" size={24} color={isDark ? "#fbcfe8" : "#db2777"} />
-                    )}
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
-                      {coupleProfile?.partnerAGender?.toLowerCase() === "female" && (
-                        <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                          <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
-                      {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
-                      {coupleProfile?.partnerAAge && coupleProfile?.partnerAGender ? " · " : ""}
-                      {coupleProfile?.partnerAGender ?? ""}
-                    </Text>
-                  </View>
-                  {isPartnerA && (
-                    <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
-                      <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
-                    </View>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "rgba(233,30,140,0.1)", alignItems: "center", justifyContent: "center" }}>
+                  {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
+                    <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                  ) : (
+                    <Ionicons name="person" size={24} color={isDark ? "#fbcfe8" : "#db2777"} />
                   )}
                 </View>
-                {coupleProfile?.partnerAGender?.toLowerCase() === "female" && (
-                  <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
-                    <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
-                      <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
-                        <Ionicons name="calendar" size={16} color="#ec4899" />
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
+                    {true && (
+                      <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                        <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
-                        <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(76,5,25,0.6)", fontSize: 11, marginTop: 2, fontWeight: "600" }}>Track your cycle</Text>
-                      </View>
-                      <View style={{ backgroundColor: "rgba(236,72,153,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-                        <Text style={{ color: "#ec4899", fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Coming Soon</Text>
-                      </View>
-                    </View>
+                    )}
+                  </View>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
+                    {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
+                    {coupleProfile?.partnerAAge && coupleProfile?.partnerAGender ? " · " : ""}
+                    {coupleProfile?.partnerAGender ?? ""}
+                  </Text>
+                </View>
+                {isPartnerA && (
+                  <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
+                    <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
                   </View>
                 )}
-              </BlurView>
+              </View>
+              {true && (
+                <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
+                  <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
+                      <Ionicons name="calendar" size={16} color="#ec4899" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
+                      <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(76,5,25,0.6)", fontSize: 11, marginTop: 2, fontWeight: "600" }}>Track your cycle</Text>
+                    </View>
+                    <View style={{ backgroundColor: "rgba(236,72,153,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+                      <Text style={{ color: "#ec4899", fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Coming Soon</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </BlurView>
           </View>
 
           {/* Partner B card */}
           <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 20 }}>
-              <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-                  <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "rgba(168,85,247,0.1)", alignItems: "center", justifyContent: "center" }}>
-                    {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
-                      <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
-                    ) : (
-                      <Ionicons name="person" size={24} color={isDark ? "#e9d5ff" : "#9333ea"} />
-                    )}
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
-                      {coupleProfile?.partnerBGender?.toLowerCase() === "female" && (
-                        <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                          <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
-                      {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
-                      {coupleProfile?.partnerBAge && coupleProfile?.partnerBGender ? " · " : ""}
-                      {coupleProfile?.partnerBGender ?? ""}
-                    </Text>
-                  </View>
-                  {!isPartnerA && (
-                    <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
-                      <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
-                    </View>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "rgba(168,85,247,0.1)", alignItems: "center", justifyContent: "center" }}>
+                  {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
+                    <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                  ) : (
+                    <Ionicons name="person" size={24} color={isDark ? "#e9d5ff" : "#9333ea"} />
                   )}
                 </View>
-                {coupleProfile?.partnerBGender?.toLowerCase() === "female" && (
-                  <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
-                    <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
-                      <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
-                        <Ionicons name="calendar" size={16} color="#ec4899" />
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
+                    {true && (
+                      <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                        <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
-                        <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(76,5,25,0.6)", fontSize: 11, marginTop: 2, fontWeight: "600" }}>Track your cycle</Text>
-                      </View>
-                      <View style={{ backgroundColor: "rgba(236,72,153,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-                        <Text style={{ color: "#ec4899", fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Coming Soon</Text>
-                      </View>
-                    </View>
+                    )}
+                  </View>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
+                    {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
+                    {coupleProfile?.partnerBAge && coupleProfile?.partnerBGender ? " · " : ""}
+                    {coupleProfile?.partnerBGender ?? ""}
+                  </Text>
+                </View>
+                {!isPartnerA && (
+                  <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
+                    <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
                   </View>
                 )}
-              </BlurView>
+              </View>
+              {true && (
+                <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
+                  <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
+                      <Ionicons name="calendar" size={16} color="#ec4899" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
+                      <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(76,5,25,0.6)", fontSize: 11, marginTop: 2, fontWeight: "600" }}>Track your cycle</Text>
+                    </View>
+                    <View style={{ backgroundColor: "rgba(236,72,153,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+                      <Text style={{ color: "#ec4899", fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Coming Soon</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </BlurView>
           </View>
 
           {/* Account */}
