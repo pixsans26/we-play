@@ -617,17 +617,17 @@ export default function ImageScratchScreen() {
           {!isScratched && imageTask ? (
             <View style={{ width: "100%" }}>
               <ScratchCard onScratchComplete={handleScratchComplete}>
-                <LinearGradient
-                  colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
-                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                  style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden" }}
-                >
-                  <Image
-                    source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
-                    style={{ width: "100%", height: "100%" }}
-                    resizeMode="cover"
-                  />
-                </LinearGradient>
+                  <LinearGradient
+                    colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
+                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                    style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden", padding: 16 }}
+                  >
+                    <Image
+                      source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
+                      style={{ width: "100%", height: "100%", borderRadius: 16 }}
+                      resizeMode="cover"
+                    />
+                  </LinearGradient>
               </ScratchCard>
             </View>
           ) : isScratched && imageTask ? (
@@ -636,18 +636,18 @@ export default function ImageScratchScreen() {
               aspectRatio: 4 / 5,
               borderRadius: 32, overflow: "hidden", opacity: revealOpacity,
             }}>
-              <LinearGradient
-                colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                style={{ flex: 1 }}
-              >
-                <Image
-                  source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
-                  style={{ width: "100%", height: "100%" }}
-                  resizeMode="cover"
-                />
-                {/* Timer overlay at bottom of image */}
-                {timerStarted && (
+                <LinearGradient
+                  colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                  style={{ flex: 1, padding: 16 }}
+                >
+                  <Image
+                    source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
+                    style={{ width: "100%", height: "100%", borderRadius: 16 }}
+                    resizeMode="cover"
+                  />
+                  {/* Timer overlay at bottom of image */}
+                  {timerStarted && (
                   <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: "rgba(0,0,0,0.65)", alignItems: "center" }}>
                     <Animated.Text style={[
                       { fontSize: 36, fontWeight: "900", fontFamily: "DynaPuff_700Bold", color: timeLeft <= 10 ? "#f87171" : "#ffffff" },
