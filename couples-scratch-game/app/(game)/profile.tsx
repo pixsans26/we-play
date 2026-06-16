@@ -197,7 +197,6 @@ export default function ProfileScreen() {
 
           {/* Partner A card */}
           <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 12 }}>
-            <Pressable onPress={() => router.push({ pathname: "/(game)/partner-profile", params: { partner: "A" } })} style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
                   <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "rgba(233,30,140,0.1)", alignItems: "center", justifyContent: "center" }}>
@@ -221,13 +220,24 @@ export default function ProfileScreen() {
                     </View>
                   )}
                 </View>
+                {coupleProfile?.partnerAGender?.toLowerCase() === "female" && (
+                  <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
+                    <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
+                      <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
+                        <Ionicons name="calendar" size={16} color="#ec4899" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
+                        <Text style={{ color: "#ec4899", fontSize: 11, fontWeight: "700" }}>COMING SOON</Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
               </BlurView>
-            </Pressable>
           </View>
 
           {/* Partner B card */}
           <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 20 }}>
-            <Pressable onPress={() => router.push({ pathname: "/(game)/partner-profile", params: { partner: "B" } })} style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
                   <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "rgba(168,85,247,0.1)", alignItems: "center", justifyContent: "center" }}>
@@ -251,8 +261,20 @@ export default function ProfileScreen() {
                     </View>
                   )}
                 </View>
+                {coupleProfile?.partnerBGender?.toLowerCase() === "female" && (
+                  <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
+                    <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
+                      <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
+                        <Ionicons name="calendar" size={16} color="#ec4899" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
+                        <Text style={{ color: "#ec4899", fontSize: 11, fontWeight: "700" }}>COMING SOON</Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
               </BlurView>
-            </Pressable>
           </View>
 
           {/* Account */}

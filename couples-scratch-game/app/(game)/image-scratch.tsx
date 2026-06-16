@@ -621,11 +621,11 @@ export default function ImageScratchScreen() {
                 <LinearGradient
                   colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                  style={{ flex: 1, padding: 8, borderRadius: 32, overflow: "hidden" }}
+                  style={{ flex: 1, padding: 8, borderRadius: 16, overflow: "hidden" }}
                 >
                   <Image
                     source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
-                    style={{ width: "100%", height: "100%", borderRadius: 16, backgroundColor: "#1e1b4b" }}
+                    style={{ width: "100%", height: "100%", borderRadius: 24, backgroundColor: "#1e1b4b" }}
                     resizeMode="contain"
                   />
                 </LinearGradient>
