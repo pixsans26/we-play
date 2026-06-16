@@ -136,7 +136,7 @@ export default function ImageScratchScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchData().catch(() => {});
+      fetchData().catch(() => { });
     }, [fetchData])
   );
 
@@ -439,7 +439,8 @@ export default function ImageScratchScreen() {
             style={{
               width: "100%",
               aspectRatio: 4 / 5,
-              borderRadius: 32, overflow: "hidden", }}
+              borderRadius: 32, overflow: "hidden",
+            }}
           >
             <LinearGradient
               colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
@@ -497,7 +498,7 @@ export default function ImageScratchScreen() {
           You've completed all Hidden Moments cards. Tell your partner to add more fun photos!
         </Text>
         <Pressable onPress={() => router.back()} style={{ borderRadius: 999, overflow: "hidden" }}>
-          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 32, paddingVertical: 16, borderRadius: 999, overflow: "hidden"}}>
+          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 32, paddingVertical: 16, borderRadius: 999, overflow: "hidden" }}>
             <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Go Back</Text>
           </BlurView>
         </Pressable>
@@ -535,7 +536,7 @@ export default function ImageScratchScreen() {
 
         {/* ── TOP HEADER: Close × top-right ── */}
         <View style={{ alignItems: "flex-end", marginBottom: 12 }}>
-          <Pressable onPress={handleGoBack} style={{ borderRadius: 32, overflow: "hidden"}}>
+          <Pressable onPress={handleGoBack} style={{ borderRadius: 32, overflow: "hidden" }}>
             <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 36, height: 36, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
               <Ionicons name="close" size={18} color={isDark ? "#ffffff" : "#042f2e"} />
             </BlurView>
@@ -617,17 +618,17 @@ export default function ImageScratchScreen() {
           {!isScratched && imageTask ? (
             <View style={{ width: "100%" }}>
               <ScratchCard onScratchComplete={handleScratchComplete}>
-                  <LinearGradient
-                    colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
-                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                    style={{ flex: 1, padding: 24, borderRadius: 32, overflow: "hidden" }}
-                  >
-                    <Image
-                      source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
-                      style={{ width: "100%", height: "100%", borderRadius: 16 }}
-                      resizeMode="cover"
-                    />
-                  </LinearGradient>
+                <LinearGradient
+                  colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                  style={{ flex: 1, padding: 8, borderRadius: 32, overflow: "hidden" }}
+                >
+                  <Image
+                    source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
+                    style={{ width: "100%", height: "100%", borderRadius: 16, backgroundColor: "#ffffff" }}
+                    resizeMode="contain"
+                  />
+                </LinearGradient>
               </ScratchCard>
             </View>
           ) : isScratched && imageTask ? (
@@ -636,49 +637,49 @@ export default function ImageScratchScreen() {
               aspectRatio: 4 / 5,
               borderRadius: 32, overflow: "hidden", opacity: revealOpacity,
             }}>
-                <LinearGradient
-                  colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
-                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                  style={{ flex: 1, padding: 24 }}
-                >
-                  <View style={{ flex: 1, borderRadius: 16, overflow: "hidden" }}>
-                    <Image
-                      source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
-                      style={{ width: "100%", height: "100%" }}
-                      resizeMode="cover"
-                    />
-                    {/* Timer overlay at bottom of image */}
-                    {timerStarted && (
-                      <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: "rgba(0,0,0,0.65)", alignItems: "center" }}>
-                        <Animated.Text style={[
-                          { fontSize: 36, fontWeight: "900", fontFamily: "DynaPuff_700Bold", color: timeLeft <= 10 ? "#f87171" : "#ffffff" },
-                          timeLeft <= 10 ? { opacity: pulseOpacity } : undefined,
-                        ]}>
-                          {formattedTime}
-                        </Animated.Text>
-                        {timerFinished ? (
-                          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                            <Ionicons name="alarm-outline" size={16} color="#4ade80" />
-                            <Text style={{ color: "#4ade80", fontSize: 16, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Time's up!</Text>
-                          </View>
-                        ) : (
-                          <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>
-                            {turnName} must complete the action!
-                          </Text>
-                        )}
-                      </View>
-                    )}
-                    {/* Pre-timer hint */}
-                    {!timerStarted && (
-                      <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 12, backgroundColor: "rgba(0,0,0,0.65)", alignItems: "center" }}>
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                          <Ionicons name="timer-outline" size={14} color="#10b981" />
-                          <Text style={{ color: "#10b981", fontSize: 13, fontWeight: "700" }}>Timer starts in 10s…</Text>
+              <LinearGradient
+                colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                style={{ flex: 1, padding: 8 }}
+              >
+                <View style={{ flex: 1, borderRadius: 16, overflow: "hidden", backgroundColor: "#ffffff" }}>
+                  <Image
+                    source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
+                    style={{ width: "100%", height: "100%", padding: 20 }}
+                    resizeMode="contain"
+                  />
+                  {/* Timer overlay at bottom of image */}
+                  {timerStarted && (
+                    <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: "rgba(0,0,0,0.65)", alignItems: "center" }}>
+                      <Animated.Text style={[
+                        { fontSize: 36, fontWeight: "900", fontFamily: "DynaPuff_700Bold", color: timeLeft <= 10 ? "#f87171" : "#ffffff" },
+                        timeLeft <= 10 ? { opacity: pulseOpacity } : undefined,
+                      ]}>
+                        {formattedTime}
+                      </Animated.Text>
+                      {timerFinished ? (
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                          <Ionicons name="alarm-outline" size={16} color="#4ade80" />
+                          <Text style={{ color: "#4ade80", fontSize: 16, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Time's up!</Text>
                         </View>
+                      ) : (
+                        <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>
+                          {turnName} must complete the action!
+                        </Text>
+                      )}
+                    </View>
+                  )}
+                  {/* Pre-timer hint */}
+                  {!timerStarted && (
+                    <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 12, backgroundColor: "rgba(0,0,0,0.65)", alignItems: "center" }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        <Ionicons name="timer-outline" size={14} color="#10b981" />
+                        <Text style={{ color: "#10b981", fontSize: 13, fontWeight: "700" }}>Timer starts in 10s…</Text>
                       </View>
-                    )}
-                  </View>
-                </LinearGradient>
+                    </View>
+                  )}
+                </View>
+              </LinearGradient>
             </Animated.View>
           ) : null}
         </View>
@@ -695,7 +696,7 @@ export default function ImageScratchScreen() {
               colors={["#e91e8c", "#7c3aed"] as any}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 999, overflow: "hidden"}}
+              style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 999, overflow: "hidden" }}
             >
               <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
               <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Complete</Text>
