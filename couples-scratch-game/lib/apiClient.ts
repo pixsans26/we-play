@@ -16,3 +16,10 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
 
   return fetch(url, { ...options, headers });
 };
+
+export const getAvatarUrl = (path?: string | null) => {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  if (path.startsWith("file://") || path.startsWith("data:")) return path;
+  return `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+};

@@ -205,7 +205,7 @@ export default function SpinWheelScreen() {
             <Ionicons name="arrow-back" size={24} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>
         </Pressable>
-        <Text style={[styles.headerTitle, { color: isDark ? "#ffffff" : "#4c0519", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }]}>Spin Wheel</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? "#ffffff" : "#4c0519", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }]}>Fate Wheel</Text>
         <View style={{ width: 44 }} />
       </View>
 

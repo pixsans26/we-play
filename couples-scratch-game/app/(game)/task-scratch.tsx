@@ -3,7 +3,7 @@ import { apiFetch } from "@/lib/apiClient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, Animated, Easing, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 import { useAuthStore } from "@/store/authStore";
@@ -85,6 +85,7 @@ export default function TaskScratchScreen() {
   );
   const switchTurn = useGameStore((s) => s.switchTurn);
   const updateStreak = useGameStore((s) => s.updateStreak);
+  const fetchData = useGameStore((s) => s.fetchData);
   const resetGameStore = useGameStore((s) => s.reset);
 
   // Theme
@@ -186,6 +187,12 @@ export default function TaskScratchScreen() {
       setTimerFinished(true);
     }
   }, [isFinished]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData().catch(() => {});
+    }, [fetchData])
+  );
 
   // Load scratch counts from DB
   const loadScratchCounts = useCallback(async () => {

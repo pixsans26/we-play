@@ -22,8 +22,8 @@ export default function DataTable<T extends { id: string | number }>({
   data, columns, onDelete, onEdit, emptyMessage = "No records found."
 }: Props<T>) {
   const [deleteId, setDeleteId] = useState<string | number | null>(null);
-  
-  // Sorting state
+
+  // Sorting stater
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortAsc, setSortAsc] = useState<boolean>(true);
 
@@ -40,11 +40,11 @@ export default function DataTable<T extends { id: string | number }>({
     if (!sortCol) return 0;
     const aVal = a[sortCol];
     const bVal = b[sortCol];
-    
+
     if (aVal === bVal) return 0;
     if (aVal === null || aVal === undefined) return sortAsc ? 1 : -1;
     if (bVal === null || bVal === undefined) return sortAsc ? -1 : 1;
-    
+
     if (typeof aVal === 'string' && typeof bVal === 'string') {
       return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     }
@@ -59,8 +59,8 @@ export default function DataTable<T extends { id: string | number }>({
             <thead>
               <tr className="bg-slate-50">
                 {columns.map(col => (
-                  <th 
-                    key={String(col.key)} 
+                  <th
+                    key={String(col.key)}
                     onClick={() => handleSort(String(col.key))}
                     className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition select-none"
                   >

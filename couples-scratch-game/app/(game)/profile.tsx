@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Pressable, ScrollView, Animated, Easing } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, Easing, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -133,14 +133,22 @@ export default function ProfileScreen() {
           >
             {/* Avatars */}
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 14 }}>
-              <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center" }}>
-                <Text style={{ fontSize: 26 }}>👤</Text>
+              <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
+                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                ) : (
+                  <Text style={{ fontSize: 26 }}>👤</Text>
+                )}
               </View>
               <View style={{ marginHorizontal: -8, width: 36, height: 36, borderRadius: 32, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.4)", alignItems: "center", justifyContent: "center", zIndex: 1 }}>
                 <Ionicons name="heart" size={18} color="#e11d48" />
               </View>
-              <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center" }}>
-                <Text style={{ fontSize: 26 }}>👤</Text>
+              <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
+                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                ) : (
+                  <Text style={{ fontSize: 26 }}>👤</Text>
+                )}
               </View>
             </View>
             <Text style={{ color: "#ffffff", fontSize: 22, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 4, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
@@ -161,14 +169,14 @@ export default function ProfileScreen() {
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 32, overflow: "hidden", padding: 12, alignItems: "center" }}>
               <Ionicons name="image-outline" size={20} color={isDark ? "#60a5fa" : "#2563eb"} style={{ marginBottom: 6 }} />
               <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold", flexShrink: 1 }} numberOfLines={1}>{imageCount}</Text>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 10, marginTop: 2, fontWeight: "700" }}>Image Scratch</Text>
+              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 10, marginTop: 2, fontWeight: "700" }}>Hidden Moments</Text>
             </BlurView>
           </View>
           <View style={{ width: "48%", borderRadius: 32, overflow: "hidden"}}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 32, overflow: "hidden", padding: 12, alignItems: "center" }}>
               <Ionicons name="document-text-outline" size={20} color={isDark ? "#10b981" : "#059669"} style={{ marginBottom: 6 }} />
               <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold", flexShrink: 1 }} numberOfLines={1}>{taskCount}</Text>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 10, marginTop: 2, fontWeight: "700" }}>Task Scratch</Text>
+              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 10, marginTop: 2, fontWeight: "700" }}>Love Missions</Text>
             </BlurView>
           </View>
           <View style={{ width: "48%", borderRadius: 32, overflow: "hidden"}}>
@@ -189,10 +197,15 @@ export default function ProfileScreen() {
 
         {/* Partner A card */}
         <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 12 }}>
-          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
+          <Pressable onPress={() => router.push({ pathname: "/(game)/partner-profile", params: { partner: "A" } })} style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "rgba(233,30,140,0.1)", alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name="person" size={24} color={isDark ? "#fbcfe8" : "#db2777"} />
+                {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
+                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                ) : (
+                  <Ionicons name="person" size={24} color={isDark ? "#fbcfe8" : "#db2777"} />
+                )}
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
@@ -208,15 +221,21 @@ export default function ProfileScreen() {
                 </View>
               )}
             </View>
-          </BlurView>
+            </BlurView>
+          </Pressable>
         </View>
 
         {/* Partner B card */}
         <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 20 }}>
-          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
+          <Pressable onPress={() => router.push({ pathname: "/(game)/partner-profile", params: { partner: "B" } })} style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 20 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 48, height: 48, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "rgba(168,85,247,0.1)", alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name="person" size={24} color={isDark ? "#e9d5ff" : "#9333ea"} />
+                {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
+                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                ) : (
+                  <Ionicons name="person" size={24} color={isDark ? "#e9d5ff" : "#9333ea"} />
+                )}
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
@@ -232,7 +251,8 @@ export default function ProfileScreen() {
                 </View>
               )}
             </View>
-          </BlurView>
+            </BlurView>
+          </Pressable>
         </View>
 
         {/* Account */}

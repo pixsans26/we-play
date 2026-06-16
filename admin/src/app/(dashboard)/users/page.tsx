@@ -17,6 +17,8 @@ interface Couple {
   partnerBAge: number | null;
   partnerAGender: string | null;
   partnerBGender: string | null;
+  partnerAAvatar: string | null;
+  partnerBAvatar: string | null;
   createdAt: string;
 }
 
@@ -108,7 +110,11 @@ export default function UsersPage() {
               { key: "partnerAName", label: "Partner A", render: (t) => (
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-pink-100 text-pink-700 font-bold flex items-center justify-center overflow-hidden">
-                    {t.partnerAName.charAt(0).toUpperCase()}
+                    {t.partnerAAvatar ? (
+                      <img src={`${env.NEXT_PUBLIC_API_URL}${t.partnerAAvatar}`} alt="A" className="w-full h-full object-cover" />
+                    ) : (
+                      t.partnerAName.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div>
                     <div className="font-bold text-slate-800">{t.partnerAName}</div>
@@ -121,7 +127,11 @@ export default function UsersPage() {
                   {t.partnerBName ? (
                     <>
                       <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center overflow-hidden">
-                        {t.partnerBName.charAt(0).toUpperCase()}
+                        {t.partnerBAvatar ? (
+                          <img src={`${env.NEXT_PUBLIC_API_URL}${t.partnerBAvatar}`} alt="B" className="w-full h-full object-cover" />
+                        ) : (
+                          t.partnerBName.charAt(0).toUpperCase()
+                        )}
                       </div>
                       <div>
                         <div className="font-bold text-slate-800">{t.partnerBName}</div>
@@ -168,8 +178,12 @@ export default function UsersPage() {
             
             <div className="p-6 space-y-6">
               <div className="flex items-center justify-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-3xl font-bold shadow-inner">
-                  {selectedUser.partnerAName.charAt(0).toUpperCase()}
+                <div className="w-20 h-20 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-3xl font-bold shadow-inner overflow-hidden">
+                  {selectedUser.partnerAAvatar ? (
+                    <img src={`${env.NEXT_PUBLIC_API_URL}${selectedUser.partnerAAvatar}`} alt="A" className="w-full h-full object-cover" />
+                  ) : (
+                    selectedUser.partnerAName.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="flex flex-col items-center justify-center">
                   <Heart className={`w-6 h-6 ${selectedUser.partnerBUid ? "text-rose-500 fill-rose-500" : "text-slate-300"} mb-1`} />
@@ -177,8 +191,14 @@ export default function UsersPage() {
                     {selectedUser.partnerBUid ? "Coupled" : "Pending"}
                   </span>
                 </div>
-                <div className="w-20 h-20 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-3xl font-bold shadow-inner">
-                  {selectedUser.partnerBName ? selectedUser.partnerBName.charAt(0).toUpperCase() : "?"}
+                <div className="w-20 h-20 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-3xl font-bold shadow-inner overflow-hidden">
+                  {selectedUser.partnerBName ? (
+                    selectedUser.partnerBAvatar ? (
+                      <img src={`${env.NEXT_PUBLIC_API_URL}${selectedUser.partnerBAvatar}`} alt="B" className="w-full h-full object-cover" />
+                    ) : (
+                      selectedUser.partnerBName.charAt(0).toUpperCase()
+                    )
+                  ) : "?"}
                 </div>
               </div>
 

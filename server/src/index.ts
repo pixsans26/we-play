@@ -714,11 +714,21 @@ app.post("/api/couple", authenticateToken, upload.fields([{ name: "partnerAAvata
       ...(partnerBAvatar && { partnerBAvatar })
     };
 
-    if (id) {
+    let targetId = id ? Number(id) : null;
+    
+    // If no ID is given, find by partnerAUid or partnerBUid to prevent duplicates
+    if (!targetId) {
+      const [existing] = await db.select().from(couple).where(
+        sql`${couple.partnerAUid} = ${partnerAUid} OR ${couple.partnerBUid} = ${partnerAUid}`
+      );
+      if (existing) targetId = existing.id;
+    }
+
+    if (targetId) {
       const [updated] = await db
         .update(couple)
         .set(dataToSave)
-        .where(eq(couple.id, Number(id)))
+        .where(eq(couple.id, targetId))
         .returning();
       res.json(updated);
     } else {
@@ -734,6 +744,35 @@ app.post("/api/couple", authenticateToken, upload.fields([{ name: "partnerAAvata
   } catch (err) {
     console.error("[POST /api/couple]", err);
     res.status(500).json({ error: "Failed to save couple profile" });
+  }
+});
+
+app.patch("/api/couple/:uid", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const uid = String(req.params.uid);
+    const { partnerAName, partnerBName, partnerAAge, partnerBAge, partnerAGender, partnerBGender } = req.body;
+    
+    const [existing] = await db.select().from(couple).where(
+      sql`${couple.partnerAUid} = ${uid} OR ${couple.partnerBUid} = ${uid}`
+    );
+
+    if (!existing) {
+      return res.status(404).json({ error: "Couple profile not found" });
+    }
+
+    const updates: Record<string, any> = {};
+    if (partnerAName !== undefined) updates.partnerAName = partnerAName;
+    if (partnerBName !== undefined) updates.partnerBName = partnerBName;
+    if (partnerAAge !== undefined) updates.partnerAAge = partnerAAge === null ? null : Number(partnerAAge);
+    if (partnerBAge !== undefined) updates.partnerBAge = partnerBAge === null ? null : Number(partnerBAge);
+    if (partnerAGender !== undefined) updates.partnerAGender = partnerAGender;
+    if (partnerBGender !== undefined) updates.partnerBGender = partnerBGender;
+
+    const [updated] = await db.update(couple).set(updates).where(eq(couple.id, existing.id)).returning();
+    res.json(updated);
+  } catch (err) {
+    console.error("[PATCH /api/couple/:uid]", err);
+    res.status(500).json({ error: "Failed to update couple profile" });
   }
 });
 

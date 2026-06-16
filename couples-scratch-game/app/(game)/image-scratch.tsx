@@ -3,7 +3,7 @@ import { apiFetch } from "@/lib/apiClient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, Animated, Image, Easing, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 import { useAuthStore } from "@/store/authStore";
@@ -79,6 +79,7 @@ export default function ImageScratchScreen() {
   );
   const switchTurn = useGameStore((s) => s.switchTurn);
   const updateStreak = useGameStore((s) => s.updateStreak);
+  const fetchData = useGameStore((s) => s.fetchData);
   const resetGameStore = useGameStore((s) => s.reset);
 
   // Theme
@@ -132,6 +133,12 @@ export default function ImageScratchScreen() {
     }
     return coupleProfile.partnerAName;
   }, [coupleProfile, currentTurn]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData().catch(() => {});
+    }, [fetchData])
+  );
 
   const loadScratchCounts = useCallback(async () => {
     if (!coupleProfile) return;
@@ -198,6 +205,15 @@ export default function ImageScratchScreen() {
         setCurrentTask(task);
         setNoTasksRemaining(false);
         setPerformingPartnerName(getPerformingPartnerName());
+
+        // Prefetch image so it's fully loaded before we dismiss the loading state
+        if ("imageSource" in task && task.imageSource) {
+          try {
+            await Image.prefetch(`${env.EXPO_PUBLIC_API_URL}${task.imageSource}`);
+          } catch (err) {
+            console.warn("Image prefetch failed:", err);
+          }
+        }
       } else {
         setCurrentTask(null);
         setNoTasksRemaining(true);
@@ -436,14 +452,6 @@ export default function ImageScratchScreen() {
                 style={{ width: "100%", height: "100%" }}
                 resizeMode="cover"
               />
-              <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.8)"]}
-                style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 24, paddingTop: 64, justifyContent: "flex-end" }}
-              >
-                <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
-                  {prevTask.title}
-                </Text>
-              </LinearGradient>
             </LinearGradient>
           </View>
 
@@ -486,7 +494,7 @@ export default function ImageScratchScreen() {
         <Ionicons name="camera" size={80} color={isDark ? "#ffffff" : "#042f2e"} style={{ marginBottom: 20 }} />
         <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 28, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 12 }}>All Done!</Text>
         <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 16, textAlign: "center", marginBottom: 30, lineHeight: 22 }}>
-          You've completed all Image Scratch cards. Tell your partner to add more fun photos!
+          You've completed all Hidden Moments cards. Tell your partner to add more fun photos!
         </Text>
         <Pressable onPress={() => router.back()} style={{ borderRadius: 999, overflow: "hidden" }}>
           <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 32, paddingVertical: 16, borderRadius: 999, overflow: "hidden"}}>
@@ -619,14 +627,6 @@ export default function ImageScratchScreen() {
                     style={{ width: "100%", height: "100%" }}
                     resizeMode="cover"
                   />
-                  <LinearGradient
-                    colors={["transparent", "rgba(0,0,0,0.8)"]}
-                    style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 24, paddingTop: 64, justifyContent: "flex-end" }}
-                  >
-                    <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
-                      {imageTask.title}
-                    </Text>
-                  </LinearGradient>
                 </LinearGradient>
               </ScratchCard>
             </View>
@@ -646,14 +646,6 @@ export default function ImageScratchScreen() {
                   style={{ width: "100%", height: "100%" }}
                   resizeMode="cover"
                 />
-                <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.8)"]}
-                  style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 24, paddingTop: 80, paddingBottom: 100, justifyContent: "flex-end" }}
-                >
-                  <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
-                    {imageTask.title}
-                  </Text>
-                </LinearGradient>
                 {/* Timer overlay at bottom of image */}
                 {timerStarted && (
                   <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: "rgba(0,0,0,0.65)", alignItems: "center" }}>

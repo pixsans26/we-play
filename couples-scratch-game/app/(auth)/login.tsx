@@ -9,6 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
@@ -92,7 +93,7 @@ export default function LoginScreen() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      
+
       // Save credentials for future biometric logins
       await SecureStore.setItemAsync("biometric_email", email.trim());
       await SecureStore.setItemAsync("biometric_password", password);
@@ -118,12 +119,13 @@ export default function LoginScreen() {
 
             {/* Hero */}
             <View style={{ alignItems: "center", marginBottom: 44 }}>
-              <LinearGradient
-                colors={["#f953c6", "#7c3aed"]}
-                style={{ width: 80, height: 80, borderRadius: 40, alignItems: "center", justifyContent: "center", marginBottom: 20 }}
-              >
-                <Ionicons name="heart" size={40} color="#ffffff" />
-              </LinearGradient>
+              <View style={{ width: 140, height: 140, borderRadius: 24, overflow: "hidden", marginBottom: 20 }}>
+                <Image
+                  source={require("../../assets/adaptive-icon.png")}
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="cover"
+                />
+              </View>
               <Text style={{ fontSize: 32, color: theme.card.text, fontWeight: "900", marginBottom: 6, fontFamily: "DynaPuff_700Bold" }}>
                 Welcome Back
               </Text>
@@ -139,69 +141,69 @@ export default function LoginScreen() {
                 borderRadius: 32, overflow: "hidden",
               }}>
 
-              {error && (
-                <View style={{ backgroundColor: "rgba(239,68,68,0.15)", borderWidth: 1, borderColor: "rgba(248,113,113,0.3)", borderRadius: 32, overflow: "hidden", padding: 12, marginBottom: 20 }}>
-                  <Text style={{ color: "#fca5a5", fontSize: 13, textAlign: "center" }}>{error}</Text>
-                </View>
-              )}
+                {error && (
+                  <View style={{ backgroundColor: "rgba(239,68,68,0.15)", borderWidth: 1, borderColor: "rgba(248,113,113,0.3)", borderRadius: 32, overflow: "hidden", padding: 12, marginBottom: 20 }}>
+                    <Text style={{ color: "#fca5a5", fontSize: 13, textAlign: "center" }}>{error}</Text>
+                  </View>
+                )}
 
-              {/* Email */}
-              <View style={{ marginBottom: 16 }}>
-                <Text style={{ color: theme.card.subtext, fontSize: 13, fontWeight: "700", marginBottom: 8 }}>
-                  EMAIL
-                </Text>
-                <View style={{ backgroundColor: theme.input.bg, borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}>
-                  <Ionicons name="mail-outline" size={18} color={theme.card.subtext} style={{ marginRight: 10 }} />
-                  <TextInput
-                    style={{ flex: 1, color: theme.card.text, fontSize: 16, paddingVertical: 14 }}
-                    placeholder="your@email.com"
-                    placeholderTextColor={theme.input.placeholder}
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    editable={!isLoading}
-                  />
+                {/* Email */}
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={{ color: theme.card.subtext, fontSize: 13, fontWeight: "700", marginBottom: 8 }}>
+                    EMAIL
+                  </Text>
+                  <View style={{ backgroundColor: theme.input.bg, borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}>
+                    <Ionicons name="mail-outline" size={18} color={theme.card.subtext} style={{ marginRight: 10 }} />
+                    <TextInput
+                      style={{ flex: 1, color: theme.card.text, fontSize: 16, paddingVertical: 14 }}
+                      placeholder="your@email.com"
+                      placeholderTextColor={theme.input.placeholder}
+                      value={email}
+                      onChangeText={setEmail}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={!isLoading}
+                    />
+                  </View>
                 </View>
-              </View>
 
-              {/* Password */}
-              <View style={{ marginBottom: 28 }}>
-                <Text style={{ color: theme.card.subtext, fontSize: 13, fontWeight: "700", marginBottom: 8 }}>
-                  PASSWORD
-                </Text>
-                <View style={{ backgroundColor: theme.input.bg, borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}>
-                  <Ionicons name="lock-closed-outline" size={18} color={theme.card.subtext} style={{ marginRight: 10 }} />
-                  <TextInput
-                    style={{ flex: 1, color: theme.card.text, fontSize: 16, paddingVertical: 14 }}
-                    placeholder="Enter your password"
-                    placeholderTextColor={theme.input.placeholder}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
-                    editable={!isLoading}
-                  />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
-                    <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={18} color={theme.card.subtext} />
-                  </TouchableOpacity>
+                {/* Password */}
+                <View style={{ marginBottom: 28 }}>
+                  <Text style={{ color: theme.card.subtext, fontSize: 13, fontWeight: "700", marginBottom: 8 }}>
+                    PASSWORD
+                  </Text>
+                  <View style={{ backgroundColor: theme.input.bg, borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}>
+                    <Ionicons name="lock-closed-outline" size={18} color={theme.card.subtext} style={{ marginRight: 10 }} />
+                    <TextInput
+                      style={{ flex: 1, color: theme.card.text, fontSize: 16, paddingVertical: 14 }}
+                      placeholder="Enter your password"
+                      placeholderTextColor={theme.input.placeholder}
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry={!showPassword}
+                      editable={!isLoading}
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+                      <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={18} color={theme.card.subtext} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
 
-              {/* Button */}
-              <TouchableOpacity onPress={handleLogin} disabled={isLoading} activeOpacity={0.85}>
-                <LinearGradient
-                  colors={["#f953c6", "#7c3aed"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={{ borderRadius: 999, overflow: "hidden", paddingVertical: 17, alignItems: "center" }}
-                >
-                  {isLoading
-                    ? <ActivityIndicator color="#ffffff" />
-                    : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800" }}>Log In</Text>
-                  }
-                </LinearGradient>
-              </TouchableOpacity>
+                {/* Button */}
+                <TouchableOpacity onPress={handleLogin} disabled={isLoading} activeOpacity={0.85}>
+                  <LinearGradient
+                    colors={["#f953c6", "#7c3aed"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{ borderRadius: 999, overflow: "hidden", paddingVertical: 17, alignItems: "center" }}
+                  >
+                    {isLoading
+                      ? <ActivityIndicator color="#ffffff" />
+                      : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800" }}>Log In</Text>
+                    }
+                  </LinearGradient>
+                </TouchableOpacity>
               </BlurView>
             </View>
 

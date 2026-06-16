@@ -499,7 +499,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     paddingBottom: 15,
-
+    borderWidth: 2,
+    borderColor: "#e2e8f0",
     borderBottomWidth: 0,
   },
   marqueeBg: {

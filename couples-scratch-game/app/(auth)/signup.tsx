@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Image
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, Link } from "expo-router";
@@ -73,12 +73,13 @@ export default function SignupScreen() {
 
           {/* Hero */}
           <View style={{ alignItems: "center", marginBottom: 36 }}>
-            <LinearGradient
-              colors={["#f953c6", "#7c3aed"]}
-              style={{ width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center", marginBottom: 18 }}
-            >
-              <Ionicons name="heart" size={36} color="#ffffff" />
-            </LinearGradient>
+            <View style={{ width: 100, height: 100, borderRadius: 24, overflow: "hidden", marginBottom: 18 }}>
+              <Image
+                source={require("../../assets/adaptive-icon.png")}
+                style={{ width: "100%", height: "100%" }}
+                resizeMode="cover"
+              />
+            </View>
             <Text style={{ fontSize: 30, color: theme.card.text, fontWeight: "900", marginBottom: 6, fontFamily: "DynaPuff_700Bold" }}>Create Account</Text>
             <Text style={{ fontSize: 14, color: theme.card.subtext }}>Start your journey together ❤️</Text>
           </View>

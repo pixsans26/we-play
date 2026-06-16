@@ -10,8 +10,8 @@
     "scheme": "couples-scratch-game",
     "splash": {
       "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ff2d6b"
+      "resizeMode": "cover",
+      "backgroundColor": "#290036"
     },
     "ios": {
       "supportsTablet": true,

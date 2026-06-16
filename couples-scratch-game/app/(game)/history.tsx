@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
+import { env } from "@/lib/env";
 import {
   View,
   Text,
@@ -51,10 +52,10 @@ function getTaskLabel(entry: HistoryEntry): string {
     if (parts.length >= 5) {
       return `Lvl ${parts[1]}: ${parts[2]} + ${parts[3]} + ${parts[4]}`;
     }
-    return `Love Lottery: ${entry.taskId}`;
+    return `Heart Draw: ${entry.taskId}`;
   }
   if (entry.taskType === "spin_wheel") {
-    return `Spin Wheel: ${entry.taskId}`;
+    return `Fate Wheel: ${entry.taskId}`;
   }
   return `Task ${entry.taskId}`;
 }
@@ -313,10 +314,11 @@ export default function HistoryScreen() {
         transparent={true}
         onRequestClose={() => setSelectedEntry(null)}
       >
-        <View style={{ flex: 1, justifyContent: "flex-end" }}>
-          <View
+        <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <LinearGradient
+            colors={theme.background as [string, string, ...string[]]}
+            locations={[0, 0.5, 1]}
             style={{
-              backgroundColor: theme.card.bg,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
               borderTopWidth: 1,
@@ -367,7 +369,7 @@ export default function HistoryScreen() {
                     color={theme.card.subtext}
                   />
                   <Text style={{ color: theme.card.subtext, fontSize: 12 }}>
-                    {isTextTask ? "Text Task" : isImageTask ? "Image Task" : isLottery ? "Love Lottery" : "Spin Wheel"}
+                    {isTextTask ? "Text Task" : isImageTask ? "Image Task" : isLottery ? "Heart Draw" : "Fate Wheel"}
                   </Text>
                 </View>
               </View>
@@ -402,7 +404,7 @@ export default function HistoryScreen() {
               {isImageTask && imageTask && (
                 <View>
                   <Image
-                    source={imageTask.imageSource}
+                    source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
                     style={{
                       width: "100%",
                       height: 224,
@@ -424,7 +426,7 @@ export default function HistoryScreen() {
                 </View>
               )}
 
-              {/* Lottery / Spin Wheel Detail */}
+              {/* Lottery / Fate Wheel Detail */}
               {(isLottery || isSpinWheel) && (
                 <View>
                   <Text
@@ -435,7 +437,7 @@ export default function HistoryScreen() {
                       marginBottom: 12,
                     }}
                   >
-                    {isLottery ? "Love Lottery Result" : "Spin Wheel Result"}
+                    {isLottery ? "Heart Draw Result" : "Fate Wheel Result"}
                   </Text>
                   <Text
                     style={{
@@ -588,7 +590,7 @@ export default function HistoryScreen() {
               </Pressable>
 
             </ScrollView>
-          </View>
+          </LinearGradient>
         </View>
       </Modal>
     );
@@ -636,7 +638,7 @@ export default function HistoryScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 4 }}>
             {(["all", "romantic", "fun", "playful", "dare", "intimate", "lottery", "spin_wheel"] as const).map(f => {
               const isActive = filter === f;
-              const label = f === "all" ? "All" : f === "lottery" ? "Love Lottery" : f === "spin_wheel" ? "Spin Wheel" : f.charAt(0).toUpperCase() + f.slice(1);
+              const label = f === "all" ? "All" : f === "lottery" ? "Heart Draw" : f === "spin_wheel" ? "Fate Wheel" : f.charAt(0).toUpperCase() + f.slice(1);
               return (
                 <Pressable
                   key={f}
