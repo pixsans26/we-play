@@ -17,6 +17,7 @@ interface Couple {
   partnerBAvatar: string | null;
   whatALikes: string | null;
   whatBLikes: string | null;
+  createdAt?: string;
 }
 
 interface Props {

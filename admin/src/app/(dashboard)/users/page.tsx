@@ -20,6 +20,8 @@ interface Couple {
   partnerBGender: string | null;
   partnerAAvatar: string | null;
   partnerBAvatar: string | null;
+  whatALikes: string | null;
+  whatBLikes: string | null;
   createdAt: string;
 }
 
