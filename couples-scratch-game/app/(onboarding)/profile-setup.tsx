@@ -1,9 +1,10 @@
 import { env } from "@/lib/env";
 import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView,
-  Platform, ScrollView, ActivityIndicator, Image, Modal, Pressable
+  Platform, ScrollView, ActivityIndicator, Image, Modal, Pressable,
+  FlatList, Animated
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -13,9 +14,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 
-const GENDER_OPTIONS = ["male", "female", "non-binary", "other"] as const;
-type Gender = (typeof GENDER_OPTIONS)[number];
-
 const PRESET_AVATARS = [
   "/uploads/presets/avatar_boy.png",
   "/uploads/presets/avatar_girl.png",
@@ -23,95 +21,37 @@ const PRESET_AVATARS = [
   "/uploads/presets/avatar_dog.png",
 ];
 
-interface Step1Errors {
-  name?: string;
-  age?: string;
-  gender?: string;
-  preferences?: string;
-}
+const PREFERENCE_CHIPS = [
+  "Travel ✈️", "Foodie 🍔", "Movie Nights 🍿", "Outdoors 🏕️", "Gaming 🎮",
+  "Fitness 💪", "Reading 📚", "Art & Culture 🎨", "Music 🎵", "Coffee ☕",
+  "Wine Tasting 🍷", "Photography 📸", "Cooking 🍳", "Pets 🐕"
+];
 
-interface Step2Errors {
-  partnerName?: string;
-  partnerEmail?: string;
-  general?: string;
-}
-
-export function validateStep1(fields: {
-  name: string;
-  age: string;
-  gender: Gender | null;
-  preferences: string;
-}): { isValid: boolean; errors: Step1Errors } {
-  const errors: Step1Errors = {};
-
-  const trimmedName = fields.name.trim();
-  if (trimmedName.length === 0) {
-    errors.name = "Name is required";
-  } else if (trimmedName.length > 50) {
-    errors.name = "Name must be 50 characters or less";
-  }
-
-  const ageNum = parseInt(fields.age, 10);
-  if (!fields.age.trim()) {
-    errors.age = "Age is required";
-  } else if (isNaN(ageNum) || ageNum < 18 || ageNum > 120) {
-    errors.age = "Age must be between 18 and 120";
-  }
-
-  if (!fields.gender) {
-    errors.gender = "Please select a gender";
-  }
-
-  if (fields.preferences.length > 200) {
-    errors.preferences = "Preferences must be 200 characters or less";
-  }
-
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors,
-  };
-}
-
-export function validateStep2(fields: {
-  partnerName: string;
-  partnerEmail: string;
-}): { isValid: boolean; errors: Step2Errors } {
-  const errors: Step2Errors = {};
-
-  const trimmedName = fields.partnerName.trim();
-  if (trimmedName.length === 0) {
-    errors.partnerName = "Partner name is required";
-  } else if (trimmedName.length > 50) {
-    errors.partnerName = "Partner name must be 50 characters or less";
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!fields.partnerEmail.trim()) {
-    errors.partnerEmail = "Partner email is required";
-  } else if (!emailRegex.test(fields.partnerEmail.trim())) {
-    errors.partnerEmail = "Enter a valid email address";
-  }
-
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors,
-  };
-}
-
-
+const AGES = Array.from({ length: 103 }, (_, i) => i + 18); // 18 to 120
 
 export default function ProfileSetupScreen() {
-  console.log("[ProfileSetupScreen] mounted");
-
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const setCoupleProfile = useAuthStore((s) => s.setCoupleProfile);
 
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<number>(1);
   const [isLoading, setIsLoading] = useState(false);
 
   const isDark = useThemeStore((s) => s.isDark);
   const theme = getTheme(isDark);
+
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Fields
+  const [name, setName] = useState("");
+  const [age, setAge] = useState<number>(18);
+  const [avatarA, setAvatarA] = useState<string | null>(null);
+  const [selectedChips, setSelectedChips] = useState<string[]>([]);
+  const [partnerName, setPartnerName] = useState("");
+  const [partnerAge, setPartnerAge] = useState<number>(18);
+
+  // Avatar picker modal state
+  const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
 
   const inputStyle = (hasError: boolean) => ({
     backgroundColor: theme.input.bg,
@@ -132,31 +72,6 @@ export default function ProfileSetupScreen() {
     marginLeft: 4,
   };
 
-  const errorTextStyle = {
-    color: theme.error,
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4,
-  };
-
-  // Step 1 fields
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState<Gender | null>(null);
-  const [preferences, setPreferences] = useState("");
-  const [avatarA, setAvatarA] = useState<string | null>(null);
-  const [step1Errors, setStep1Errors] = useState<Step1Errors>({});
-
-  // Step 2 fields
-  const [partnerName, setPartnerName] = useState("");
-  const [partnerEmail, setPartnerEmail] = useState("");
-  const [avatarB, setAvatarB] = useState<string | null>(null);
-  const [step2Errors, setStep2Errors] = useState<Step2Errors>({});
-
-  // Avatar picker modal state
-  const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
-  const [activePartnerAvatar, setActivePartnerAvatar] = useState<"A" | "B" | null>(null);
-
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -165,61 +80,65 @@ export default function ProfileSetupScreen() {
       quality: 0.5,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      if (activePartnerAvatar === "A") setAvatarA(result.assets[0].uri);
-      if (activePartnerAvatar === "B") setAvatarB(result.assets[0].uri);
+      setAvatarA(result.assets[0].uri);
       setAvatarPickerVisible(false);
     }
   };
 
   const selectPreset = (url: string) => {
-    if (activePartnerAvatar === "A") setAvatarA(url);
-    if (activePartnerAvatar === "B") setAvatarB(url);
+    setAvatarA(url);
     setAvatarPickerVisible(false);
   };
 
-  const handleStep1Submit = () => {
-    const { isValid, errors } = validateStep1({ name, age, gender, preferences });
-
-    if (!isValid) {
-      setStep1Errors(errors);
-      return;
+  const toggleChip = (chip: string) => {
+    if (selectedChips.includes(chip)) {
+      setSelectedChips(selectedChips.filter(c => c !== chip));
+    } else {
+      setSelectedChips([...selectedChips, chip]);
     }
-
-    setStep1Errors({});
-    setStep(2);
   };
 
-  const handleStep2Submit = async () => {
-    const { isValid, errors } = validateStep2({ partnerName, partnerEmail });
-
-    if (!isValid) {
-      setStep2Errors(errors);
-      return;
+  const handleNext = () => {
+    setErrorMsg("");
+    if (step === 1) {
+      if (!name.trim()) return setErrorMsg("Please enter your name");
+      setStep(2);
+    } else if (step === 2) {
+      if (age < 18) return setErrorMsg("You must be at least 18");
+      setStep(3);
+    } else if (step === 3) {
+      setStep(4);
+    } else if (step === 4) {
+      setStep(5);
     }
+  };
+
+  const handleSubmit = async () => {
+    setErrorMsg("");
+    if (!partnerName.trim()) return setErrorMsg("Please enter your partner's name");
+    if (partnerAge < 18) return setErrorMsg("Partner must be at least 18");
 
     if (!user || !user.email) {
-      setStep2Errors({ general: "You must be logged in with an email to complete setup" });
-      return;
+      return setErrorMsg("You must be logged in to complete setup");
     }
 
-    setStep2Errors({});
     setIsLoading(true);
 
     try {
-      const ageNum = parseInt(age, 10);
-      const userEmail = user.email;
-      const pEmail = partnerEmail.trim().toLowerCase();
-
       const BASE_URL = env.EXPO_PUBLIC_API_URL;
-
       const formData = new FormData();
-      formData.append("partnerAUid", userEmail);
-      formData.append("partnerBUid", pEmail);
+      
+      formData.append("partnerAUid", user.email);
+      // partnerBUid is null since we removed email from setup
+      
       formData.append("partnerAName", name.trim());
-      formData.append("partnerAAge", ageNum.toString());
-      if (gender) formData.append("partnerAGender", gender);
-      if (preferences.trim()) formData.append("whatALikes", preferences.trim());
+      formData.append("partnerAAge", age.toString());
+      
       formData.append("partnerBName", partnerName.trim());
+      formData.append("partnerBAge", partnerAge.toString());
+
+      const prefsStr = selectedChips.join(", ");
+      if (prefsStr) formData.append("whatALikes", prefsStr);
 
       if (avatarA) {
         if (avatarA.startsWith("/uploads/presets/")) {
@@ -234,20 +153,7 @@ export default function ProfileSetupScreen() {
         }
       }
 
-      if (avatarB) {
-        if (avatarB.startsWith("/uploads/presets/")) {
-          formData.append("partnerBAvatarStr", avatarB);
-        } else {
-          const ext = avatarB.substring(avatarB.lastIndexOf(".") + 1) || "jpg";
-          formData.append("partnerBAvatar", {
-            uri: avatarB,
-            name: `avatar_B.${ext}`,
-            type: `image/${ext}`
-          } as any);
-        }
-      }
-
-      // Create couple profile via API
+      // Create couple profile
       const coupleRes = await apiFetch(`${BASE_URL}/api/couple`, {
         method: "POST",
         body: formData,
@@ -261,19 +167,7 @@ export default function ProfileSetupScreen() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userUid: userEmail,
-          scratchCount: 0,
-          completedCount: 0,
-          currentLevel: 1
-        })
-      });
-
-      // Create progress for Partner B
-      await apiFetch(`${BASE_URL}/api/progress`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userUid: pEmail,
+          userUid: user.email,
           scratchCount: 0,
           completedCount: 0,
           currentLevel: 1
@@ -299,366 +193,215 @@ export default function ProfileSetupScreen() {
       router.replace("/(game)");
     } catch (error) {
       console.warn("[ProfileSetupScreen] save failed:", error);
-      setStep2Errors({ general: "Failed to save profile. Please try again." });
+      setErrorMsg("Failed to save profile. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <LinearGradient
-      colors={theme.background as any}
-      locations={[0, 0.5, 1]}
-      style={{ flex: 1 }}
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: "center",
-            paddingHorizontal: 24,
-            paddingVertical: 32,
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Header */}
-          <View style={{ alignItems: "center", marginBottom: 32 }}>
-            <Text
+  const renderAgeList = (selectedAge: number, setAgeValue: (a: number) => void) => (
+    <View style={{ height: 250, marginVertical: 20 }}>
+      <FlatList
+        data={AGES}
+        keyExtractor={item => item.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingVertical: 100 }}
+        snapToInterval={56}
+        decelerationRate="fast"
+        renderItem={({ item }) => {
+          const isSelected = item === selectedAge;
+          return (
+            <TouchableOpacity
+              onPress={() => setAgeValue(item)}
+              activeOpacity={0.7}
               style={{
-                color: theme.card.text,
-                fontSize: 32,
-                fontWeight: "bold",
-                marginBottom: 8,
-                fontFamily: "DynaPuff_700Bold",
+                height: 56,
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              {step === 1 ? "About You" : "Your Partner"}
-            </Text>
-            <Text style={{ color: theme.card.subtext, fontSize: 14 }}>
-              {step === 1
-                ? "Tell us a bit about yourself"
-                : "Tell us about your partner"}
-            </Text>
-            {/* Step indicator */}
-            <View style={{ flexDirection: "row", marginTop: 16, gap: 8 }}>
-              <View
-                style={{
-                  height: 8,
-                  width: 32,
-                  borderRadius: 999, overflow: "hidden",
-                  backgroundColor: step === 1 ? theme.accent : (isDark ? "rgba(255,255,255,0.4)" : "rgba(168,85,247,0.3)"),
-                }}
-              />
-              <View
-                style={{
-                  height: 8,
-                  width: 32,
-                  borderRadius: 999, overflow: "hidden",
-                  backgroundColor: step === 2 ? theme.accent : (isDark ? "rgba(255,255,255,0.4)" : "rgba(168,85,247,0.3)"),
-                }}
-              />
+              <Text style={{
+                fontSize: isSelected ? 32 : 20,
+                fontWeight: isSelected ? "800" : "500",
+                color: isSelected ? theme.accent : theme.input.placeholder,
+                opacity: isSelected ? 1 : 0.5
+              }}>
+                {item}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
+      {/* Selection overlay */}
+      <View style={{
+        position: "absolute", top: "50%", left: 0, right: 0,
+        height: 56, marginTop: -28,
+        borderTopWidth: 2, borderBottomWidth: 2,
+        borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+        pointerEvents: "none"
+      }} />
+    </View>
+  );
+
+  return (
+    <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 40 }} keyboardShouldPersistTaps="handled">
+          
+          {/* Header & Progress */}
+          <View style={{ marginBottom: 32, marginTop: 20 }}>
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 24 }}>
+              {[1, 2, 3, 4, 5].map((idx) => (
+                <View key={idx} style={{
+                  flex: 1, height: 6, borderRadius: 3,
+                  backgroundColor: step >= idx ? theme.accent : (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)")
+                }} />
+              ))}
             </View>
+            <Text style={{ color: theme.card.text, fontSize: 32, fontWeight: "bold", fontFamily: "DynaPuff_700Bold", marginBottom: 8 }}>
+              {step === 1 && "What's your name?"}
+              {step === 2 && "How old are you?"}
+              {step === 3 && "Pick an Avatar"}
+              {step === 4 && "Your Interests"}
+              {step === 5 && "Your Partner"}
+            </Text>
+            <Text style={{ color: theme.card.subtext, fontSize: 16 }}>
+              {step === 1 && "Let's get to know you first."}
+              {step === 2 && "You must be 18 or older to play."}
+              {step === 3 && "Show off your personality."}
+              {step === 4 && "What do you enjoy doing?"}
+              {step === 5 && "Who will you be playing with?"}
+            </Text>
           </View>
 
-          <View
-            style={{
-              backgroundColor: theme.card.bg,
-              borderRadius: 32, overflow: "hidden",
-              padding: 24,
-              borderWidth: 1,
-              borderColor: theme.card.border,
-            }}
-          >
-            {step === 1 ? (
-              <>
-                {/* Avatar Selection */}
-                <View style={{ alignItems: "center", marginBottom: 24 }}>
-                  <TouchableOpacity onPress={() => { setActivePartnerAvatar("A"); setAvatarPickerVisible(true); }} activeOpacity={0.8} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.input.bg, borderWidth: 2, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                    {avatarA ? (
-                      <View style={{ width: "100%", height: "100%" }}>
-                        <Image source={{ uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%" }} />
-                      </View>
-                    ) : (
-                      <View style={{ alignItems: "center", justifyContent: "center" }}>
-                        <Ionicons name="camera-outline" size={32} color={theme.input.placeholder} />
-                        <Text style={{ fontSize: 10, color: theme.input.placeholder, marginTop: 4, fontWeight: "600" }}>Add Photo</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                </View>
+          <View style={{ flex: 1 }}>
+            {errorMsg ? (
+              <View style={{ backgroundColor: "rgba(239,68,68,0.2)", borderRadius: 16, padding: 12, marginBottom: 24 }}>
+                <Text style={{ color: "#fecaca", textAlign: "center", fontSize: 14 }}>{errorMsg}</Text>
+              </View>
+            ) : null}
 
-                {/* Name */}
-                <View style={{ marginBottom: 16 }}>
-                  <Text style={labelStyle}>Your Name</Text>
-                  <TextInput
-                    style={inputStyle(!!step1Errors.name)}
-                    placeholder="Enter your name"
-                    placeholderTextColor={theme.input.placeholder}
-                    value={name}
-                    onChangeText={setName}
-                    autoCapitalize="words"
-                    maxLength={50}
-                  />
-                  {step1Errors.name && (
-                    <Text style={errorTextStyle}>{step1Errors.name}</Text>
+            {step === 1 && (
+              <View style={{ marginBottom: 24 }}>
+                <TextInput
+                  style={[inputStyle(false), { fontSize: 24, paddingVertical: 20 }]}
+                  placeholder="Your Name"
+                  placeholderTextColor={theme.input.placeholder}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                  autoFocus
+                />
+              </View>
+            )}
+
+            {step === 2 && (
+              <View style={{ alignItems: "center" }}>
+                {renderAgeList(age, setAge)}
+              </View>
+            )}
+
+            {step === 3 && (
+              <View style={{ alignItems: "center", marginVertical: 40 }}>
+                <TouchableOpacity onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.8} style={{ width: 140, height: 140, borderRadius: 70, backgroundColor: theme.input.bg, borderWidth: 3, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                  {avatarA ? (
+                    <Image source={{ uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%" }} />
+                  ) : (
+                    <View style={{ alignItems: "center", justifyContent: "center" }}>
+                      <Ionicons name="camera-outline" size={48} color={theme.input.placeholder} />
+                      <Text style={{ fontSize: 14, color: theme.input.placeholder, marginTop: 8, fontWeight: "600" }}>Add Photo</Text>
+                    </View>
                   )}
-                </View>
-
-                {/* Age */}
-                <View style={{ marginBottom: 16 }}>
-                  <Text style={labelStyle}>Age</Text>
-                  <TextInput
-                    style={inputStyle(!!step1Errors.age)}
-                    placeholder="Your age"
-                    placeholderTextColor={theme.input.placeholder}
-                    value={age}
-                    onChangeText={setAge}
-                    keyboardType="number-pad"
-                    maxLength={3}
-                  />
-                  {step1Errors.age && (
-                    <Text style={errorTextStyle}>{step1Errors.age}</Text>
-                  )}
-                </View>
-
-                {/* Gender */}
-                <View style={{ marginBottom: 16 }}>
-                  <Text style={labelStyle}>Gender</Text>
-                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                    {GENDER_OPTIONS.map((option) => {
-                      const selected = gender === option;
-                      return (
-                        <TouchableOpacity
-                          key={option}
-                          onPress={() => setGender(option)}
-                          style={{
-                            paddingHorizontal: 16,
-                            paddingVertical: 8,
-                            borderRadius: 32, overflow: "hidden",
-                            borderWidth: 1,
-                            backgroundColor: selected
-                              ? theme.accent
-                              : theme.input.bg,
-                            borderColor: selected
-                              ? theme.accent
-                              : theme.input.border,
-                          }}
-                        >
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              textTransform: "capitalize",
-                              color: selected ? "#ffffff" : theme.card.text,
-                            }}
-                          >
-                            {option}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                  {step1Errors.gender && (
-                    <Text style={errorTextStyle}>{step1Errors.gender}</Text>
-                  )}
-                </View>
-
-                {/* Preferences */}
-                <View style={{ marginBottom: 24 }}>
-                  <Text style={labelStyle}>Preferences (optional)</Text>
-                  <TextInput
-                    style={[
-                      inputStyle(!!step1Errors.preferences),
-                      { textAlignVertical: "top", minHeight: 80 },
-                    ]}
-                    placeholder="What do you enjoy together?"
-                    placeholderTextColor={theme.input.placeholder}
-                    value={preferences}
-                    onChangeText={setPreferences}
-                    multiline
-                    numberOfLines={3}
-                    maxLength={200}
-                  />
-                  {step1Errors.preferences && (
-                    <Text style={errorTextStyle}>{step1Errors.preferences}</Text>
-                  )}
-                  <Text
-                    style={{
-                      color: theme.card.subtext,
-                      fontSize: 12,
-                      marginTop: 4,
-                      marginLeft: 4,
-                    }}
-                  >
-                    {preferences.length}/200
-                  </Text>
-                </View>
-
-                {/* Next */}
-                <TouchableOpacity onPress={handleStep1Submit} activeOpacity={0.8}>
-                  <LinearGradient
-                    colors={["#ff2d6b", "#a82dff"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={{
-                      borderRadius: 32, overflow: "hidden",
-                      paddingVertical: 16,
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "#ffffff",
-                        fontSize: 18,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Next
-                    </Text>
-                  </LinearGradient>
                 </TouchableOpacity>
-              </>
-            ) : (
-              <>
-                {step2Errors.general && (
-                  <View
-                    style={{
-                      backgroundColor: "rgba(239,68,68,0.2)",
-                      borderRadius: 32, overflow: "hidden",
-                      padding: 12,
-                      marginBottom: 16,
-                    }}
-                  >
-                    <Text
+              </View>
+            )}
+
+            {step === 4 && (
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12, marginVertical: 20 }}>
+                {PREFERENCE_CHIPS.map(chip => {
+                  const selected = selectedChips.includes(chip);
+                  return (
+                    <TouchableOpacity
+                      key={chip}
+                      onPress={() => toggleChip(chip)}
                       style={{
-                        color: "#fecaca",
-                        textAlign: "center",
-                        fontSize: 14,
+                        paddingHorizontal: 20, paddingVertical: 12,
+                        borderRadius: 32, borderWidth: 2,
+                        backgroundColor: selected ? theme.accent : "transparent",
+                        borderColor: selected ? theme.accent : theme.input.border,
                       }}
                     >
-                      {step2Errors.general}
-                    </Text>
-                  </View>
-                )}
+                      <Text style={{
+                        fontSize: 16, fontWeight: "600",
+                        color: selected ? "#fff" : theme.card.text
+                      }}>
+                        {chip}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
 
-                {/* Avatar Selection for Partner */}
-                <View style={{ alignItems: "center", marginBottom: 24 }}>
-                  <TouchableOpacity onPress={() => { setActivePartnerAvatar("B"); setAvatarPickerVisible(true); }} activeOpacity={0.8} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.input.bg, borderWidth: 2, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                    {avatarB ? (
-                      <View style={{ width: "100%", height: "100%" }}>
-                        <Image source={{ uri: getAvatarUrl(avatarB) || undefined }} style={{ width: "100%", height: "100%" }} />
-                      </View>
-                    ) : (
-                      <View style={{ alignItems: "center", justifyContent: "center" }}>
-                        <Ionicons name="camera-outline" size={32} color={theme.input.placeholder} />
-                        <Text style={{ fontSize: 10, color: theme.input.placeholder, marginTop: 4, fontWeight: "600" }}>Add Photo</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                </View>
-
-                {/* Partner Name */}
-                <View style={{ marginBottom: 24 }}>
+            {step === 5 && (
+              <View style={{ gap: 24 }}>
+                <View>
                   <Text style={labelStyle}>Partner's Name</Text>
                   <TextInput
-                    style={inputStyle(!!step2Errors.partnerName)}
-                    placeholder="Enter your partner's name"
+                    style={[inputStyle(false), { fontSize: 20 }]}
+                    placeholder="Partner's Name"
                     placeholderTextColor={theme.input.placeholder}
                     value={partnerName}
                     onChangeText={setPartnerName}
                     autoCapitalize="words"
-                    maxLength={50}
                   />
-                  {step2Errors.partnerName && (
-                    <Text style={errorTextStyle}>{step2Errors.partnerName}</Text>
-                  )}
                 </View>
-
-                {/* Partner Email */}
-                <View style={{ marginBottom: 24 }}>
-                  <Text style={labelStyle}>Partner's Email</Text>
-                  <TextInput
-                    style={inputStyle(!!step2Errors.partnerEmail)}
-                    placeholder="Enter your partner's email"
-                    placeholderTextColor={theme.input.placeholder}
-                    value={partnerEmail}
-                    onChangeText={setPartnerEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                  />
-                  {step2Errors.partnerEmail && (
-                    <Text style={errorTextStyle}>{step2Errors.partnerEmail}</Text>
-                  )}
+                <View>
+                  <Text style={labelStyle}>Partner's Age</Text>
+                  {renderAgeList(partnerAge, setPartnerAge)}
                 </View>
-
-                <View style={{ gap: 12 }}>
-                  {/* Start Playing */}
-                  <TouchableOpacity
-                    onPress={handleStep2Submit}
-                    disabled={isLoading}
-                    activeOpacity={0.8}
-                  >
-                    <LinearGradient
-                      colors={["#ff2d6b", "#a82dff"]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{
-                        borderRadius: 32, overflow: "hidden",
-                        paddingVertical: 16,
-                        alignItems: "center",
-                      }}
-                    >
-                      {isLoading ? (
-                        <ActivityIndicator color="#ffffff" />
-                      ) : (
-                        <Text
-                          style={{
-                            color: "#ffffff",
-                            fontSize: 18,
-                            fontWeight: "bold",
-                          }}
-                        >
-                          Start Playing
-                        </Text>
-                      )}
-                    </LinearGradient>
-                  </TouchableOpacity>
-
-                  {/* Back */}
-                  <TouchableOpacity
-                    onPress={() => {
-                      setStep2Errors({});
-                      setStep(1);
-                    }}
-                    disabled={isLoading}
-                    activeOpacity={0.8}
-                    style={{ paddingVertical: 12, alignItems: "center" }}
-                  >
-                    <Text
-                      style={{
-                        color: theme.card.subtext,
-                        fontSize: 16,
-                        fontWeight: "600",
-                      }}
-                    >
-                      ← Back
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </>
+              </View>
             )}
           </View>
+
+          {/* Navigation Buttons */}
+          <View style={{ marginTop: "auto", paddingTop: 20, gap: 16 }}>
+            {step < 5 ? (
+              <>
+                <TouchableOpacity onPress={handleNext} activeOpacity={0.8}>
+                  <LinearGradient colors={["#ff2d6b", "#a82dff"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 32, paddingVertical: 18, alignItems: "center" }}>
+                    <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold" }}>Continue</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+                {(step === 3 || step === 4) && (
+                  <TouchableOpacity onPress={handleNext} style={{ alignItems: "center", paddingVertical: 12 }}>
+                    <Text style={{ color: theme.card.subtext, fontSize: 16, fontWeight: "600" }}>Skip for now</Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            ) : (
+              <TouchableOpacity onPress={handleSubmit} disabled={isLoading} activeOpacity={0.8}>
+                <LinearGradient colors={["#ff2d6b", "#a82dff"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 32, paddingVertical: 18, alignItems: "center" }}>
+                  {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold" }}>Start Playing</Text>}
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+            
+            {step > 1 && (
+              <TouchableOpacity onPress={() => setStep(s => s - 1)} disabled={isLoading} style={{ alignItems: "center", paddingVertical: 12 }}>
+                <Text style={{ color: theme.card.subtext, fontSize: 16, fontWeight: "600" }}>← Back</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* ── Avatar Picker Modal ── */}
+      {/* Avatar Picker Modal */}
       <Modal visible={avatarPickerVisible} animationType="fade" transparent onRequestClose={() => setAvatarPickerVisible(false)}>
         <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }} onPress={() => setAvatarPickerVisible(false)}>
           <Pressable style={{ width: "100%", backgroundColor: theme.card.bg, borderRadius: 24, padding: 24, alignItems: "center", borderWidth: 1, borderColor: theme.card.border }}>
             <Text style={{ color: theme.card.text, fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
-            
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
               {PRESET_AVATARS.map((url, i) => (
                 <Pressable key={i} onPress={() => selectPreset(url)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
@@ -666,7 +409,6 @@ export default function ProfileSetupScreen() {
                 </Pressable>
               ))}
             </View>
-
             <Pressable onPress={pickImage} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999, backgroundColor: theme.input.bg }}>
               <Ionicons name="image-outline" size={20} color={theme.accent} />
               <Text style={{ color: theme.accent, fontWeight: "700" }}>Upload from Gallery</Text>
