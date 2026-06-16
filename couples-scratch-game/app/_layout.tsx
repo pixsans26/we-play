@@ -3,8 +3,19 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text, LogBox } from "react-native";
 import { Slot } from "expo-router";
 
-// Ignore all log warnings to keep the UI and terminal clean
+// Ignore all log warnings to keep the UI clean
 LogBox.ignoreAllLogs();
+
+// Suppress specific harmless warnings from polluting the Metro terminal
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  const msg = args[0];
+  if (typeof msg === "string") {
+    if (msg.includes("ExpoRouterToolbarModule")) return;
+    if (msg.includes("expo-av")) return;
+  }
+  originalWarn(...args);
+};
 import {
   useFonts,
   PlayfairDisplay_400Regular,
