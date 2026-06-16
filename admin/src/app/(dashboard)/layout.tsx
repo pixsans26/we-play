@@ -9,7 +9,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session?.user) redirect("/auth/login");
 
   return (
-    <Providers>
+    <Providers session={session}>
       {/* Outer: Full screen without padding */}
       <div className="min-h-screen flex items-center justify-center bg-[#fafbfe]">
         

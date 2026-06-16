@@ -115,8 +115,8 @@ export default function MainGameScreen() {
             {partnerAName} & {partnerBName}
           </Text>
         </View>
-        <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 22, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
-          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" }}>
+        <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden"}}>
+          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="person" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>
         </Pressable>
@@ -130,11 +130,11 @@ export default function MainGameScreen() {
         >
 
         {/* Level + Streak hero card */}
-        <View style={{ shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 15, elevation: 12, marginBottom: 20 }}>
+        <View style={{ marginBottom: 20 }}>
           <LinearGradient
             colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
             start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 24, padding: 22 }}
+            style={{ borderRadius: 32, overflow: "hidden", padding: 22 }}
           >
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <View>
@@ -149,7 +149,7 @@ export default function MainGameScreen() {
                 </View>
               </View>
             </View>
-            <View style={{ alignItems: "center", backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 16, paddingHorizontal: 16, paddingVertical: 10 }}>
+            <View style={{ alignItems: "center", backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 32, overflow: "hidden", paddingHorizontal: 16, paddingVertical: 10 }}>
               <Ionicons name="flame" size={22} color="#fbbf24" />
               <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginTop: 2 }}>{streak}</Text>
               <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>Streak</Text>
@@ -162,25 +162,25 @@ export default function MainGameScreen() {
               <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 12 }}>Progress to next level</Text>
               <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 12, fontWeight: "700" }}>{progressInLevel}/10</Text>
             </View>
-            <View style={{ backgroundColor: "rgba(0,0,0,0.25)", borderRadius: 999, height: 7 }}>
-              <View style={{ backgroundColor: "#ffffff", height: 7, borderRadius: 999, width: `${(progressInLevel / 10) * 100}%` }} />
+            <View style={{ backgroundColor: "rgba(0,0,0,0.25)", borderRadius: 999, overflow: "hidden", height: 7 }}>
+              <View style={{ backgroundColor: "#ffffff", height: 7, borderRadius: 999, overflow: "hidden", width: `${(progressInLevel / 10) * 100}%` }} />
             </View>
           </View>
           </LinearGradient>
         </View>
 
         {/* Whose turn */}
-        <View style={{ borderRadius: 16, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5, backgroundColor: isDark ? "#1e293b" : "#fff" }}>
-          <View style={{ borderRadius: 16, overflow: "hidden" }}>
+        <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 20, backgroundColor: isDark ? "#1e293b" : "#fff" }}>
+          <View style={{ borderRadius: 32, overflow: "hidden" }}>
           <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{
             flexDirection: "row",
             alignItems: "center",
             gap: 10,
-            borderRadius: 16,
+            borderRadius: 32, overflow: "hidden",
             paddingVertical: 12,
             paddingHorizontal: 16,
           }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : "#e11d48", marginRight: 10, shadowColor: isDark ? "#fff" : "#e11d48", shadowOffset: {width:0, height:0}, shadowOpacity: 1, shadowRadius: 4 }} />
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : "#e11d48", marginRight: 10, shadowColor: isDark ? "#fff" : "#e11d48" }} />
             <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 14, fontWeight: "700" }}>
               {turnName}'s turn to play
             </Text>
@@ -197,10 +197,10 @@ export default function MainGameScreen() {
 
         <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
           {/* Image Scratch */}
-          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}>
+          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden"}}>
             <Pressable
               onPress={() => { setMode("image"); router.push("/(game)/image-scratch"); }}
-              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 24, overflow: "hidden" })}
+              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
             >
               <Image source={require("../../assets/images/image_scratch_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
               <LinearGradient
@@ -214,10 +214,10 @@ export default function MainGameScreen() {
           </View>
 
           {/* Task Scratch */}
-          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}>
+          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden"}}>
             <Pressable
               onPress={() => { setMode("text"); router.push("/(game)/task-scratch"); }}
-              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 24, overflow: "hidden" })}
+              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
             >
               <Image source={require("../../assets/images/text_scratch_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
               <LinearGradient
@@ -231,10 +231,10 @@ export default function MainGameScreen() {
           </View>
 
           {/* Spin Wheel */}
-          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}>
+          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden"}}>
             <Pressable
               onPress={() => router.push("/(game)/spin-wheel")}
-              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 24, overflow: "hidden" })}
+              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
             >
               <Image source={require("../../assets/images/spin_wheel_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
               <LinearGradient
@@ -248,10 +248,10 @@ export default function MainGameScreen() {
           </View>
 
           {/* Love Lottery */}
-          <View style={{ width: "48%", aspectRatio: 1, borderRadius: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}>
+          <View style={{ width: "48%", aspectRatio: 1, borderRadius: 32, overflow: "hidden"}}>
             <Pressable
               onPress={() => router.push("/(game)/lottery")}
-              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 24, overflow: "hidden" })}
+              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
             >
               <Image source={require("../../assets/images/love_lottery_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
               <LinearGradient

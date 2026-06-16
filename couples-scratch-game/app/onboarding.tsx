@@ -181,10 +181,9 @@ const styles = StyleSheet.create({
   skipBtn: { position: "absolute", top: 56, right: 20, zIndex: 10 },
   skipPill: {
     borderWidth: 1,
-    borderRadius: 999,
+    borderRadius: 999, overflow: "hidden",
     paddingVertical: 6,
     paddingHorizontal: 16,
-    overflow: "hidden",
   },
   skipText: { color: "rgba(220,180,255,0.75)", fontSize: 14, fontWeight: "600" },
   page: {
@@ -238,6 +237,6 @@ const styles = StyleSheet.create({
   dotActive: { width: 28, backgroundColor: "#f953c6" },
   dotInactive: { width: 8, backgroundColor: "rgba(220,180,255,0.3)" },
   btnWrapper: { width: "100%" },
-  btn: { borderRadius: 999, paddingVertical: 17, alignItems: "center" },
+  btn: { borderRadius: 999, overflow: "hidden", paddingVertical: 17, alignItems: "center" },
   btnText: { color: "#ffffff", fontSize: 17, fontWeight: "800" },
 });

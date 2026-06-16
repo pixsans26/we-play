@@ -50,6 +50,28 @@ app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// ─── SSE Notifications (Admin) ─────────────────────────────────────────────────
+let adminClients: Response[] = [];
+
+app.get("/api/admin/events", (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  adminClients.push(res);
+
+  req.on("close", () => {
+    adminClients = adminClients.filter((client) => client !== res);
+  });
+});
+
+const broadcastAdminEvent = (data: any) => {
+  adminClients.forEach((client) => {
+    client.write(`data: ${JSON.stringify(data)}\n\n`);
+  });
+};
+
 // ─── JWT Authentication Middleware ──────────────────────────────────────────
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
@@ -588,6 +610,8 @@ app.post("/api/history", authenticateToken, async (req: Request, res: Response) 
         .where(eq(userProgress.userUid, userUid));
     }
     
+    broadcastAdminEvent({ type: "TASK_COMPLETED", message: `A user just completed a ${taskType} task!` });
+    
     res.status(201).json(inserted);
   } catch (err) {
     console.error("[POST /api/history]", err);
@@ -663,25 +687,48 @@ app.get("/api/couple/:uid", authenticateToken, async (req: Request, res: Respons
   }
 });
 
-app.post("/api/couple", authenticateToken, async (req: Request, res: Response) => {
+app.post("/api/couple", authenticateToken, upload.fields([{ name: "partnerAAvatar", maxCount: 1 }, { name: "partnerBAvatar", maxCount: 1 }]), async (req: Request, res: Response) => {
   try {
     const { id, partnerAUid, partnerBUid, partnerAName, partnerBName, partnerAAge, partnerBAge, partnerAGender, partnerBGender, whatALikes, whatBLikes } = req.body;
     if (!partnerAUid || !partnerAName) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    let partnerAAvatar = req.body.partnerAAvatar || undefined;
+    let partnerBAvatar = req.body.partnerBAvatar || undefined;
+
+    if (files && files["partnerAAvatar"]) {
+      partnerAAvatar = `/uploads/${files["partnerAAvatar"][0].filename}`;
+    }
+    if (files && files["partnerBAvatar"]) {
+      partnerBAvatar = `/uploads/${files["partnerBAvatar"][0].filename}`;
+    }
+
+    const dataToSave = {
+      partnerAUid, partnerBUid, partnerAName, partnerBName,
+      partnerAAge: partnerAAge ? Number(partnerAAge) : null,
+      partnerBAge: partnerBAge ? Number(partnerBAge) : null,
+      partnerAGender, partnerBGender, whatALikes, whatBLikes,
+      ...(partnerAAvatar && { partnerAAvatar }),
+      ...(partnerBAvatar && { partnerBAvatar })
+    };
+
     if (id) {
       const [updated] = await db
         .update(couple)
-        .set({ partnerAUid, partnerBUid, partnerAName, partnerBName, partnerAAge, partnerBAge, partnerAGender, partnerBGender, whatALikes, whatBLikes })
+        .set(dataToSave)
         .where(eq(couple.id, Number(id)))
         .returning();
       res.json(updated);
     } else {
       const [inserted] = await db
         .insert(couple)
-        .values({ partnerAUid, partnerBUid, partnerAName, partnerBName, partnerAAge, partnerBAge, partnerAGender, partnerBGender, whatALikes, whatBLikes })
+        .values(dataToSave as any)
         .returning();
+        
+      broadcastAdminEvent({ type: "NEW_USER", message: `A new couple just registered: ${partnerAName}!` });
+      
       res.status(201).json(inserted);
     }
   } catch (err) {

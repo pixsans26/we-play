@@ -84,11 +84,11 @@ export default function SignupScreen() {
           </View>
 
           {/* Card */}
-          <View style={{ borderRadius: 28, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 15, elevation: 12 }}>
-            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ padding: 24 }}>
+          <View style={{ borderRadius: 28 }}>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ padding: 24, borderRadius: 32, overflow: "hidden" }}>
 
             {errors.general && (
-              <View style={{ backgroundColor: "rgba(239,68,68,0.15)", borderRadius: 12, padding: 12, marginBottom: 16 }}>
+              <View style={{ backgroundColor: "rgba(239,68,68,0.15)", borderRadius: 32, overflow: "hidden", padding: 12, marginBottom: 16 }}>
                 <Text style={{ color: "#fca5a5", textAlign: "center", fontSize: 13 }}>{errors.general}</Text>
               </View>
             )}
@@ -96,7 +96,7 @@ export default function SignupScreen() {
             {/* Name */}
             <View style={{ marginBottom: 14 }}>
               <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7 }}>NAME</Text>
-              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.name), borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
+              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.name), borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
                 <Ionicons name="person-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
                 <TextInput
                   style={{ flex: 1, color: theme.card.text, fontSize: 15, paddingVertical: 13 }}
@@ -110,7 +110,7 @@ export default function SignupScreen() {
             {/* Email */}
             <View style={{ marginBottom: 14 }}>
               <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7 }}>EMAIL</Text>
-              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.email), borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
+              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.email), borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
                 <Ionicons name="mail-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
                 <TextInput
                   style={{ flex: 1, color: theme.card.text, fontSize: 15, paddingVertical: 13 }}
@@ -124,7 +124,7 @@ export default function SignupScreen() {
             {/* Password */}
             <View style={{ marginBottom: 14 }}>
               <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7 }}>PASSWORD</Text>
-              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.password), borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
+              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.password), borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
                 <Ionicons name="lock-closed-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
                 <TextInput
                   style={{ flex: 1, color: theme.card.text, fontSize: 15, paddingVertical: 13 }}
@@ -141,7 +141,7 @@ export default function SignupScreen() {
             {/* Confirm Password */}
             <View style={{ marginBottom: 26 }}>
               <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7 }}>CONFIRM PASSWORD</Text>
-              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.confirmPassword), borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
+              <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.confirmPassword), borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
                 <Ionicons name="shield-checkmark-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
                 <TextInput
                   style={{ flex: 1, color: theme.card.text, fontSize: 15, paddingVertical: 13 }}
@@ -156,7 +156,7 @@ export default function SignupScreen() {
             <TouchableOpacity onPress={handleSignup} disabled={isLoading} activeOpacity={0.85}>
               <LinearGradient
                 colors={["#f953c6", "#7c3aed"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={{ borderRadius: 999, paddingVertical: 17, alignItems: "center" }}
+                style={{ borderRadius: 999, overflow: "hidden", paddingVertical: 17, alignItems: "center" }}
               >
                 {isLoading
                   ? <ActivityIndicator color="#ffffff" />

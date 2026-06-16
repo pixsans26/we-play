@@ -10,9 +10,12 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { Ionicons } from "@expo/vector-icons";
 
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
@@ -114,7 +117,7 @@ export default function ProfileSetupScreen() {
     backgroundColor: theme.input.bg,
     borderWidth: 1,
     borderColor: hasError ? theme.error : theme.input.border,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
     color: theme.card.text,
@@ -141,12 +144,26 @@ export default function ProfileSetupScreen() {
   const [age, setAge] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [preferences, setPreferences] = useState("");
+  const [avatarA, setAvatarA] = useState<string | null>(null);
   const [step1Errors, setStep1Errors] = useState<Step1Errors>({});
 
   // Step 2 fields
   const [partnerName, setPartnerName] = useState("");
   const [partnerEmail, setPartnerEmail] = useState("");
+  const [avatarB, setAvatarB] = useState<string | null>(null);
   const [step2Errors, setStep2Errors] = useState<Step2Errors>({});
+
+  const pickImage = async (setAvatar: (uri: string) => void) => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setAvatar(result.assets[0].uri);
+    }
+  };
 
   const handleStep1Submit = () => {
     const { isValid, errors } = validateStep1({ name, age, gender, preferences });
@@ -183,19 +200,37 @@ export default function ProfileSetupScreen() {
 
       const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
+      const formData = new FormData();
+      formData.append("partnerAUid", userEmail);
+      formData.append("partnerBUid", pEmail);
+      formData.append("partnerAName", name.trim());
+      formData.append("partnerAAge", ageNum.toString());
+      if (gender) formData.append("partnerAGender", gender);
+      if (preferences.trim()) formData.append("whatALikes", preferences.trim());
+      formData.append("partnerBName", partnerName.trim());
+
+      if (avatarA) {
+        const ext = avatarA.substring(avatarA.lastIndexOf(".") + 1) || "jpg";
+        formData.append("partnerAAvatar", {
+          uri: avatarA,
+          name: `avatar_A.${ext}`,
+          type: `image/${ext}`
+        } as any);
+      }
+
+      if (avatarB) {
+        const ext = avatarB.substring(avatarB.lastIndexOf(".") + 1) || "jpg";
+        formData.append("partnerBAvatar", {
+          uri: avatarB,
+          name: `avatar_B.${ext}`,
+          type: `image/${ext}`
+        } as any);
+      }
+
       // Create couple profile via API
       const coupleRes = await apiFetch(`${BASE_URL}/api/couple`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          partnerAUid: userEmail,
-          partnerBUid: pEmail,
-          partnerAName: name.trim(),
-          partnerAAge: ageNum,
-          partnerAGender: gender,
-          whatALikes: preferences.trim() || null,
-          partnerBName: partnerName.trim()
-        })
+        body: formData,
       });
 
       if (!coupleRes.ok) throw new Error("Failed to create couple profile");
@@ -233,6 +268,8 @@ export default function ProfileSetupScreen() {
         partnerBName: coupleRecord.partnerBName ?? null,
         partnerAAge: coupleRecord.partnerAAge ?? null,
         partnerBAge: coupleRecord.partnerBAge ?? null,
+        partnerAAvatar: coupleRecord.partnerAAvatar ?? null,
+        partnerBAvatar: coupleRecord.partnerBAvatar ?? null,
         partnerAGender: coupleRecord.partnerAGender ?? null,
         partnerBGender: coupleRecord.partnerBGender ?? null,
         whatALikes: coupleRecord.whatALikes ?? null,
@@ -291,7 +328,7 @@ export default function ProfileSetupScreen() {
                 style={{
                   height: 8,
                   width: 32,
-                  borderRadius: 999,
+                  borderRadius: 999, overflow: "hidden",
                   backgroundColor: step === 1 ? theme.accent : (isDark ? "rgba(255,255,255,0.4)" : "rgba(168,85,247,0.3)"),
                 }}
               />
@@ -299,7 +336,7 @@ export default function ProfileSetupScreen() {
                 style={{
                   height: 8,
                   width: 32,
-                  borderRadius: 999,
+                  borderRadius: 999, overflow: "hidden",
                   backgroundColor: step === 2 ? theme.accent : (isDark ? "rgba(255,255,255,0.4)" : "rgba(168,85,247,0.3)"),
                 }}
               />
@@ -309,7 +346,7 @@ export default function ProfileSetupScreen() {
           <View
             style={{
               backgroundColor: theme.card.bg,
-              borderRadius: 24,
+              borderRadius: 32, overflow: "hidden",
               padding: 24,
               borderWidth: 1,
               borderColor: theme.card.border,
@@ -317,6 +354,22 @@ export default function ProfileSetupScreen() {
           >
             {step === 1 ? (
               <>
+                {/* Avatar Selection */}
+                <View style={{ alignItems: "center", marginBottom: 24 }}>
+                  <TouchableOpacity onPress={() => pickImage(setAvatarA)} activeOpacity={0.8} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.input.bg, borderWidth: 2, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                    {avatarA ? (
+                      <View style={{ width: "100%", height: "100%" }}>
+                        <Image source={{ uri: avatarA }} style={{ width: "100%", height: "100%" }} />
+                      </View>
+                    ) : (
+                      <View style={{ alignItems: "center", justifyContent: "center" }}>
+                        <Ionicons name="camera-outline" size={32} color={theme.input.placeholder} />
+                        <Text style={{ fontSize: 10, color: theme.input.placeholder, marginTop: 4, fontWeight: "600" }}>Add Photo</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
+
                 {/* Name */}
                 <View style={{ marginBottom: 16 }}>
                   <Text style={labelStyle}>Your Name</Text>
@@ -364,7 +417,7 @@ export default function ProfileSetupScreen() {
                           style={{
                             paddingHorizontal: 16,
                             paddingVertical: 8,
-                            borderRadius: 12,
+                            borderRadius: 32, overflow: "hidden",
                             borderWidth: 1,
                             backgroundColor: selected
                               ? theme.accent
@@ -430,7 +483,7 @@ export default function ProfileSetupScreen() {
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={{
-                      borderRadius: 12,
+                      borderRadius: 32, overflow: "hidden",
                       paddingVertical: 16,
                       alignItems: "center",
                     }}
@@ -453,7 +506,7 @@ export default function ProfileSetupScreen() {
                   <View
                     style={{
                       backgroundColor: "rgba(239,68,68,0.2)",
-                      borderRadius: 12,
+                      borderRadius: 32, overflow: "hidden",
                       padding: 12,
                       marginBottom: 16,
                     }}
@@ -469,6 +522,22 @@ export default function ProfileSetupScreen() {
                     </Text>
                   </View>
                 )}
+
+                {/* Avatar Selection for Partner */}
+                <View style={{ alignItems: "center", marginBottom: 24 }}>
+                  <TouchableOpacity onPress={() => pickImage(setAvatarB)} activeOpacity={0.8} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.input.bg, borderWidth: 2, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                    {avatarB ? (
+                      <View style={{ width: "100%", height: "100%" }}>
+                        <Image source={{ uri: avatarB }} style={{ width: "100%", height: "100%" }} />
+                      </View>
+                    ) : (
+                      <View style={{ alignItems: "center", justifyContent: "center" }}>
+                        <Ionicons name="camera-outline" size={32} color={theme.input.placeholder} />
+                        <Text style={{ fontSize: 10, color: theme.input.placeholder, marginTop: 4, fontWeight: "600" }}>Add Photo</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
 
                 {/* Partner Name */}
                 <View style={{ marginBottom: 24 }}>
@@ -516,7 +585,7 @@ export default function ProfileSetupScreen() {
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={{
-                        borderRadius: 12,
+                        borderRadius: 32, overflow: "hidden",
                         paddingVertical: 16,
                         alignItems: "center",
                       }}

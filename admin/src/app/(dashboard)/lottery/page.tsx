@@ -148,7 +148,7 @@ export default function LotteryPage() {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
               <h2 className="text-lg font-bold text-slate-800">{editing ? "Edit Lottery Item" : "Create Lottery Item"}</h2>
               <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-slate-200 text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
@@ -212,7 +212,7 @@ export default function LotteryPage() {
           No lottery items found. Create your first item above!
         </div>
       ) : (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <DataTable
             data={paginated}
             onDelete={handleDelete}

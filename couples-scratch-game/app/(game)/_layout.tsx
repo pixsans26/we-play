@@ -191,7 +191,6 @@ export default function GameLayout() {
             styles.navContainer,
             {
               backgroundColor: isDark ? "rgba(30,0,53,0.65)" : "rgba(255,255,255,0.65)",
-              shadowColor: "#000",
               overflow: "hidden",
             },
           ]}
@@ -229,10 +228,6 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     paddingTop: 12,
     paddingHorizontal: 8,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 20,
   },
   tabItem: {
     flex: 1,
@@ -244,7 +239,7 @@ const styles = StyleSheet.create({
     height: 32,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
+    borderRadius: 32, overflow: "hidden",
     position: "relative",
   },
   pillBg: {
@@ -253,7 +248,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 16,
+    borderRadius: 32, overflow: "hidden",
   },
   activeDot: {
     position: "absolute",

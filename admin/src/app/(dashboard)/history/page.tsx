@@ -26,6 +26,7 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<TaskHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedRecord, setSelectedRecord] = useState<TaskHistory | null>(null);
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
@@ -100,7 +101,7 @@ export default function HistoryPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginated.map(record => (
-                  <tr key={record.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={record.id} onClick={() => setSelectedRecord(record)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
                     <td className="px-6 py-4 text-sm text-slate-600">
                       {new Date(record.scratchedAt).toLocaleString()}
                     </td>
@@ -164,6 +165,95 @@ export default function HistoryPage() {
           <div className="flex gap-2">
             <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50">Prev</button>
             <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50">Next</button>
+          </div>
+        </div>
+      )}
+
+      {/* View Record Modal */}
+      {selectedRecord && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <History className="w-5 h-5 text-indigo-500" />
+                History Record
+              </h2>
+              <button onClick={() => setSelectedRecord(null)} className="p-2 rounded-xl hover:bg-slate-200 text-slate-500 transition-colors"><XCircle className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-6">
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</p>
+                  {selectedRecord.completed ? (
+                    <span className="inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600">
+                      <CheckCircle2 className="w-4 h-4" /> Completed
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500">
+                      <XCircle className="w-4 h-4" /> Pending
+                    </span>
+                  )}
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Time Taken</p>
+                  <p className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    {selectedRecord.timeTaken !== null ? `${selectedRecord.timeTaken}s` : '-'}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Task Details</p>
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-500 font-medium">Type</span>
+                    <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
+                      selectedRecord.taskType === 'image' ? 'bg-purple-100 text-purple-700' :
+                      selectedRecord.taskType === 'text' ? 'bg-blue-100 text-blue-700' :
+                      selectedRecord.taskType === 'spin' ? 'bg-orange-100 text-orange-700' :
+                      'bg-indigo-100 text-indigo-700'
+                    }`}>
+                      {selectedRecord.taskType}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-500 font-medium">Task ID</span>
+                    <span className="text-sm font-bold text-slate-800">{selectedRecord.taskId}</span>
+                  </div>
+                  {selectedRecord.category && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-500 font-medium">Category</span>
+                      <span className="text-sm font-bold text-slate-800 capitalize">{selectedRecord.category}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Involved Users</p>
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase">Initiator (Scratcher)</span>
+                    <p className="text-sm font-bold text-slate-800 mt-0.5 break-all">{selectedRecord.userUid}</p>
+                  </div>
+                  {selectedRecord.performerUid && selectedRecord.performerUid !== selectedRecord.userUid && (
+                    <div className="pt-2 border-t border-slate-200">
+                      <span className="text-[11px] font-semibold text-slate-400 uppercase">Performer</span>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5 break-all">{selectedRecord.performerUid}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-center pt-2">
+                <p className="text-xs font-medium text-slate-400">
+                  Recorded on {new Date(selectedRecord.scratchedAt).toLocaleString()}
+                </p>
+              </div>
+
+            </div>
           </div>
         </div>
       )}

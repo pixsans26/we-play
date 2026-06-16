@@ -201,7 +201,7 @@ export default function SpinWheelScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 22 }}>
+          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden"}}>
             <Ionicons name="arrow-back" size={24} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>
         </Pressable>
@@ -335,14 +335,14 @@ export default function SpinWheelScreen() {
             <View style={styles.modalContent}>
               <Animated.View style={[
                 styles.resultCard,
-                { shadowColor: result.color, shadowOpacity: 0.8, shadowRadius: 20, elevation: 15, borderColor: "#ffffff", borderWidth: 2 }
+                { shadowColor: result.color, borderColor: "#ffffff", borderWidth: 2 }
               ]}>
                 <LinearGradient
                   colors={[result.color, `${result.color}CC`]}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                   style={styles.resultGradient}
                 >
-                  <View style={{ position: "absolute", top: 10, left: 10, right: 10, bottom: 10, borderWidth: 1, borderColor: "rgba(255,255,255,0.3)", borderRadius: 16, borderStyle: "dashed" }} />
+                  <View style={{ position: "absolute", top: 10, left: 10, right: 10, bottom: 10, borderWidth: 1, borderColor: "rgba(255,255,255,0.3)", borderRadius: 32, overflow: "hidden", borderStyle: "dashed" }} />
                   {result.emoji ? (
                     <Text style={{ fontSize: 60, marginBottom: 16 }}>{result.emoji}</Text>
                   ) : (
@@ -387,28 +387,28 @@ export default function SpinWheelScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 22, paddingTop: 56 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20 },
-  backButton: { width: 44, height: 44, borderRadius: 22, overflow: "hidden" },
+  backButton: { width: 44, height: 44, borderRadius: 32, overflow: "hidden" },
   headerTitle: { fontSize: 20, fontWeight: "800", fontFamily: "DynaPuff_700Bold" },
-  textCardContainer: { borderRadius: 16, marginBottom: 30, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 10, overflow: "visible" },
-  textCardInner: { borderRadius: 16, padding: 16, alignItems: "center", overflow: "hidden" },
-  badge: { backgroundColor: "rgba(0,0,0,0.6)", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, position: "absolute", top: -14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 4, elevation: 5 },
+  textCardContainer: { borderRadius: 32, marginBottom: 30, overflow: "visible" },
+  textCardInner: { borderRadius: 32, padding: 16, alignItems: "center", overflow: "hidden" },
+  badge: { backgroundColor: "rgba(0,0,0,0.6)", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 32, overflow: "hidden", position: "absolute", top: -14 },
   badgeText: { color: "#fff", fontSize: 10, fontWeight: "900" },
   subtitle: { fontSize: 16, textAlign: "center", fontWeight: "700" },
   wheelContainer: { alignItems: "center", justifyContent: "center", marginBottom: 40, position: "relative" },
-  wheelWrapper: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2, elevation: 25, shadowColor: "#000", shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.6, shadowRadius: 20 },
-  pointerContainer: { position: "absolute", top: -15, zIndex: 10, alignItems: "center", elevation: 25, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 6 },
+  wheelWrapper: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2 },
+  pointerContainer: { position: "absolute", top: -15, zIndex: 10, alignItems: "center" },
   actionContainer: { flex: 1, alignItems: "center", justifyContent: "flex-start", paddingBottom: 40 },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center", padding: 22 },
   modalContent: { width: "100%", alignItems: "center" },
   
-  arcadeBtnWrapper: { width: 220, height: 65, alignSelf: "center", elevation: 15, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 12 },
-  arcadeBtnBase: { position: "absolute", width: "100%", height: "100%", borderRadius: 32, top: 6 },
-  arcadeBtnTop: { width: "100%", height: "100%", borderRadius: 32, alignItems: "center", justifyContent: "center", borderWidth: 2 },
+  arcadeBtnWrapper: { width: 220, height: 65, alignSelf: "center" },
+  arcadeBtnBase: { position: "absolute", width: "100%", height: "100%", borderRadius: 32, overflow: "hidden", top: 6 },
+  arcadeBtnTop: { width: "100%", height: "100%", borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center", borderWidth: 2 },
   arcadeBtnText: { color: "#fff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 2 },
   
-  spinButton: { paddingVertical: 18, paddingHorizontal: 48, borderRadius: 30, elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, alignItems: "center" },
+  spinButton: { paddingVertical: 18, paddingHorizontal: 48, borderRadius: 30, alignItems: "center" },
   spinButtonText: { color: "#ffffff", fontSize: 22, fontWeight: "900", fontFamily: "DynaPuff_700Bold" },
-  resultCard: { width: "100%", borderRadius: 24, elevation: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, marginBottom: 16 },
+  resultCard: { width: "100%", borderRadius: 32, overflow: "hidden", marginBottom: 16 },
   resultGradient: { padding: 24, alignItems: "center" },
   resultLabel: { color: "#ffffff", fontSize: 28, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 8 },
   resultDesc: { color: "#ffffff", fontSize: 16, textAlign: "center", opacity: 0.9, fontWeight: "500" },

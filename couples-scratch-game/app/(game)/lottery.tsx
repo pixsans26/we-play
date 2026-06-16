@@ -80,7 +80,7 @@ export default function LotteryScreen() {
     setLvl1Count(lotteryHistory.filter(h => h.taskId.includes("_1_")).length);
     setLvl2Count(lotteryHistory.filter(h => h.taskId.includes("_2_")).length);
     setSeenCombos(new Set(lotteryHistory.map(h => h.taskId)));
-    
+
     setStatsA({
       rolls: lotteryHistory.filter(h => h.userUid === coupleProfile.partnerAUid).length,
       performs: lotteryHistory.filter(h => h.performerUid === coupleProfile.partnerAUid).length,
@@ -144,10 +144,22 @@ export default function LotteryScreen() {
       return;
     }
 
-    const levelFilteredCol1 = lotteryData.col1.filter((c: any) => c.level <= selectedLevel);
-    const levelFilteredCol2 = lotteryData.col2.filter((c: any) => c.level === selectedLevel);
-    const baseCol3 = lotteryData.col3.filter((c: any) => c.level === selectedLevel);
-    
+    let levelFilteredCol1, levelFilteredCol2, baseCol3;
+
+    if (selectedLevel === 3) {
+      levelFilteredCol1 = lotteryData.col1.filter((c: any) => c.level === 3);
+      levelFilteredCol2 = lotteryData.col2.filter((c: any) => c.level === 2 || c.level === 3);
+      baseCol3 = lotteryData.col3.filter((c: any) => c.level === 3);
+    } else if (selectedLevel === 2) {
+      levelFilteredCol1 = lotteryData.col1.filter((c: any) => c.level === 2);
+      levelFilteredCol2 = lotteryData.col2.filter((c: any) => c.level === 2);
+      baseCol3 = lotteryData.col3.filter((c: any) => c.level === 2);
+    } else {
+      levelFilteredCol1 = lotteryData.col1.filter((c: any) => c.level === 1);
+      levelFilteredCol2 = lotteryData.col2.filter((c: any) => c.level === 1);
+      baseCol3 = lotteryData.col3.filter((c: any) => c.level === 1);
+    }
+
     // If no items match the level (e.g. database setup issues), fallback to all items
     const col1List = levelFilteredCol1.length > 0 ? levelFilteredCol1 : lotteryData.col1;
     const col2List = levelFilteredCol2.length > 0 ? levelFilteredCol2 : lotteryData.col2;
@@ -160,14 +172,14 @@ export default function LotteryScreen() {
     do {
       c1 = col1List[Math.floor(Math.random() * col1List.length)];
       c2 = col2List[Math.floor(Math.random() * col2List.length)];
-      
+
       const isMouth = c1.type === "mouth";
       const isHand = c1.type === "hand";
-      
+
       let validCol3 = col3List;
       if (isMouth) validCol3 = validCol3.filter((c: any) => c.type === "any" || c.type === "mouth");
       if (isHand) validCol3 = validCol3.filter((c: any) => c.type === "any" || c.type === "hand");
-      
+
       if (validCol3.length === 0) validCol3 = col3List;
       c3 = validCol3[Math.floor(Math.random() * validCol3.length)];
 
@@ -182,7 +194,7 @@ export default function LotteryScreen() {
     // Generate reels
     const SPIN_ITEMS = 30;
     const ITEM_HEIGHT = 60;
-    
+
     const generateReel = (pool: any[], finalResult: string) => {
       const reel = [];
       for (let i = 0; i < SPIN_ITEMS - 1; i++) {
@@ -222,7 +234,7 @@ export default function LotteryScreen() {
       setResults(finalCombo);
       setCurrentComboId(finalComboId);
       setIsRolling(false);
-    }, 3200); 
+    }, 3200);
   };
 
   const handleDone = async () => {
@@ -260,7 +272,7 @@ export default function LotteryScreen() {
 
   return (
     <LinearGradient colors={bgColors} locations={[0, 1]} style={styles.container}>
-      
+
       {/* Decorative Background Hearts */}
       <Animated.View style={{ position: "absolute", top: 80, left: -20, transform: [{ rotate: "-15deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -20] }) }] }}>
         <Ionicons name="heart" size={120} color={heartColor} />
@@ -271,16 +283,16 @@ export default function LotteryScreen() {
       <Animated.View style={{ position: "absolute", bottom: 100, left: 30, transform: [{ rotate: "-10deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -40] }) }] }}>
         <Ionicons name="heart" size={150} color={heartColor} />
       </Animated.View>
-      
+
       {/* Top Nav */}
       <View style={styles.topNav}>
         <Pressable onPress={() => router.back()} style={styles.navButton}>
-          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 22 }}>
+          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden" }}>
             <Ionicons name="arrow-back" size={24} color={isDark ? "#fff" : "#4c0519"} />
           </BlurView>
         </Pressable>
         <Pressable onPress={handleResetLottery} style={styles.navButton}>
-          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 22 }}>
+          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden" }}>
             <Ionicons name="refresh" size={22} color={isDark ? "#fff" : "#4c0519"} />
           </BlurView>
         </Pressable>
@@ -307,10 +319,10 @@ export default function LotteryScreen() {
       </View>
 
       <View style={styles.machineWrapper}>
-        
+
         {/* Arcade Cabinet Casing */}
         <View style={[styles.cabinetOuter, { backgroundColor: isDark ? "#4c0519" : "#fecdd3" }]}>
-          
+
           {/* Marquee Header */}
           <View style={styles.marqueeHeader}>
             <LinearGradient colors={["#f43f5e", "#be123c"]} style={styles.marqueeBg} />
@@ -318,7 +330,7 @@ export default function LotteryScreen() {
             <Ionicons name="heart" size={20} color="#fef08a" style={{ position: "absolute", top: 5, left: 80 }} />
             <Ionicons name="heart" size={20} color="#fef08a" style={{ position: "absolute", top: 5, right: 80 }} />
             <Ionicons name="heart" size={14} color="#fef08a" style={{ position: "absolute", top: 10, right: 40 }} />
-            
+
             {/* Ribbon */}
             <View style={styles.ribbon}>
               <LinearGradient colors={["#fde047", "#d97706"]} style={StyleSheet.absoluteFillObject} />
@@ -328,19 +340,19 @@ export default function LotteryScreen() {
 
           {/* Machine Body (Metallic) */}
           <LinearGradient colors={isDark ? ["#881337", "#9f1239", "#be123c"] : ["#fff1f2", "#ffe4e6", "#fecdd3"]} style={styles.machineBody}>
-            
-            <View style={{ alignSelf: "center", borderRadius: 12, overflow: "hidden", marginBottom: 16 }}>
-               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 16, paddingVertical: 6, borderRadius: 12 }}>
-                 <Text style={[styles.turnIndicatorText, { color: isDark ? "#fb923c" : "#c2410c" }]}>
-                   {turnName} <Text style={{ color: isDark ? "#fff" : "#000" }}>rolls</Text> • {otherName} <Text style={{ color: isDark ? "#fff" : "#000" }}>performs</Text>
-                 </Text>
-               </BlurView>
+
+            <View style={{ alignSelf: "center", borderRadius: 32, overflow: "hidden", marginBottom: 16 }}>
+              <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 16, paddingVertical: 6, borderRadius: 32, overflow: "hidden" }}>
+                <Text style={[styles.turnIndicatorText, { color: isDark ? "#fb923c" : "#c2410c" }]}>
+                  {turnName} <Text style={{ color: isDark ? "#fff" : "#000" }}>rolls</Text> • {otherName} <Text style={{ color: isDark ? "#fff" : "#000" }}>performs</Text>
+                </Text>
+              </BlurView>
             </View>
 
             {/* Recessed Reels Container */}
             <View style={styles.reelsOuter}>
               <View style={styles.reelsInner}>
-                
+
                 {/* Column 1 */}
                 <LinearGradient colors={["#881337", "#fff1f2", "#fff1f2", "#881337"]} style={styles.reelColumn}>
                   <Animated.View style={[styles.reelStrip, getColStyle(col1Anim)]}>
@@ -389,7 +401,7 @@ export default function LotteryScreen() {
                     )}
                   </Animated.View>
                 </LinearGradient>
-                
+
 
 
               </View>
@@ -397,7 +409,7 @@ export default function LotteryScreen() {
 
             {/* Bottom Control Panel */}
             <LinearGradient colors={["#4c0519", "#881337"]} style={styles.controlPanel}>
-              
+
               {/* Digital Stats Screen */}
               <View style={styles.statsScreen}>
                 <View style={styles.statBox}>
@@ -462,26 +474,21 @@ export default function LotteryScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 56, paddingHorizontal: 16 },
   topNav: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 },
-  navButton: { width: 44, height: 44, borderRadius: 22, overflow: "hidden" },
-  
+  navButton: { width: 44, height: 44, borderRadius: 32, overflow: "hidden" },
+
   kpiRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20, gap: 8 },
-  kpiCard: { flex: 1, borderRadius: 12, paddingVertical: 10, alignItems: "center", borderWidth: 1, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.5, shadowRadius: 4, elevation: 5 },
+  kpiCard: { flex: 1, borderRadius: 32, overflow: "hidden", paddingVertical: 10, alignItems: "center", borderWidth: 1 },
   kpiLabel: { fontSize: 9, fontWeight: "800", marginBottom: 4, textAlign: "center" },
   kpiValue: { fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold" },
 
-  machineWrapper: { flex: 1, justifyContent: "center", alignItems: "center", marginBottom: 40 },
-  
+  machineWrapper: { flex: 1, justifyContent: "center", alignItems: "center", marginBottom: 40, overflow: "hidden" },
+
   cabinetOuter: {
     width: "100%",
     maxWidth: 400,
     backgroundColor: "#fecdd3",
     borderRadius: 30,
     padding: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 15,
   },
 
   marqueeHeader: {
@@ -492,8 +499,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     paddingBottom: 15,
-    borderWidth: 2,
-    borderColor: "#e2e8f0",
+
     borderBottomWidth: 0,
   },
   marqueeBg: {
@@ -505,11 +511,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     borderColor: "#fde047",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 5,
     overflow: "hidden",
   },
   ribbonText: {
@@ -533,7 +534,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.4)",
     paddingHorizontal: 16,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 32, overflow: "hidden",
     marginBottom: 16,
   },
   turnIndicatorText: {
@@ -544,13 +545,9 @@ const styles = StyleSheet.create({
 
   reelsOuter: {
     backgroundColor: "#000",
-    borderRadius: 12,
+    borderRadius: 12, overflow: "hidden",
     padding: 4,
     marginBottom: 20,
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.5,
-    shadowRadius: 1,
   },
   reelsInner: {
     flexDirection: "row",
@@ -590,12 +587,12 @@ const styles = StyleSheet.create({
   },
 
   controlPanel: {
-    borderRadius: 16,
+    borderRadius: 32, overflow: "hidden",
     padding: 16,
     borderWidth: 2,
     borderColor: "#475569",
   },
-  
+
   statsScreen: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -605,11 +602,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 2,
     borderColor: "#4c0519",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 2,
-    elevation: 3,
   },
   statBox: {
     alignItems: "center",
@@ -644,14 +636,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 32, overflow: "hidden",
     backgroundColor: "#831843",
     top: 4,
   },
   levelBtnTop: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 32, overflow: "hidden",
     backgroundColor: "#db2777",
     alignItems: "center",
     justifyContent: "center",

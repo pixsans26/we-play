@@ -57,7 +57,7 @@ export default function ProfilePage() {
           No admins found in the database.
         </div>
       ) : (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <DataTable
             data={profiles}
             onDelete={async () => { alert("Cannot delete admins from dashboard yet."); }}

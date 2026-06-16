@@ -133,13 +133,14 @@ export default function LoginScreen() {
             </View>
 
             {/* Card */}
-            <View style={{ borderRadius: 28, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 15, elevation: 12 }}>
+            <View style={{ borderRadius: 28 }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{
                 padding: 24,
+                borderRadius: 32, overflow: "hidden",
               }}>
 
               {error && (
-                <View style={{ backgroundColor: "rgba(239,68,68,0.15)", borderWidth: 1, borderColor: "rgba(248,113,113,0.3)", borderRadius: 14, padding: 12, marginBottom: 20 }}>
+                <View style={{ backgroundColor: "rgba(239,68,68,0.15)", borderWidth: 1, borderColor: "rgba(248,113,113,0.3)", borderRadius: 32, overflow: "hidden", padding: 12, marginBottom: 20 }}>
                   <Text style={{ color: "#fca5a5", fontSize: 13, textAlign: "center" }}>{error}</Text>
                 </View>
               )}
@@ -149,7 +150,7 @@ export default function LoginScreen() {
                 <Text style={{ color: theme.card.subtext, fontSize: 13, fontWeight: "700", marginBottom: 8 }}>
                   EMAIL
                 </Text>
-                <View style={{ backgroundColor: theme.input.bg, borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}>
+                <View style={{ backgroundColor: theme.input.bg, borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}>
                   <Ionicons name="mail-outline" size={18} color={theme.card.subtext} style={{ marginRight: 10 }} />
                   <TextInput
                     style={{ flex: 1, color: theme.card.text, fontSize: 16, paddingVertical: 14 }}
@@ -170,7 +171,7 @@ export default function LoginScreen() {
                 <Text style={{ color: theme.card.subtext, fontSize: 13, fontWeight: "700", marginBottom: 8 }}>
                   PASSWORD
                 </Text>
-                <View style={{ backgroundColor: theme.input.bg, borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}>
+                <View style={{ backgroundColor: theme.input.bg, borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 16 }}>
                   <Ionicons name="lock-closed-outline" size={18} color={theme.card.subtext} style={{ marginRight: 10 }} />
                   <TextInput
                     style={{ flex: 1, color: theme.card.text, fontSize: 16, paddingVertical: 14 }}
@@ -193,7 +194,7 @@ export default function LoginScreen() {
                   colors={["#f953c6", "#7c3aed"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
-                  style={{ borderRadius: 999, paddingVertical: 17, alignItems: "center" }}
+                  style={{ borderRadius: 999, overflow: "hidden", paddingVertical: 17, alignItems: "center" }}
                 >
                   {isLoading
                     ? <ActivityIndicator color="#ffffff" />

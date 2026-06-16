@@ -20,6 +20,8 @@ export interface CoupleProfile {
   partnerBUid: string | null;
   partnerAName: string;
   partnerBName: string | null;
+  partnerAAvatar?: string | null;
+  partnerBAvatar?: string | null;
   partnerAAge: number | null;
   partnerBAge: number | null;
   partnerAGender: string | null;

@@ -6,6 +6,10 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import DataTable from "@/components/DataTable";
 import { Plus, FileText, Loader2, X, Filter, Search } from "lucide-react";
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 interface TextTask {
   id: string; title: string; description: string;
@@ -141,13 +145,14 @@ export default function TextTasksPage() {
       {/* Add/Edit Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50 shrink-0">
               <h2 className="text-lg font-bold text-slate-800">{editing ? "Edit Text Task" : "Add New Text Task"}</h2>
               <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-slate-200 text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
             </div>
-            <form onSubmit={handleSave} className="p-6 space-y-5">
-              <div className="grid grid-cols-2 gap-5">
+            <form onSubmit={handleSave} className="p-6 flex flex-col overflow-y-auto">
+              <div className="space-y-5">
+                <div className="grid grid-cols-2 gap-5">
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Task ID</label>
                   <input value={form.id} disabled placeholder="Auto-generated"
@@ -168,8 +173,28 @@ export default function TextTasksPage() {
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Description</label>
-                <textarea required rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Detailed instructions for the couple..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 resize-none transition-all" />
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                  <style jsx global>{`
+                    .quill { display: flex; flex-direction: column; }
+                    .ql-toolbar { border: none !important; border-bottom: 1px solid #f1f5f9 !important; background: #f8fafc; }
+                    .ql-container { border: none !important; font-size: 14px; min-height: 150px; }
+                    .ql-editor { color: #334155; }
+                  `}</style>
+                  <ReactQuill 
+                    theme="snow" 
+                    value={form.description} 
+                    onChange={(val) => setForm(f => ({ ...f, description: val }))} 
+                    placeholder="Detailed instructions for the couple..."
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link', 'clean']
+                      ]
+                    }}
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-5">
                 <div>
@@ -183,7 +208,8 @@ export default function TextTasksPage() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all" />
                 </div>
               </div>
-              <div className="flex gap-3 pt-4 border-t border-slate-100">
+              </div>
+              <div className="flex gap-3 pt-6 mt-6 border-t border-slate-100 shrink-0">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 bg-white border border-slate-200 rounded-xl py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-all">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-3 text-sm font-semibold shadow-sm flex items-center justify-center gap-2 transition-all disabled:opacity-70">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
@@ -198,7 +224,7 @@ export default function TextTasksPage() {
       {loading ? (
         <div className="text-center py-20 text-slate-400"><Loader2 className="w-8 h-8 animate-spin mx-auto" /></div>
       ) : (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <DataTable
           data={paginated}
           onDelete={handleDelete}
@@ -209,7 +235,7 @@ export default function TextTasksPage() {
             { key: "title", label: "Title", render: (t) => (
               <div>
                 <div className="font-semibold text-slate-800">{t.title}</div>
-                <div className="text-slate-500 text-xs truncate max-w-xs mt-0.5">{t.description}</div>
+                <div className="text-slate-500 text-xs truncate max-w-xs mt-0.5 line-clamp-2" dangerouslySetInnerHTML={{ __html: t.description }} />
               </div>
             )},
             { key: "category", label: "Category", render: (t) => (

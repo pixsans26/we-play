@@ -8,6 +8,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "@/components/CustomBlurView";
 import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -34,17 +36,17 @@ interface SettingRowProps {
 
 function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, danger, isDark }: SettingRowProps) {
   return (
-    <View style={{ borderRadius: 18, marginBottom: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 1, elevation: 5 }}>
+    <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 2 }}>
       <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed && onPress ? 0.75 : 1 })}>
         <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{
           flexDirection: "row",
           alignItems: "center",
-          borderRadius: 18,
+          borderRadius: 32, overflow: "hidden",
           padding: 18,
           gap: 14,
         }}>
           <View style={{
-            width: 42, height: 42, borderRadius: 18,
+            width: 42, height: 42, borderRadius: 32, overflow: "hidden",
             backgroundColor: danger ? (isDark ? "rgba(239,68,68,0.2)" : "rgba(239,68,68,0.1)") : (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)"),
             alignItems: "center", justifyContent: "center",
 
@@ -83,7 +85,21 @@ export default function SettingsScreen() {
   const [genderB, setGenderB] = useState(coupleProfile?.partnerBGender ?? "");
   const [likesA, setLikesA] = useState(coupleProfile?.whatALikes ?? "");
   const [likesB, setLikesB] = useState(coupleProfile?.whatBLikes ?? "");
+  const [avatarA, setAvatarA] = useState(coupleProfile?.partnerAAvatar ?? null);
+  const [avatarB, setAvatarB] = useState(coupleProfile?.partnerBAvatar ?? null);
   const [savingProfile, setSavingProfile] = useState(false);
+
+  const pickImage = async (setAvatar: (uri: string) => void) => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setAvatar(result.assets[0].uri);
+    }
+  };
 
   const bgAnim = useRef(new Animated.Value(0)).current;
 
@@ -155,20 +171,37 @@ export default function SettingsScreen() {
 
     setSavingProfile(true);
     try {
-      const updatedProfile = {
-        ...coupleProfile,
-        partnerAName: trimA,
-        partnerBName: trimB || null,
-        partnerAGender: genderA.trim() || null,
-        partnerBGender: genderB.trim() || null,
-        whatALikes: likesA.trim() || null,
-        whatBLikes: likesB.trim() || null,
-      };
+      const formData = new FormData();
+      formData.append("partnerAUid", coupleProfile.partnerAUid);
+      if (coupleProfile.partnerBUid) formData.append("partnerBUid", coupleProfile.partnerBUid);
+      formData.append("partnerAName", trimA);
+      if (trimB) formData.append("partnerBName", trimB);
+      if (genderA.trim()) formData.append("partnerAGender", genderA.trim());
+      if (genderB.trim()) formData.append("partnerBGender", genderB.trim());
+      if (likesA.trim()) formData.append("whatALikes", likesA.trim());
+      if (likesB.trim()) formData.append("whatBLikes", likesB.trim());
+
+      if (avatarA && avatarA !== coupleProfile.partnerAAvatar) {
+        const ext = avatarA.substring(avatarA.lastIndexOf(".") + 1) || "jpg";
+        formData.append("partnerAAvatar", {
+          uri: avatarA,
+          name: `avatar_A.${ext}`,
+          type: `image/${ext}`
+        } as any);
+      }
+      
+      if (avatarB && avatarB !== coupleProfile.partnerBAvatar) {
+        const ext = avatarB.substring(avatarB.lastIndexOf(".") + 1) || "jpg";
+        formData.append("partnerBAvatar", {
+          uri: avatarB,
+          name: `avatar_B.${ext}`,
+          type: `image/${ext}`
+        } as any);
+      }
 
       const res = await apiFetch(`${BASE_URL}/api/couple`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedProfile)
+        body: formData
       });
 
       if (res.ok) {
@@ -202,8 +235,8 @@ export default function SettingsScreen() {
 
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, paddingHorizontal: 22 }}>
-        <Pressable onPress={() => router.back()} style={{ borderRadius: 20, marginRight: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
-          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" }}>
+        <Pressable onPress={() => router.back()} style={{ borderRadius: 32, overflow: "hidden", marginRight: 14 }}>
+          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 40, height: 40, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="arrow-back" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>
         </Pressable>
@@ -260,16 +293,6 @@ export default function SettingsScreen() {
               theme={theme}
               onPress={handleResetHistory}
               right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
-            />
-            <SettingRow
-              isDark={isDark}
-              icon="log-out-outline"
-              iconColor="#ef4444"
-              label="Log Out"
-              sublabel="Sign out of your account"
-              theme={theme}
-              onPress={handleLogout}
-              danger
             />
           </View>
 
@@ -384,25 +407,26 @@ export default function SettingsScreen() {
             </View>
             <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 11 }}>Version 1.0.0</Text>
           </View>
+
+          {/* Logout Button */}
+          <View style={{ alignItems: "center", marginTop: 32 }}>
+            <Pressable onPress={handleLogout} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)" })}>
+              <Text style={{ color: "#ef4444", fontSize: 13, fontWeight: "700" }}>Log Out</Text>
+            </Pressable>
+          </View>
         </ScrollView>
       </FadingEdgeMask>
 
       {/* ── Edit Profile Modal ── */}
       <Modal visible={editProfileVisible} animationType="slide" transparent onRequestClose={() => setEditProfileVisible(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "flex-end" }}>
-          <View style={{
-            backgroundColor: isDark ? "#2a0410" : "#fff0f8",
+          <LinearGradient colors={theme.background} style={{
             borderTopLeftRadius: 32,
             borderTopRightRadius: 32,
             borderTopWidth: 1,
             borderColor: "rgba(255,255,255,0.2)",
             padding: 28,
             paddingBottom: 40,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: -10 },
-            shadowOpacity: 0.2,
-            shadowRadius: 15,
-            elevation: 20,
             maxHeight: "85%",
           }}>
             {/* Modal header */}
@@ -413,7 +437,7 @@ export default function SettingsScreen() {
               </View>
               <Pressable
                 onPress={() => setEditProfileVisible(false)}
-                style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(0,0,0,0.05)", borderWidth: 1, borderColor: "rgba(0,0,0,0.1)", alignItems: "center", justifyContent: "center" }}
+                style={{ width: 36, height: 36, borderRadius: 32, overflow: "hidden", backgroundColor: "rgba(0,0,0,0.05)", borderWidth: 1, borderColor: "rgba(0,0,0,0.1)", alignItems: "center", justifyContent: "center" }}
               >
                 <Ionicons name="close" size={18} color={isDark ? "#fff" : "#1e0a2e"} />
               </Pressable>
@@ -426,12 +450,23 @@ export default function SettingsScreen() {
                   YOU
                 </Text>
                 <View style={{ gap: 10 }}>
+                  {/* Avatar A Selection */}
+                  <View style={{ alignItems: "center", marginBottom: 12 }}>
+                    <Pressable onPress={() => pickImage(setAvatarA)} style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                      {avatarA ? (
+                        <Image source={{ uri: avatarA }} style={{ width: "100%", height: "100%" }} />
+                      ) : (
+                        <Ionicons name="camera-outline" size={24} color={isDark ? "rgba(255,255,255,0.5)" : "#9333ea"} />
+                      )}
+                    </Pressable>
+                  </View>
+
                   {/* Name A */}
                   <View style={{
                     flexDirection: "row", alignItems: "center",
                     backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#ffffff",
                     borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)",
-                    borderRadius: 14, paddingHorizontal: 14,
+                    borderRadius: 32, overflow: "hidden", paddingHorizontal: 14,
                   }}>
                     <Ionicons name="person-outline" size={16} color={isDark ? "rgba(255,255,255,0.7)" : "#6d4c8a"} style={{ marginRight: 10 }} />
                     <TextInput
@@ -456,7 +491,7 @@ export default function SettingsScreen() {
                             flex: 1, paddingVertical: 10, alignItems: "center",
                             backgroundColor: genderA === option ? (isDark ? "rgba(168,85,247,0.3)" : "#f3e8ff") : (isDark ? "rgba(255,255,255,0.05)" : "#f8fafc"),
                             borderWidth: 1, borderColor: genderA === option ? "#a855f7" : (isDark ? "rgba(255,255,255,0.15)" : "#e2e8f0"),
-                            borderRadius: 12,
+                            borderRadius: 32, overflow: "hidden",
                           }}
                         >
                           <Text style={{
@@ -475,7 +510,7 @@ export default function SettingsScreen() {
                     flexDirection: "row", alignItems: "center",
                     backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#ffffff",
                     borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)",
-                    borderRadius: 14, paddingHorizontal: 14,
+                    borderRadius: 32, overflow: "hidden", paddingHorizontal: 14,
                   }}>
                     <Ionicons name="heart-outline" size={16} color={isDark ? "rgba(255,255,255,0.7)" : "#6d4c8a"} style={{ marginRight: 10 }} />
                     <TextInput
@@ -495,12 +530,23 @@ export default function SettingsScreen() {
                   YOUR PARTNER
                 </Text>
                 <View style={{ gap: 10 }}>
+                  {/* Avatar B Selection */}
+                  <View style={{ alignItems: "center", marginBottom: 12 }}>
+                    <Pressable onPress={() => pickImage(setAvatarB)} style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                      {avatarB ? (
+                        <Image source={{ uri: avatarB }} style={{ width: "100%", height: "100%" }} />
+                      ) : (
+                        <Ionicons name="camera-outline" size={24} color={isDark ? "rgba(255,255,255,0.5)" : "#9333ea"} />
+                      )}
+                    </Pressable>
+                  </View>
+
                   {/* Name B */}
                   <View style={{
                     flexDirection: "row", alignItems: "center",
                     backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#ffffff",
                     borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)",
-                    borderRadius: 14, paddingHorizontal: 14,
+                    borderRadius: 32, overflow: "hidden", paddingHorizontal: 14,
                   }}>
                     <Ionicons name="person-outline" size={16} color={isDark ? "rgba(255,255,255,0.7)" : "#6d4c8a"} style={{ marginRight: 10 }} />
                     <TextInput
@@ -525,7 +571,7 @@ export default function SettingsScreen() {
                             flex: 1, paddingVertical: 10, alignItems: "center",
                             backgroundColor: genderB === option ? (isDark ? "rgba(168,85,247,0.3)" : "#f3e8ff") : (isDark ? "rgba(255,255,255,0.05)" : "#f8fafc"),
                             borderWidth: 1, borderColor: genderB === option ? "#a855f7" : (isDark ? "rgba(255,255,255,0.15)" : "#e2e8f0"),
-                            borderRadius: 12,
+                            borderRadius: 32, overflow: "hidden",
                           }}
                         >
                           <Text style={{
@@ -544,7 +590,7 @@ export default function SettingsScreen() {
                     flexDirection: "row", alignItems: "center",
                     backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#ffffff",
                     borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)",
-                    borderRadius: 14, paddingHorizontal: 14,
+                    borderRadius: 32, overflow: "hidden", paddingHorizontal: 14,
                   }}>
                     <Ionicons name="heart-outline" size={16} color={isDark ? "rgba(255,255,255,0.7)" : "#6d4c8a"} style={{ marginRight: 10 }} />
                     <TextInput
@@ -567,7 +613,7 @@ export default function SettingsScreen() {
                 <LinearGradient
                   colors={["#e91e8c", "#7c3aed"] as any}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                  style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16, borderRadius: 999 }}
+                  style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16, borderRadius: 999, overflow: "hidden"}}
                 >
                   <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
                   <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>
@@ -576,7 +622,7 @@ export default function SettingsScreen() {
                 </LinearGradient>
               </Pressable>
             </ScrollView>
-          </View>
+          </LinearGradient>
         </KeyboardAvoidingView>
       </Modal>
     </LinearGradient>

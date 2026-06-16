@@ -134,7 +134,7 @@ export default function SpinWheelPage() {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
               <h2 className="text-lg font-bold text-slate-800">{editing ? "Edit Spin Item" : "Add Spin Item"}</h2>
               <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-slate-200 text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
@@ -144,7 +144,7 @@ export default function SpinWheelPage() {
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Emoji</label>
                   <input required value={form.emoji} onChange={e => setForm(f => ({ ...f, emoji: e.target.value }))} placeholder="🎯"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-lg text-center focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all" />
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-lg text-center focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Color (Hex)</label>
@@ -194,7 +194,7 @@ export default function SpinWheelPage() {
           No spin wheel items found. Add one above!
         </div>
       ) : (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <DataTable
             data={paginated}
             onDelete={handleDelete}

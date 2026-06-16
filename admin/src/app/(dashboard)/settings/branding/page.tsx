@@ -116,7 +116,7 @@ export default function BrandingSettings() {
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 space-y-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-8">
         
         {/* App Name Section */}
         <div>
@@ -203,7 +203,7 @@ export default function BrandingSettings() {
             <label className="text-xs font-semibold text-slate-500 block">Upload Logo Image</label>
             <div className="flex items-center gap-4">
               <label className="flex-1 cursor-pointer">
-                <div className="border-2 border-dashed border-slate-200 hover:border-[#5e51d9] bg-slate-50 rounded-xl p-4 flex flex-col items-center justify-center transition-all text-center">
+                <div className="border-2 border-dashed border-slate-200 hover:border-[#5e51d9] bg-slate-50 rounded-2xl p-4 flex flex-col items-center justify-center transition-all text-center">
                   <ImageIcon className="w-6 h-6 text-slate-400 mb-2" />
                   <span className="text-sm font-medium text-slate-600">Click to upload logo</span>
                   <span className="text-xs text-slate-400 mt-1">PNG, JPG up to 5MB</span>

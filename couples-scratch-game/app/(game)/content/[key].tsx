@@ -70,8 +70,8 @@ export default function ContentScreen() {
 
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, paddingHorizontal: 22 }}>
-        <Pressable onPress={() => router.back()} style={{ borderRadius: 20, marginRight: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
-          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" }}>
+        <Pressable onPress={() => router.back()} style={{ borderRadius: 32, overflow: "hidden", marginRight: 14 }}>
+          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 40, height: 40, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="arrow-back" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>
         </Pressable>
@@ -87,7 +87,7 @@ export default function ContentScreen() {
       >
         <View style={{ 
           backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.4)",
-          borderRadius: 24,
+          borderRadius: 32, overflow: "hidden",
           padding: 24,
           minHeight: 300
         }}>

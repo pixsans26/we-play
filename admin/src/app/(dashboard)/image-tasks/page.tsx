@@ -153,7 +153,7 @@ export default function ImageTasksPage() {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
               <h2 className="text-lg font-bold text-slate-800">{editing ? "Edit Image Task" : "Upload Image Task"}</h2>
               <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-slate-200 text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
@@ -217,10 +217,10 @@ export default function ImageTasksPage() {
           <p className="text-sm mt-1">Upload your first photo task above!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {paginated.map(task => (
-            <div key={task.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group">
-              <div className="h-56 bg-slate-100 relative overflow-hidden">
+            <div key={task.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group">
+              <div className="aspect-square bg-slate-100 relative overflow-hidden">
                 <img src={`${ASSETS}${task.imageSource}`} alt={task.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x300?text=No+Image"; }} />
@@ -230,16 +230,16 @@ export default function ImageTasksPage() {
                 
                 {/* Top badges */}
                 <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-                  <span className="bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm backdrop-blur-md">
+                  <span className="bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-2xl shadow-sm backdrop-blur-md">
                     {task.id}
                   </span>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-[-10px] group-hover:translate-y-0">
                     <button onClick={() => handleEdit(task)}
-                      className="bg-white/90 p-2 rounded-lg text-indigo-500 shadow-sm hover:bg-indigo-50 hover:text-indigo-600 backdrop-blur-md">
+                      className="bg-white/90 p-2 rounded-2xl text-indigo-500 shadow-sm hover:bg-indigo-50 hover:text-indigo-600 backdrop-blur-md">
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button onClick={() => setDeleteId(task.id)}
-                      className="bg-white/90 p-2 rounded-lg text-red-500 shadow-sm hover:bg-red-50 hover:text-red-600 backdrop-blur-md">
+                      className="bg-white/90 p-2 rounded-2xl text-red-500 shadow-sm hover:bg-red-50 hover:text-red-600 backdrop-blur-md">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

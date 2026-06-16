@@ -174,14 +174,9 @@ export default function HistoryScreen() {
             backgroundColor: theme.card.bg,
             borderWidth: 1,
             borderColor: theme.card.border,
-            borderRadius: 20,
+            borderRadius: 32, overflow: "hidden",
             padding: 16,
             marginBottom: 12,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 8,
-            elevation: 3,
           }}
         >
           {/* Title row with heart status icon */}
@@ -327,11 +322,6 @@ export default function HistoryScreen() {
               borderTopWidth: 1,
               borderColor: theme.card.border,
               maxHeight: "85%",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -4 },
-              shadowOpacity: 0.1,
-              shadowRadius: 10,
-              elevation: 10,
             }}
           >
             <ScrollView
@@ -344,7 +334,7 @@ export default function HistoryScreen() {
                   alignSelf: "flex-end",
                   marginBottom: 16,
                   backgroundColor: theme.glass.bg,
-                  borderRadius: 999,
+                  borderRadius: 999, overflow: "hidden",
                   paddingHorizontal: 16,
                   paddingVertical: 8,
                   borderWidth: 1,
@@ -364,7 +354,7 @@ export default function HistoryScreen() {
                     alignItems: "center",
                     gap: 4,
                     backgroundColor: theme.glass.bg,
-                    borderRadius: 999,
+                    borderRadius: 999, overflow: "hidden",
                     paddingHorizontal: 12,
                     paddingVertical: 4,
                     borderWidth: 1,
@@ -416,7 +406,7 @@ export default function HistoryScreen() {
                     style={{
                       width: "100%",
                       height: 224,
-                      borderRadius: 16,
+                      borderRadius: 32, overflow: "hidden",
                       marginBottom: 16,
                     }}
                     resizeMode="cover"
@@ -490,7 +480,7 @@ export default function HistoryScreen() {
                   backgroundColor: theme.glass.bg,
                   borderWidth: 1,
                   borderColor: theme.glass.border,
-                  borderRadius: 16,
+                  borderRadius: 32, overflow: "hidden",
                   padding: 16,
                   marginTop: 8,
                 }}
@@ -584,7 +574,7 @@ export default function HistoryScreen() {
                   justifyContent: "center",
                   gap: 8,
                   marginTop: 24,
-                  borderRadius: 999,
+                  borderRadius: 999, overflow: "hidden",
                   backgroundColor: "rgba(239, 68, 68, 0.1)",
                   borderWidth: 1,
                   borderColor: "rgba(239, 68, 68, 0.3)",
@@ -630,7 +620,7 @@ export default function HistoryScreen() {
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
           <Pressable
             onPress={() => router.back()}
-            style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: theme.glass.bg, borderWidth: 1, borderColor: theme.glass.border, alignItems: "center", justifyContent: "center", marginRight: 14 }}
+            style={{ width: 40, height: 40, borderRadius: 32, overflow: "hidden", backgroundColor: theme.glass.bg, borderWidth: 1, borderColor: theme.glass.border, alignItems: "center", justifyContent: "center", marginRight: 14 }}
           >
             <Ionicons name="arrow-back" size={20} color={theme.card.text} />
           </Pressable>
@@ -654,7 +644,7 @@ export default function HistoryScreen() {
                   style={{
                     paddingHorizontal: 18,
                     paddingVertical: 10,
-                    borderRadius: 24,
+                    borderRadius: 32, overflow: "hidden",
                     backgroundColor: isActive ? theme.accent : theme.glass.bg,
                     borderWidth: 1,
                     borderColor: isActive ? theme.accent : theme.glass.border,
@@ -691,7 +681,7 @@ export default function HistoryScreen() {
             justifyContent: "center",
             gap: 8,
             marginTop: 16,
-            borderRadius: 999,
+            borderRadius: 999, overflow: "hidden",
             backgroundColor: theme.glass.bg,
             borderWidth: 1,
             borderColor: theme.glass.border,

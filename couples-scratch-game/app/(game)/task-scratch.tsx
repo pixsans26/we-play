@@ -511,7 +511,7 @@ export default function TaskScratchScreen() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  borderRadius: 16,
+                  borderRadius: 32, overflow: "hidden",
                   backgroundColor: "transparent",
                   paddingVertical: 16,
                 }}
@@ -539,7 +539,7 @@ export default function TaskScratchScreen() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                borderRadius: 16,
+                borderRadius: 32, overflow: "hidden",
                 borderWidth: 1,
                 borderColor: theme.glass.border,
                 backgroundColor: "transparent",
@@ -598,7 +598,7 @@ export default function TaskScratchScreen() {
           <View
             style={{
               width: "100%",
-              borderRadius: 24,
+              borderRadius: 32, overflow: "hidden",
               backgroundColor: theme.glass.bg,
               borderWidth: 1,
               borderColor: theme.glass.border,
@@ -655,7 +655,7 @@ export default function TaskScratchScreen() {
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-              borderRadius: 16,
+              borderRadius: 32, overflow: "hidden",
               borderWidth: 1,
               borderColor: theme.glass.border,
               backgroundColor: "transparent",
@@ -713,16 +713,16 @@ export default function TaskScratchScreen() {
 
         {/* ── TOP HEADER: Close × top-right ── */}
         <View style={{ alignItems: "flex-end", marginBottom: 12 }}>
-          <Pressable onPress={handleGoBack} style={{ borderRadius: 18, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
-            <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" }}>
+          <Pressable onPress={handleGoBack} style={{ borderRadius: 32, overflow: "hidden"}}>
+            <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 36, height: 36, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
               <Ionicons name="close" size={18} color={isDark ? "#ffffff" : "#0f172a"} />
             </BlurView>
           </Pressable>
         </View>
 
         {/* ── SCRATCH COUNTER BAR ── */}
-        <View style={{ borderRadius: 18, marginBottom: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 5 }}>
-          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flexDirection: "row", alignItems: "center", borderRadius: 18, paddingVertical: 10, paddingHorizontal: 16 }}>
+        <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 14 }}>
+          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flexDirection: "row", alignItems: "center", borderRadius: 32, overflow: "hidden", paddingVertical: 10, paddingHorizontal: 16 }}>
             {/* Partner A */}
             <View style={{ flex: 1, alignItems: "center" }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 }}>
@@ -740,7 +740,7 @@ export default function TaskScratchScreen() {
               <View style={{
                 marginTop: 3,
                 backgroundColor: currentTurn === "A" ? "rgba(250,204,21,0.2)" : "rgba(168,85,247,0.2)",
-                borderRadius: 999,
+                borderRadius: 999, overflow: "hidden",
                 paddingHorizontal: 8,
                 paddingVertical: 2
               }}>
@@ -767,13 +767,13 @@ export default function TaskScratchScreen() {
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           {/* Scratcher → Performer pill */}
           {textTask && (
-            <View style={{ borderRadius: 999, marginBottom: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 4 }}>
+            <View style={{ borderRadius: 999, overflow: "hidden", marginBottom: 12 }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 10,
-                borderRadius: 999,
+                borderRadius: 999, overflow: "hidden",
                 paddingHorizontal: 16,
                 paddingVertical: 7,
               }}>
@@ -793,12 +793,12 @@ export default function TaskScratchScreen() {
           )}
 
           {!isScratched && textTask ? (
-            <View style={{ width: "100%", shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 15, elevation: 12 }}>
+            <View style={{ width: "100%" }}>
               <ScratchCard onScratchComplete={handleScratchComplete}>
                 <LinearGradient
                   colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                  style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 24, padding: 24 }}
+                  style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden", padding: 24 }}
                 >
                   <Ionicons name="flame" size={48} color="#ffffff" style={{ marginBottom: 12 }} />
                   <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
@@ -814,14 +814,7 @@ export default function TaskScratchScreen() {
             <Animated.View style={{
               width: "100%",
               aspectRatio: 4 / 5,
-              borderRadius: 24,
-              overflow: "hidden",
-              opacity: revealOpacity,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.5,
-              shadowRadius: 15,
-              elevation: 12,
+              borderRadius: 32, overflow: "hidden", opacity: revealOpacity,
             }}>
               <LinearGradient
                 colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
@@ -839,7 +832,7 @@ export default function TaskScratchScreen() {
                 {/* Auto-start countdown or timer display */}
                 {!timerStarted && !isCompleted && (
                   <View style={{ alignItems: "center", marginTop: 24 }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 32, overflow: "hidden", paddingHorizontal: 14, paddingVertical: 8 }}>
                       <Ionicons name="timer-outline" size={16} color="#ffffff" />
                       <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "700" }}>Timer starts in 10s…</Text>
                     </View>
@@ -883,7 +876,7 @@ export default function TaskScratchScreen() {
               colors={["#e91e8c", "#7c3aed"] as any}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 999 }}
+              style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 999, overflow: "hidden"}}
             >
               <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
               <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Complete</Text>
@@ -893,9 +886,9 @@ export default function TaskScratchScreen() {
           {/* Previous (left) + Skip (right) */}
           <View style={{ flexDirection: "row", gap: 10 }}>
             {/* Previous */}
-            <View style={{ flex: 1, borderRadius: 16, overflow: "hidden", opacity: (previousTask && !showPrevious) ? 1 : 0.35 }}>
+            <View style={{ flex: 1, borderRadius: 32, overflow: "hidden", opacity: (previousTask && !showPrevious) ? 1 : 0.35 }}>
               <Pressable onPress={handlePrevious} disabled={!previousTask || showPrevious} style={{ flex: 1 }}>
-                <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 16, backgroundColor: (previousTask && !showPrevious) ? "rgba(99,102,241,0.12)" : "transparent", paddingVertical: 13, paddingHorizontal: 12 }}>
+                <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 32, overflow: "hidden", backgroundColor: (previousTask && !showPrevious) ? "rgba(99,102,241,0.12)" : "transparent", paddingVertical: 13, paddingHorizontal: 12 }}>
                   <Ionicons name="arrow-back" size={16} color={(previousTask && !showPrevious) ? "#6366f1" : (isDark ? "#ffffff" : "#1e1b4b")} />
                   <Text style={{ color: (previousTask && !showPrevious) ? "#6366f1" : (isDark ? "#ffffff" : "#1e1b4b"), fontSize: 14, fontWeight: "700" }}>Previous</Text>
                 </BlurView>
@@ -903,9 +896,9 @@ export default function TaskScratchScreen() {
             </View>
 
             {/* Skip */}
-            <View style={{ flex: 1, borderRadius: 16, overflow: "hidden", opacity: canSkip ? 1 : 0.35 }}>
+            <View style={{ flex: 1, borderRadius: 32, overflow: "hidden", opacity: canSkip ? 1 : 0.35 }}>
               <Pressable onPress={handleSkip} disabled={!canSkip} style={{ flex: 1 }}>
-                <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 16, backgroundColor: canSkip ? "rgba(245,158,11,0.12)" : "transparent", paddingVertical: 13, paddingHorizontal: 12 }}>
+                <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 32, overflow: "hidden", backgroundColor: canSkip ? "rgba(245,158,11,0.12)" : "transparent", paddingVertical: 13, paddingHorizontal: 12 }}>
                   <Ionicons name="play-skip-forward" size={16} color={canSkip ? "#f59e0b" : (isDark ? "#ffffff" : "#1e1b4b")} />
                   <Text style={{ color: canSkip ? "#f59e0b" : (isDark ? "#ffffff" : "#1e1b4b"), fontSize: 14, fontWeight: "700" }}>Skip</Text>
                 </BlurView>

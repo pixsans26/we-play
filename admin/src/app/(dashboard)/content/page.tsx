@@ -4,6 +4,10 @@ import { env } from "@/lib/env";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Save, Loader2, FileText } from "lucide-react";
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 const API = `${env.NEXT_PUBLIC_API_URL}/api/config`;
 
@@ -112,13 +116,26 @@ export default function AppContentPage() {
               <Loader2 className="w-8 h-8 animate-spin" />
             </div>
           ) : (
-            <div className="flex-1 flex flex-col">
-              <p className="text-sm text-slate-500 mb-2">You can use basic Markdown (like **bold**, *italic*, # Headers, - Lists) to format this content.</p>
-              <textarea
-                value={contents[activeTab] || ""}
-                onChange={(e) => handleContentChange(e.target.value)}
+            <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden">
+              <style jsx global>{`
+                .quill { display: flex; flex-direction: column; flex: 1; }
+                .ql-toolbar { border: none !important; border-bottom: 1px solid #f1f5f9 !important; background: #f8fafc; }
+                .ql-container { border: none !important; font-size: 15px; flex: 1; }
+                .ql-editor { color: #334155; min-height: 400px; }
+              `}</style>
+              <ReactQuill 
+                theme="snow" 
+                value={contents[activeTab] || ""} 
+                onChange={handleContentChange} 
                 placeholder={`Enter content for ${CONFIG_KEYS.find(k => k.key === activeTab)?.label}...`}
-                className="flex-1 w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-700 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 resize-none font-mono text-sm leading-relaxed"
+                modules={{
+                  toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'clean']
+                  ]
+                }}
               />
             </div>
           )}

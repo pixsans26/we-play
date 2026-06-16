@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import DataTable from "@/components/DataTable";
-import { Users, Loader2, Search } from "lucide-react";
+import { Users, Loader2, Search, XCircle, Heart, User, Activity } from "lucide-react";
 
 interface Couple {
   id: number;
@@ -27,6 +27,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
+  const [selectedUser, setSelectedUser] = useState<Couple | null>(null);
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
   const { data: session } = useSession();
@@ -97,11 +98,11 @@ export default function UsersPage() {
           No couples found in the database.
         </div>
       ) : (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
           <DataTable
             data={paginated}
             onDelete={async () => { alert("Cannot delete couples from dashboard yet."); }}
-            onEdit={(couple) => { router.push(`/users/${couple.id}`); }}
+            onEdit={(couple) => { setSelectedUser(couple as Couple); }}
             emptyMessage="No couples found."
             columns={[
               { key: "partnerAName", label: "Partner A", render: (t) => (
@@ -150,6 +151,112 @@ export default function UsersPage() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* User View Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Users className="w-5 h-5 text-pink-500" />
+                Couple Profile
+              </h2>
+              <button onClick={() => setSelectedUser(null)} className="p-2 rounded-xl hover:bg-slate-200 text-slate-500 transition-colors"><XCircle className="w-5 h-5" /></button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="flex items-center justify-center gap-4">
+                <div className="w-20 h-20 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-3xl font-bold shadow-inner">
+                  {selectedUser.partnerAName.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex flex-col items-center justify-center">
+                  <Heart className={`w-6 h-6 ${selectedUser.partnerBUid ? "text-rose-500 fill-rose-500" : "text-slate-300"} mb-1`} />
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${selectedUser.partnerBUid ? "bg-rose-100 text-rose-700" : "bg-slate-100 text-slate-500"}`}>
+                    {selectedUser.partnerBUid ? "Coupled" : "Pending"}
+                  </span>
+                </div>
+                <div className="w-20 h-20 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-3xl font-bold shadow-inner">
+                  {selectedUser.partnerBName ? selectedUser.partnerBName.charAt(0).toUpperCase() : "?"}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+                    <User className="w-4 h-4 text-pink-500" /> Partner A
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Name</span>
+                      <span className="text-sm font-semibold text-slate-700">{selectedUser.partnerAName}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">UID</span>
+                      <span className="text-xs font-medium text-slate-500 break-all">{selectedUser.partnerAUid}</span>
+                    </div>
+                    <div className="flex gap-4">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Age</span>
+                        <span className="text-sm font-medium text-slate-600">{selectedUser.partnerAAge || "-"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gender</span>
+                        <span className="text-sm font-medium text-slate-600 capitalize">{selectedUser.partnerAGender || "-"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+                    <User className="w-4 h-4 text-purple-500" /> Partner B
+                  </h3>
+                  {selectedUser.partnerBName ? (
+                    <div className="space-y-3">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Name</span>
+                        <span className="text-sm font-semibold text-slate-700">{selectedUser.partnerBName}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">UID</span>
+                        <span className="text-xs font-medium text-slate-500 break-all">{selectedUser.partnerBUid}</span>
+                      </div>
+                      <div className="flex gap-4">
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Age</span>
+                          <span className="text-sm font-medium text-slate-600">{selectedUser.partnerBAge || "-"}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gender</span>
+                          <span className="text-sm font-medium text-slate-600 capitalize">{selectedUser.partnerBGender || "-"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center space-y-2 opacity-60">
+                      <Activity className="w-6 h-6 text-slate-400" />
+                      <p className="text-xs font-medium text-slate-500">Awaiting partner connection</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="text-center pt-2">
+                <p className="text-xs font-medium text-slate-400">
+                  Account created on {new Date(selectedUser.createdAt).toLocaleDateString()}
+                </p>
+                <button 
+                  onClick={() => router.push(`/users/${selectedUser.id}`)} 
+                  className="mt-4 w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold py-2.5 rounded-xl transition-colors text-sm"
+                >
+                  View Full Details / Edit
+                </button>
+              </div>
+
+            </div>
+          </div>
         </div>
       )}
     </div>

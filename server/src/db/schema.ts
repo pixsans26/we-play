@@ -61,6 +61,8 @@ export const couple = pgTable("couple", {
   partnerBUid: text("partner_b_uid"),
   partnerAName: text("partner_a_name").notNull(),
   partnerBName: text("partner_b_name"),
+  partnerAAvatar: text("partner_a_avatar"),
+  partnerBAvatar: text("partner_b_avatar"),
   partnerAAge: integer("partner_a_age"),
   partnerBAge: integer("partner_b_age"),
   partnerAGender: text("partner_a_gender"),
