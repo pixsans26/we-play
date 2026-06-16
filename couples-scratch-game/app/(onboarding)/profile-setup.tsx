@@ -1,16 +1,9 @@
 import { env } from "@/lib/env";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-  Image,
+  View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView,
+  Platform, ScrollView, ActivityIndicator, Image, Modal, Pressable
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -22,6 +15,13 @@ import { useThemeStore, getTheme } from "@/store/themeStore";
 
 const GENDER_OPTIONS = ["male", "female", "non-binary", "other"] as const;
 type Gender = (typeof GENDER_OPTIONS)[number];
+
+const PRESET_AVATARS = [
+  "/uploads/presets/avatar_boy.png",
+  "/uploads/presets/avatar_girl.png",
+  "/uploads/presets/avatar_cat.png",
+  "/uploads/presets/avatar_dog.png",
+];
 
 interface Step1Errors {
   name?: string;
@@ -153,7 +153,11 @@ export default function ProfileSetupScreen() {
   const [avatarB, setAvatarB] = useState<string | null>(null);
   const [step2Errors, setStep2Errors] = useState<Step2Errors>({});
 
-  const pickImage = async (setAvatar: (uri: string) => void) => {
+  // Avatar picker modal state
+  const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
+  const [activePartnerAvatar, setActivePartnerAvatar] = useState<"A" | "B" | null>(null);
+
+  const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -161,8 +165,16 @@ export default function ProfileSetupScreen() {
       quality: 0.5,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setAvatar(result.assets[0].uri);
+      if (activePartnerAvatar === "A") setAvatarA(result.assets[0].uri);
+      if (activePartnerAvatar === "B") setAvatarB(result.assets[0].uri);
+      setAvatarPickerVisible(false);
     }
+  };
+
+  const selectPreset = (url: string) => {
+    if (activePartnerAvatar === "A") setAvatarA(url);
+    if (activePartnerAvatar === "B") setAvatarB(url);
+    setAvatarPickerVisible(false);
   };
 
   const handleStep1Submit = () => {
@@ -210,21 +222,29 @@ export default function ProfileSetupScreen() {
       formData.append("partnerBName", partnerName.trim());
 
       if (avatarA) {
-        const ext = avatarA.substring(avatarA.lastIndexOf(".") + 1) || "jpg";
-        formData.append("partnerAAvatar", {
-          uri: avatarA,
-          name: `avatar_A.${ext}`,
-          type: `image/${ext}`
-        } as any);
+        if (avatarA.startsWith("/uploads/presets/")) {
+          formData.append("partnerAAvatarStr", avatarA);
+        } else {
+          const ext = avatarA.substring(avatarA.lastIndexOf(".") + 1) || "jpg";
+          formData.append("partnerAAvatar", {
+            uri: avatarA,
+            name: `avatar_A.${ext}`,
+            type: `image/${ext}`
+          } as any);
+        }
       }
 
       if (avatarB) {
-        const ext = avatarB.substring(avatarB.lastIndexOf(".") + 1) || "jpg";
-        formData.append("partnerBAvatar", {
-          uri: avatarB,
-          name: `avatar_B.${ext}`,
-          type: `image/${ext}`
-        } as any);
+        if (avatarB.startsWith("/uploads/presets/")) {
+          formData.append("partnerBAvatarStr", avatarB);
+        } else {
+          const ext = avatarB.substring(avatarB.lastIndexOf(".") + 1) || "jpg";
+          formData.append("partnerBAvatar", {
+            uri: avatarB,
+            name: `avatar_B.${ext}`,
+            type: `image/${ext}`
+          } as any);
+        }
       }
 
       // Create couple profile via API
@@ -356,10 +376,10 @@ export default function ProfileSetupScreen() {
               <>
                 {/* Avatar Selection */}
                 <View style={{ alignItems: "center", marginBottom: 24 }}>
-                  <TouchableOpacity onPress={() => pickImage(setAvatarA)} activeOpacity={0.8} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.input.bg, borderWidth: 2, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                  <TouchableOpacity onPress={() => { setActivePartnerAvatar("A"); setAvatarPickerVisible(true); }} activeOpacity={0.8} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.input.bg, borderWidth: 2, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                     {avatarA ? (
                       <View style={{ width: "100%", height: "100%" }}>
-                        <Image source={{ uri: avatarA }} style={{ width: "100%", height: "100%" }} />
+                        <Image source={{ uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%" }} />
                       </View>
                     ) : (
                       <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -525,10 +545,10 @@ export default function ProfileSetupScreen() {
 
                 {/* Avatar Selection for Partner */}
                 <View style={{ alignItems: "center", marginBottom: 24 }}>
-                  <TouchableOpacity onPress={() => pickImage(setAvatarB)} activeOpacity={0.8} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.input.bg, borderWidth: 2, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                  <TouchableOpacity onPress={() => { setActivePartnerAvatar("B"); setAvatarPickerVisible(true); }} activeOpacity={0.8} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: theme.input.bg, borderWidth: 2, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                     {avatarB ? (
                       <View style={{ width: "100%", height: "100%" }}>
-                        <Image source={{ uri: avatarB }} style={{ width: "100%", height: "100%" }} />
+                        <Image source={{ uri: getAvatarUrl(avatarB) || undefined }} style={{ width: "100%", height: "100%" }} />
                       </View>
                     ) : (
                       <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -632,6 +652,29 @@ export default function ProfileSetupScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* ── Avatar Picker Modal ── */}
+      <Modal visible={avatarPickerVisible} animationType="fade" transparent onRequestClose={() => setAvatarPickerVisible(false)}>
+        <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }} onPress={() => setAvatarPickerVisible(false)}>
+          <Pressable style={{ width: "100%", backgroundColor: theme.card.bg, borderRadius: 24, padding: 24, alignItems: "center", borderWidth: 1, borderColor: theme.card.border }}>
+            <Text style={{ color: theme.card.text, fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
+            
+            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
+              {PRESET_AVATARS.map((url, i) => (
+                <Pressable key={i} onPress={() => selectPreset(url)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
+                  <Image source={{ uri: getAvatarUrl(url) || undefined }} style={{ width: "100%", height: "100%" }} />
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable onPress={pickImage} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999, backgroundColor: theme.input.bg }}>
+              <Ionicons name="image-outline" size={20} color={theme.accent} />
+              <Text style={{ color: theme.accent, fontWeight: "700" }}>Upload from Gallery</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
     </LinearGradient>
   );
 }
