@@ -625,7 +625,7 @@ export default function ImageScratchScreen() {
                 >
                   <Image
                     source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
-                    style={{ width: "100%", height: "100%", borderRadius: 16, backgroundColor: "#ffffff" }}
+                    style={{ width: "100%", height: "100%", borderRadius: 16, backgroundColor: "#1e1b4b" }}
                     resizeMode="contain"
                   />
                 </LinearGradient>
@@ -642,7 +642,7 @@ export default function ImageScratchScreen() {
                 start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                 style={{ flex: 1, padding: 8 }}
               >
-                <View style={{ flex: 1, borderRadius: 16, overflow: "hidden", backgroundColor: "#ffffff" }}>
+                <View style={{ flex: 1, borderRadius: 16, overflow: "hidden", backgroundColor: "#1e1b4b" }}>
                   <Image
                     source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
                     style={{ width: "100%", height: "100%", padding: 20 }}
