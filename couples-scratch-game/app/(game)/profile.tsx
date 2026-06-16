@@ -228,7 +228,10 @@ export default function ProfileScreen() {
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
-                        <Text style={{ color: "#ec4899", fontSize: 11, fontWeight: "700" }}>COMING SOON</Text>
+                        <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(76,5,25,0.6)", fontSize: 11, marginTop: 2, fontWeight: "600" }}>Track your cycle</Text>
+                      </View>
+                      <View style={{ backgroundColor: "rgba(236,72,153,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+                        <Text style={{ color: "#ec4899", fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Coming Soon</Text>
                       </View>
                     </View>
                   </View>
@@ -269,7 +272,10 @@ export default function ProfileScreen() {
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
-                        <Text style={{ color: "#ec4899", fontSize: 11, fontWeight: "700" }}>COMING SOON</Text>
+                        <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(76,5,25,0.6)", fontSize: 11, marginTop: 2, fontWeight: "600" }}>Track your cycle</Text>
+                      </View>
+                      <View style={{ backgroundColor: "rgba(236,72,153,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+                        <Text style={{ color: "#ec4899", fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Coming Soon</Text>
                       </View>
                     </View>
                   </View>
