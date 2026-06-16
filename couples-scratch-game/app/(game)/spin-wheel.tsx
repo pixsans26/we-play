@@ -6,11 +6,11 @@ import { Ionicons } from "@expo/vector-icons";
 import Svg, { Path, G, Text as SvgText, Circle, Polygon, Image as SvgImage, Defs, LinearGradient as SvgLinearGradient, Stop } from "react-native-svg";
 import { BlurView } from "@/components/CustomBlurView";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
-
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import HeartConfetti from "@/components/Confetti/HeartConfetti";
+import { useSound } from "@/hooks/useSound";
 
 const { width } = Dimensions.get("window");
 const WHEEL_SIZE = width * 0.85;
@@ -61,6 +61,7 @@ export default function SpinWheelScreen() {
   const switchTurn = useGameStore((s) => s.switchTurn);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const { logScratch } = useScratchHistory();
+  const { playLevelUp } = useSound();
 
   const rawTasks = useGameStore((s) => s.spinTasks);
   
@@ -138,6 +139,7 @@ export default function SpinWheelScreen() {
     const task = spinTasks[index];
     setResult(task);
     setShowConfetti(true);
+    playLevelUp();
   };
 
   const handleDone = () => {

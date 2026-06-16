@@ -1,54 +1,71 @@
-import { useEffect } from "react";
-import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
+import { useEffect, useRef } from "react";
+import { Audio } from "expo-av";
 
 /**
  * Hook providing sound effect playback functions for the game.
- * All functions silently fail if sound cannot load or play (non-blocking).
- * Respects device silent/muted mode (playsInSilentMode: false).
+ * Uses expo-av for robust cross-platform audio playback.
  */
 
 export function useSound() {
-  const scratchPlayer = useAudioPlayer(require("@/assets/sounds/scratch.mp3"));
-  const alarmPlayer = useAudioPlayer(require("@/assets/sounds/alarm.mp3"));
-  const levelUpPlayer = useAudioPlayer(require("@/assets/sounds/level-up.mp3"));
+  const scratchSound = useRef<Audio.Sound | null>(null);
+  const alarmSound = useRef<Audio.Sound | null>(null);
+  const levelUpSound = useRef<Audio.Sound | null>(null);
 
   useEffect(() => {
-    setAudioModeAsync({
-      playsInSilentMode: false,
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      playThroughEarpieceAndroid: false
     }).catch(() => {});
+
+    async function loadSounds() {
+      try {
+        const { sound: s1 } = await Audio.Sound.createAsync(require("@/assets/sounds/scratch.mp3"));
+        scratchSound.current = s1;
+        
+        const { sound: s2 } = await Audio.Sound.createAsync(require("@/assets/sounds/alarm.mp3"));
+        alarmSound.current = s2;
+        
+        const { sound: s3 } = await Audio.Sound.createAsync(require("@/assets/sounds/level-up.mp3"));
+        levelUpSound.current = s3;
+      } catch (e) {
+        console.warn("Failed to load sounds", e);
+      }
+    }
+    loadSounds();
+
+    return () => {
+      scratchSound.current?.unloadAsync();
+      alarmSound.current?.unloadAsync();
+      levelUpSound.current?.unloadAsync();
+    };
   }, []);
 
   const playScratch = async () => {
     try {
-      if (scratchPlayer) {
-        scratchPlayer.seekTo(0);
-        scratchPlayer.play();
+      if (scratchSound.current) {
+        await scratchSound.current.setPositionAsync(0);
+        await scratchSound.current.playAsync();
       }
-    } catch {
-      // Silently fail
-    }
+    } catch {}
   };
 
   const playAlarm = async () => {
     try {
-      if (alarmPlayer) {
-        alarmPlayer.seekTo(0);
-        alarmPlayer.play();
+      if (alarmSound.current) {
+        await alarmSound.current.setPositionAsync(0);
+        await alarmSound.current.playAsync();
       }
-    } catch {
-      // Silently fail
-    }
+    } catch {}
   };
 
   const playLevelUp = async () => {
     try {
-      if (levelUpPlayer) {
-        levelUpPlayer.seekTo(0);
-        levelUpPlayer.play();
+      if (levelUpSound.current) {
+        await levelUpSound.current.setPositionAsync(0);
+        await levelUpSound.current.playAsync();
       }
-    } catch {
-      // Silently fail
-    }
+    } catch {}
   };
 
   return {

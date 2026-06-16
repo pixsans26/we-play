@@ -11,6 +11,7 @@ import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
+import { useSound } from "@/hooks/useSound";
 
 const { width } = Dimensions.get("window");
 
@@ -22,6 +23,7 @@ export default function LotteryScreen() {
   const switchTurn = useGameStore((s) => s.switchTurn);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const { getAllHistory, logScratch } = useScratchHistory();
+  const { playLevelUp } = useSound();
 
   const store = useGameStore((s) => s);
   const [selectedLevel, setSelectedLevel] = useState(1);
@@ -234,6 +236,7 @@ export default function LotteryScreen() {
       setResults(finalCombo);
       setCurrentComboId(finalComboId);
       setIsRolling(false);
+      playLevelUp();
     }, 3200);
   };
 
