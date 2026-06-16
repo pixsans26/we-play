@@ -15,6 +15,91 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 
+const AGES = Array.from({ length: 103 }, (_, i) => i + 18); // 18 to 120
+
+const AgeWheelPicker = ({ selectedAge, setAgeValue, theme, isDark }: { selectedAge: number, setAgeValue: (a: number) => void, theme: any, isDark: boolean }) => {
+  const scrollY = useRef(new Animated.Value((selectedAge - 18) * 56)).current;
+
+  return (
+    <View style={{ height: 250, marginVertical: 20 }}>
+      {/* Selection overlay */}
+      <View style={{
+        position: "absolute", top: "50%", left: 0, right: 0,
+        height: 56, marginTop: -28,
+        borderTopWidth: 2, borderBottomWidth: 2,
+        borderColor: theme.accent,
+        backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)",
+        borderRadius: 16,
+        pointerEvents: "none"
+      }} />
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingVertical: 97 }}
+        snapToInterval={56}
+        decelerationRate="fast"
+        contentOffset={{ x: 0, y: (selectedAge - 18) * 56 }}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        onScrollEndDrag={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const index = Math.max(0, Math.min(AGES.length - 1, Math.round(y / 56)));
+          if (AGES[index]) setAgeValue(AGES[index]);
+        }}
+        onMomentumScrollEnd={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const index = Math.max(0, Math.min(AGES.length - 1, Math.round(y / 56)));
+          if (AGES[index]) setAgeValue(AGES[index]);
+        }}
+      >
+        {AGES.map((item, index) => {
+          const inputRange = [
+            (index - 2) * 56,
+            (index - 1) * 56,
+            index * 56,
+            (index + 1) * 56,
+            (index + 2) * 56
+          ];
+
+          const scale = scrollY.interpolate({
+            inputRange,
+            outputRange: [0.6, 0.8, 1.25, 0.8, 0.6],
+            extrapolate: 'clamp'
+          });
+
+          const opacity = scrollY.interpolate({
+            inputRange,
+            outputRange: [0.1, 0.3, 1, 0.3, 0.1],
+            extrapolate: 'clamp'
+          });
+
+          return (
+            <Animated.View
+              key={item.toString()}
+              style={{
+                height: 56,
+                justifyContent: "center",
+                alignItems: "center",
+                transform: [{ scale }],
+                opacity
+              }}
+            >
+              <Text style={{
+                fontSize: 28,
+                color: theme.text,
+                fontWeight: "900",
+                fontFamily: "DynaPuff_700Bold",
+              }}>{item}</Text>
+            </Animated.View>
+          );
+        })}
+      </Animated.ScrollView>
+    </View>
+  );
+};
+
 const PRESET_AVATARS_LOCAL = [
   { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.png") },
   { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.png") },
@@ -27,8 +112,6 @@ const PREFERENCE_CHIPS = [
   "Fitness 💪", "Reading 📚", "Art & Culture 🎨", "Music 🎵", "Coffee ☕",
   "Wine Tasting 🍷", "Photography 📸", "Cooking 🍳", "Pets 🐕"
 ];
-
-const AGES = Array.from({ length: 103 }, (_, i) => i + 18); // 18 to 120
 
 export default function ProfileSetupScreen() {
   const router = useRouter();
@@ -201,61 +284,6 @@ export default function ProfileSetupScreen() {
     }
   };
 
-  const renderAgeList = (selectedAge: number, setAgeValue: (a: number) => void) => (
-    <View style={{ height: 250, marginVertical: 20 }}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: 97 }}
-        snapToInterval={56}
-        decelerationRate="fast"
-        contentOffset={{ x: 0, y: (selectedAge - 18) * 56 }}
-        onScrollEndDrag={(e) => {
-          const y = e.nativeEvent.contentOffset.y;
-          const index = Math.max(0, Math.min(AGES.length - 1, Math.round(y / 56)));
-          if (AGES[index]) setAgeValue(AGES[index]);
-        }}
-        onMomentumScrollEnd={(e) => {
-          const y = e.nativeEvent.contentOffset.y;
-          const index = Math.max(0, Math.min(AGES.length - 1, Math.round(y / 56)));
-          if (AGES[index]) setAgeValue(AGES[index]);
-        }}
-      >
-        {AGES.map((item) => {
-          const isSelected = item === selectedAge;
-          return (
-            <TouchableOpacity
-              key={item.toString()}
-              onPress={() => setAgeValue(item)}
-              activeOpacity={0.7}
-              style={{
-                height: 56,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{
-                fontSize: isSelected ? 32 : 20,
-                fontWeight: isSelected ? "800" : "500",
-                color: isSelected ? theme.accent : theme.input.placeholder,
-                opacity: isSelected ? 1 : 0.5
-              }}>
-                {item}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-      {/* Selection overlay */}
-      <View style={{
-        position: "absolute", top: "50%", left: 0, right: 0,
-        height: 56, marginTop: -28,
-        borderTopWidth: 2, borderBottomWidth: 2,
-        borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-        pointerEvents: "none"
-      }} />
-    </View>
-  );
-
   return (
     <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
@@ -310,7 +338,7 @@ export default function ProfileSetupScreen() {
 
             {step === 2 && (
               <View style={{ alignItems: "center" }}>
-                {renderAgeList(age, setAge)}
+                <AgeWheelPicker selectedAge={age} setAgeValue={setAge} theme={theme} isDark={isDark} />
               </View>
             )}
 
@@ -371,7 +399,7 @@ export default function ProfileSetupScreen() {
                 </View>
                 <View>
                   <Text style={labelStyle}>Partner's Age</Text>
-                  {renderAgeList(partnerAge, setPartnerAge)}
+                  <AgeWheelPicker selectedAge={partnerAge} setAgeValue={setPartnerAge} theme={theme} isDark={isDark} />
                 </View>
               </View>
             )}
