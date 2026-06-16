@@ -100,6 +100,33 @@ const AgeWheelPicker = ({ selectedAge, setAgeValue, theme, isDark }: { selectedA
   );
 };
 
+const GenderSelector = ({ value, onChange, theme }: { value: string, onChange: (v: string) => void, theme: any }) => (
+  <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
+    {["Male", "Female", "Other"].map(g => (
+      <TouchableOpacity
+        key={g}
+        onPress={() => onChange(g)}
+        activeOpacity={0.8}
+        style={{
+          flex: 1,
+          paddingVertical: 14,
+          borderRadius: 16,
+          borderWidth: 2,
+          borderColor: value === g ? theme.accent : theme.input.border,
+          backgroundColor: value === g ? theme.accent : theme.input.bg,
+          alignItems: "center"
+        }}
+      >
+        <Text style={{
+          color: value === g ? "#fff" : theme.input.text,
+          fontWeight: "800",
+          fontFamily: "DynaPuff_700Bold",
+        }}>{g}</Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+);
+
 const PRESET_AVATARS_LOCAL = [
   { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.png") },
   { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.png") },
@@ -128,10 +155,12 @@ export default function ProfileSetupScreen() {
 
   // Fields
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<string>("Male");
   const [age, setAge] = useState<number>(18);
   const [avatarA, setAvatarA] = useState<string | null>(null);
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
   const [partnerName, setPartnerName] = useState("");
+  const [partnerGender, setPartnerGender] = useState<string>("Female");
   const [partnerAge, setPartnerAge] = useState<number>(18);
 
   // Avatar picker modal state
@@ -222,9 +251,11 @@ export default function ProfileSetupScreen() {
 
       formData.append("partnerAName", name.trim());
       formData.append("partnerAAge", age.toString());
+      formData.append("partnerAGender", gender);
 
       formData.append("partnerBName", partnerName.trim());
       formData.append("partnerBAge", partnerAge.toString());
+      formData.append("partnerBGender", partnerGender);
 
       const prefsStr = selectedChips.join(", ");
       if (prefsStr) formData.append("whatALikes", prefsStr);
@@ -341,16 +372,23 @@ export default function ProfileSetupScreen() {
             ) : null}
 
             {step === 1 && (
-              <View style={{ marginBottom: 24 }}>
-                <TextInput
-                  style={[inputStyle(false), { fontSize: 24, paddingVertical: 20 }]}
-                  placeholder="Your Name"
-                  placeholderTextColor={theme.input.placeholder}
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                  autoFocus
-                />
+              <View style={{ marginBottom: 24, gap: 24 }}>
+                <View>
+                  <Text style={labelStyle}>Your Name</Text>
+                  <TextInput
+                    style={[inputStyle(false), { fontSize: 24, paddingVertical: 20 }]}
+                    placeholder="Your Name"
+                    placeholderTextColor={theme.input.placeholder}
+                    value={name}
+                    onChangeText={setName}
+                    autoCapitalize="words"
+                    autoFocus
+                  />
+                </View>
+                <View>
+                  <Text style={labelStyle}>Your Gender</Text>
+                  <GenderSelector value={gender} onChange={setGender} theme={theme} />
+                </View>
               </View>
             )}
 
@@ -414,6 +452,10 @@ export default function ProfileSetupScreen() {
                     onChangeText={setPartnerName}
                     autoCapitalize="words"
                   />
+                </View>
+                <View>
+                  <Text style={labelStyle}>Partner's Gender</Text>
+                  <GenderSelector value={partnerGender} onChange={setPartnerGender} theme={theme} />
                 </View>
                 <View>
                   <Text style={labelStyle}>Partner's Age</Text>
