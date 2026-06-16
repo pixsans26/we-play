@@ -216,13 +216,13 @@ export default function ProfileSetupScreen() {
     try {
       const BASE_URL = env.EXPO_PUBLIC_API_URL;
       const formData = new FormData();
-      
+
       formData.append("partnerAUid", user.email);
       // partnerBUid is null since we removed email from setup
-      
+
       formData.append("partnerAName", name.trim());
       formData.append("partnerAAge", age.toString());
-      
+
       formData.append("partnerBName", partnerName.trim());
       formData.append("partnerBAge", partnerAge.toString());
 
@@ -288,9 +288,27 @@ export default function ProfileSetupScreen() {
     <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 40 }} keyboardShouldPersistTaps="handled">
-          
+
           {/* Header & Progress */}
           <View style={{ marginBottom: 32, marginTop: 20 }}>
+            {/* Top Left Back Button */}
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
+              <TouchableOpacity 
+                onPress={() => {
+                  if (step > 1) setStep(s => s - 1);
+                  else router.back();
+                }}
+                style={{ 
+                  width: 44, height: 44, borderRadius: 22, 
+                  backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                  alignItems: "center", justifyContent: "center",
+                  marginLeft: -8
+                }}
+              >
+                <Ionicons name="arrow-back" size={24} color={theme.card.text} />
+              </TouchableOpacity>
+            </View>
+
             <View style={{ flexDirection: "row", gap: 8, marginBottom: 24 }}>
               {[1, 2, 3, 4, 5].map((idx) => (
                 <View key={idx} style={{
@@ -346,7 +364,7 @@ export default function ProfileSetupScreen() {
               <View style={{ alignItems: "center", marginVertical: 40 }}>
                 <TouchableOpacity onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.8} style={{ width: 140, height: 140, borderRadius: 70, backgroundColor: theme.input.bg, borderWidth: 3, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {avatarA ? (
-                    <Image source={PRESET_AVATARS_LOCAL.find(p => p.url === avatarA)?.source || { uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%" }} />
+                    <Image source={PRESET_AVATARS_LOCAL.find(p => p.url === avatarA)?.source || { uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "120%", height: "120%" }} />
                   ) : (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                       <Ionicons name="camera-outline" size={48} color={theme.input.placeholder} />
@@ -427,12 +445,8 @@ export default function ProfileSetupScreen() {
                 </LinearGradient>
               </TouchableOpacity>
             )}
-            
-            {step > 1 && (
-              <TouchableOpacity onPress={() => setStep(s => s - 1)} disabled={isLoading} style={{ alignItems: "center", paddingVertical: 12 }}>
-                <Text style={{ color: theme.card.subtext, fontSize: 16, fontWeight: "600" }}>← Back</Text>
-              </TouchableOpacity>
-            )}
+
+            {/* Navigation back text below has been replaced by top left back button, so we remove it */}
           </View>
 
         </ScrollView>
@@ -443,10 +457,10 @@ export default function ProfileSetupScreen() {
         <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }} onPress={() => setAvatarPickerVisible(false)}>
           <Pressable style={{ width: "100%", backgroundColor: theme.card.bg, borderRadius: 24, padding: 24, alignItems: "center", borderWidth: 1, borderColor: theme.card.border }}>
             <Text style={{ color: theme.card.text, fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24, }}>
               {PRESET_AVATARS_LOCAL.map((preset, i) => (
-                <Pressable key={i} onPress={() => selectPreset(preset.source)} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
-                  <Image source={preset.source} style={{ width: "100%", height: "100%" }} />
+                <Pressable key={i} onPress={() => selectPreset(preset.source)} style={{ width: 64, height: 64, borderRadius: 32, alignItems: "center", justifyContent: "center", overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
+                  <Image source={preset.source} style={{ width: "120%", height: "120%", }} />
                 </Pressable>
               ))}
             </View>
