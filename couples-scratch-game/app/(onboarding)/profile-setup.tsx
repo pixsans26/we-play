@@ -21,7 +21,7 @@ const AgeWheelPicker = ({ selectedAge, setAgeValue, theme, isDark }: { selectedA
   const scrollY = useRef(new Animated.Value((selectedAge - 18) * 56)).current;
 
   return (
-    <View style={{ height: 250, marginVertical: 20 }}>
+    <View style={{ width: "50%", height: 250, marginVertical: 20 }}>
       {/* Selection overlay */}
       <View style={{
         position: "absolute", top: "50%", left: 0, right: 0,
@@ -88,7 +88,7 @@ const AgeWheelPicker = ({ selectedAge, setAgeValue, theme, isDark }: { selectedA
             >
               <Text style={{
                 fontSize: 28,
-                color: theme.text,
+                color: item === selectedAge ? theme.accent : theme.text,
                 fontWeight: "900",
                 fontFamily: "DynaPuff_700Bold",
               }}>{item}</Text>
