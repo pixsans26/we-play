@@ -6,7 +6,7 @@ import {
   Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform, Animated, Easing
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { signOut } from "firebase/auth";
@@ -34,7 +34,7 @@ interface SettingRowProps {
 
 function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, danger, isDark }: SettingRowProps) {
   return (
-    <View style={{ borderRadius: 18, overflow: "hidden", marginBottom: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 1, elevation: 5 }}>
+    <View style={{ borderRadius: 18, marginBottom: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 1, elevation: 5 }}>
       <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed && onPress ? 0.75 : 1 })}>
         <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{
           flexDirection: "row",
@@ -202,7 +202,7 @@ export default function SettingsScreen() {
 
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, paddingHorizontal: 22 }}>
-        <Pressable onPress={() => router.back()} style={{ borderRadius: 20, overflow: "hidden", marginRight: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
+        <Pressable onPress={() => router.back()} style={{ borderRadius: 20, marginRight: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="arrow-back" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>

@@ -23,7 +23,11 @@
         "backgroundColor": "#ff2d6b"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.couples.scratchgame"
+      "package": "com.couples.scratchgame",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -35,6 +39,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9d88f4c2-af13-4603-accc-131ec5da880f"
+      }
     }
   }
 }

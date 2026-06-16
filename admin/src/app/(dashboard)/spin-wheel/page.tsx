@@ -1,5 +1,6 @@
 "use client";
 import { env } from "@/lib/env";
+import toast from "react-hot-toast";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -53,21 +54,33 @@ export default function SpinWheelPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    await fetch(API, { method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify(form),
-    });
-    setSaving(false);
-    setShowForm(false);
-    setForm(emptyForm);
-    setEditing(false);
-    load();
+    try {
+      const response = await fetch(API, { method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(form),
+      });
+      if (!response.ok) throw new Error("Failed to save");
+      toast.success(editing ? "Spin item updated successfully!" : "Spin item added successfully!");
+      setShowForm(false);
+      setForm(emptyForm);
+      setEditing(false);
+      load();
+    } catch (err) {
+      toast.error("Failed to save spin item.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (id: string | number) => {
-    if (!confirm("Delete this spin wheel item?")) return;
-    await fetch(`${API}/${id}`, { headers: { "Authorization": `Bearer ${token}` }, method: "DELETE" });
-    load();
+    try {
+      const res = await fetch(`${API}/${id}`, { headers: { "Authorization": `Bearer ${token}` }, method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      toast.success("Spin item deleted!");
+      load();
+    } catch (err) {
+      toast.error("Failed to delete spin item.");
+    }
   };
 
   const handleEdit = (item: SpinWheelItem) => {

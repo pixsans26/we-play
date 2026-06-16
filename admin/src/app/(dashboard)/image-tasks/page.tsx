@@ -1,9 +1,11 @@
 "use client";
 import { env } from "@/lib/env";
+import toast from "react-hot-toast";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Plus, Image as ImageIcon, Loader2, X, Trash2, Edit2, Search, Filter } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface ImageTask {
   id: string; imageSource: string; title: string;
@@ -26,6 +28,7 @@ export default function ImageTasksPage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [editing, setEditing] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | number | null>(null);
 
   // Search & Pagination
   const [search, setSearch] = useState("");
@@ -64,22 +67,34 @@ export default function ImageTasksPage() {
     e.preventDefault();
     if (!file && !id) return;
     setSaving(true);
-    const fd = new FormData();
-    fd.append("id", id);
-    fd.append("title", title);
-    fd.append("level", String(level));
-    if (file) fd.append("image", file);
-    await fetch(API, { headers: { "Authorization": `Bearer ${token}` }, method: "POST", body: fd });
-    setSaving(false);
-    setShowForm(false);
-    setId(""); setTitle(""); setLevel(1); setFile(null); setPreview("");
-    load();
+    try {
+      const fd = new FormData();
+      fd.append("id", id);
+      fd.append("title", title);
+      fd.append("level", String(level));
+      if (file) fd.append("image", file);
+      const res = await fetch(API, { headers: { "Authorization": `Bearer ${token}` }, method: "POST", body: fd });
+      if (!res.ok) throw new Error("Failed to save");
+      toast.success(editing ? "Image task updated!" : "Image task uploaded!");
+      setShowForm(false);
+      setId(""); setTitle(""); setLevel(1); setFile(null); setPreview("");
+      load();
+    } catch (err) {
+      toast.error("Failed to upload image.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (id: string | number) => {
-    if (!confirm("Delete this image task?")) return;
-    await fetch(`${API}/${id}`, { headers: { "Authorization": `Bearer ${token}` }, method: "DELETE" });
-    load();
+    try {
+      const res = await fetch(`${API}/${id}`, { headers: { "Authorization": `Bearer ${token}` }, method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      toast.success("Image task deleted!");
+      load();
+    } catch (err) {
+      toast.error("Failed to delete image task.");
+    }
   };
 
   const handleEdit = (task: ImageTask) => {
@@ -223,7 +238,7 @@ export default function ImageTasksPage() {
                       className="bg-white/90 p-2 rounded-lg text-indigo-500 shadow-sm hover:bg-indigo-50 hover:text-indigo-600 backdrop-blur-md">
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(task.id)}
+                    <button onClick={() => setDeleteId(task.id)}
                       className="bg-white/90 p-2 rounded-lg text-red-500 shadow-sm hover:bg-red-50 hover:text-red-600 backdrop-blur-md">
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -251,6 +266,17 @@ export default function ImageTasksPage() {
           </div>
         </div>
       )}
+      
+      <ConfirmModal
+        isOpen={deleteId !== null}
+        onCancel={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId !== null) {
+            handleDelete(deleteId);
+            setDeleteId(null);
+          }
+        }}
+      />
     </div>
   );
 }

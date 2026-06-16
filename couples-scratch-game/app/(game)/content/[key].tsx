@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Animated, Easing, ActivityIndicator, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 import { Ionicons } from "@expo/vector-icons";
 import RenderHtml from 'react-native-render-html';
 import { apiFetch } from "@/lib/apiClient";
@@ -70,7 +70,7 @@ export default function ContentScreen() {
 
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, paddingHorizontal: 22 }}>
-        <Pressable onPress={() => router.back()} style={{ borderRadius: 20, overflow: "hidden", marginRight: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
+        <Pressable onPress={() => router.back()} style={{ borderRadius: 20, marginRight: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="arrow-back" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>

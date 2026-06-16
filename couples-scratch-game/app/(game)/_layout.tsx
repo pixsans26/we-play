@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import { Slot, useRouter, usePathname } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";

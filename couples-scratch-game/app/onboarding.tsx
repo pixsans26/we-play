@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 
 // SVG files — works after: npx expo start --clear

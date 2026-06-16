@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Path, G, Text as SvgText, Circle, Polygon, Image as SvgImage, Defs, LinearGradient as SvgLinearGradient, Stop } from "react-native-svg";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 
 import { useThemeStore, getTheme } from "@/store/themeStore";
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   badgeText: { color: "#fff", fontSize: 10, fontWeight: "900" },
   subtitle: { fontSize: 16, textAlign: "center", fontWeight: "700" },
   wheelContainer: { alignItems: "center", justifyContent: "center", marginBottom: 40, position: "relative" },
-  wheelWrapper: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2, overflow: "hidden", elevation: 25, shadowColor: "#000", shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.6, shadowRadius: 20 },
+  wheelWrapper: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2, elevation: 25, shadowColor: "#000", shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.6, shadowRadius: 20 },
   pointerContainer: { position: "absolute", top: -15, zIndex: 10, alignItems: "center", elevation: 25, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 6 },
   actionContainer: { flex: 1, alignItems: "center", justifyContent: "flex-start", paddingBottom: 40 },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center", padding: 22 },
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   
   spinButton: { paddingVertical: 18, paddingHorizontal: 48, borderRadius: 30, elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, alignItems: "center" },
   spinButtonText: { color: "#ffffff", fontSize: 22, fontWeight: "900", fontFamily: "DynaPuff_700Bold" },
-  resultCard: { width: "100%", borderRadius: 24, overflow: "hidden", elevation: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, marginBottom: 16 },
+  resultCard: { width: "100%", borderRadius: 24, elevation: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, marginBottom: 16 },
   resultGradient: { padding: 24, alignItems: "center" },
   resultLabel: { color: "#ffffff", fontSize: 28, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 8 },
   resultDesc: { color: "#ffffff", fontSize: 16, textAlign: "center", opacity: 0.9, fontWeight: "500" },

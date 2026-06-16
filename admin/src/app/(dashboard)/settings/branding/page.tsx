@@ -1,5 +1,6 @@
 "use client";
 import { env } from "@/lib/env";
+import toast from "react-hot-toast";
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -71,14 +72,15 @@ export default function BrandingSettings() {
         },
         body: JSON.stringify({ value: JSON.stringify(config) })
       });
-      if (res.ok) {
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      }
+      if (!res.ok) throw new Error("Failed to save");
+      setSuccess(true);
+      toast.success("Branding settings saved!");
+      setTimeout(() => setSuccess(false), 3000);
     } catch (e) {
-      console.error(e);
+      toast.error("Failed to save branding settings.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const updateField = (field: keyof BrandingConfig, value: string) => {
@@ -227,14 +229,13 @@ export default function BrandingSettings() {
                         headers: { "Authorization": `Bearer ${token}` },
                         body: fd
                       });
-                      if (res.ok) {
-                        const data = await res.json();
-                        // Backend returns a relative path like /uploads/..., we prefix with backend URL
-                        const baseUrl = API.replace("/api/config/app_branding", "");
-                        updateField('logoUrl', baseUrl + data.url);
-                      }
+                      if (!res.ok) throw new Error("Failed to upload");
+                      const data = await res.json();
+                      const baseUrl = API.replace("/api/config/app_branding", "");
+                      updateField('logoUrl', baseUrl + data.url);
+                      toast.success("Logo uploaded!");
                     } catch (err) {
-                      console.error("Upload failed", err);
+                      toast.error("Failed to upload logo.");
                     }
                   }}
                 />

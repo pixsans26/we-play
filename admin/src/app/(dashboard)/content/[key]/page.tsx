@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2, Save } from "lucide-react";
+import toast from "react-hot-toast";
 
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
@@ -53,7 +54,7 @@ export default function ContentEditor() {
     
     setSaving(true);
     try {
-      await fetch(`${API}/${key}`, {
+      const res = await fetch(`${API}/${key}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,11 +62,14 @@ export default function ContentEditor() {
         },
         body: JSON.stringify({ value })
       });
+      if (!res.ok) throw new Error("Failed to save");
+      toast.success(`${title} saved successfully!`);
       router.refresh();
     } catch (e) {
-      console.error(e);
+      toast.error(`Failed to save ${title}.`);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   if (loading) {

@@ -18,7 +18,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import { auth } from "@/lib/firebase";
 import { useSettingsStore } from "@/store/settingsStore";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 
 function getAuthErrorMessage(code: string): string {
@@ -133,7 +133,7 @@ export default function LoginScreen() {
             </View>
 
             {/* Card */}
-            <View style={{ borderRadius: 28, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 15, elevation: 12 }}>
+            <View style={{ borderRadius: 28, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 15, elevation: 12 }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{
                 padding: 24,
               }}>

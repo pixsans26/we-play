@@ -5,7 +5,7 @@ import { View, Text, Pressable, ScrollView, Image, Animated, Easing } from "reac
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
@@ -115,7 +115,7 @@ export default function MainGameScreen() {
             {partnerAName} & {partnerBName}
           </Text>
         </View>
-        <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 22, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
+        <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 22, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="person" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>
@@ -170,7 +170,8 @@ export default function MainGameScreen() {
         </View>
 
         {/* Whose turn */}
-        <View style={{ borderRadius: 16, overflow: "hidden", marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5 }}>
+        <View style={{ borderRadius: 16, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5, backgroundColor: isDark ? "#1e293b" : "#fff" }}>
+          <View style={{ borderRadius: 16, overflow: "hidden" }}>
           <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{
             flexDirection: "row",
             alignItems: "center",
@@ -179,7 +180,7 @@ export default function MainGameScreen() {
             paddingVertical: 12,
             paddingHorizontal: 16,
           }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : "#e11d48", shadowColor: isDark ? "#fff" : "#e11d48", shadowOffset: {width:0, height:0}, shadowOpacity: 1, shadowRadius: 4 }} />
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : "#e11d48", marginRight: 10, shadowColor: isDark ? "#fff" : "#e11d48", shadowOffset: {width:0, height:0}, shadowOpacity: 1, shadowRadius: 4 }} />
             <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 14, fontWeight: "700" }}>
               {turnName}'s turn to play
             </Text>
@@ -187,72 +188,81 @@ export default function MainGameScreen() {
             <Ionicons name="heart" size={16} color={isDark ? "#ffffff" : "#e11d48"} />
           </BlurView>
         </View>
+        </View>
 
         {/* Game mode cards - 2x2 Grid */}
         <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>
           CHOOSE A GAME MODE
         </Text>
 
-        <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 14 }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
           {/* Image Scratch */}
-          <Pressable
-            onPress={() => { setMode("image"); router.push("/(game)/image-scratch"); }}
-            style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 24, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 })}
-          >
-            <Image source={require("../../assets/images/image_scratch_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.9)"]}
-              style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
+          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}>
+            <Pressable
+              onPress={() => { setMode("image"); router.push("/(game)/image-scratch"); }}
+              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 24, overflow: "hidden" })}
             >
-              <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Image Scratch</Text>
-              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Reveal pictures</Text>
-            </LinearGradient>
-          </Pressable>
+              <Image source={require("../../assets/images/image_scratch_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
+              <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.9)"]}
+                style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
+              >
+                <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Image Scratch</Text>
+                <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Reveal pictures</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
 
           {/* Task Scratch */}
-          <Pressable
-            onPress={() => { setMode("text"); router.push("/(game)/task-scratch"); }}
-            style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 24, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 })}
-          >
-            <Image source={require("../../assets/images/text_scratch_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.9)"]}
-              style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
+          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}>
+            <Pressable
+              onPress={() => { setMode("text"); router.push("/(game)/task-scratch"); }}
+              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 24, overflow: "hidden" })}
             >
-              <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Task Scratch</Text>
-              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Fun challenges</Text>
-            </LinearGradient>
-          </Pressable>
+              <Image source={require("../../assets/images/text_scratch_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
+              <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.9)"]}
+                style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
+              >
+                <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Task Scratch</Text>
+                <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Fun challenges</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
 
           {/* Spin Wheel */}
-          <Pressable
-            onPress={() => router.push("/(game)/spin-wheel")}
-            style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, width: "48%", aspectRatio: 1, borderRadius: 24, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 })}
-          >
-            <Image source={require("../../assets/images/spin_wheel_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.9)"]}
-              style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
+          <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}>
+            <Pressable
+              onPress={() => router.push("/(game)/spin-wheel")}
+              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 24, overflow: "hidden" })}
             >
-              <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Spin Wheel</Text>
-              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Win a reward</Text>
-            </LinearGradient>
-          </Pressable>
+              <Image source={require("../../assets/images/spin_wheel_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
+              <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.9)"]}
+                style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
+              >
+                <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Spin Wheel</Text>
+                <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Win a reward</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
 
           {/* Love Lottery */}
-          <Pressable
-            onPress={() => router.push("/(game)/lottery")}
-            style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, width: "48%", aspectRatio: 1, borderRadius: 24, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 })}
-          >
-            <Image source={require("../../assets/images/love_lottery_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.9)"]}
-              style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
+          <View style={{ width: "48%", aspectRatio: 1, borderRadius: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}>
+            <Pressable
+              onPress={() => router.push("/(game)/lottery")}
+              style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 24, overflow: "hidden" })}
             >
-              <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Love Lottery</Text>
-              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Roll the dice</Text>
-            </LinearGradient>
-          </Pressable>
+              <Image source={require("../../assets/images/love_lottery_cover.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
+              <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.9)"]}
+                style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
+              >
+                <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Love Lottery</Text>
+                <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Fun generator</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
         </View>
 
 

@@ -5,7 +5,7 @@ import { View, Text, Pressable, StyleSheet, Animated, Easing, Alert, Dimensions 
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
@@ -145,8 +145,8 @@ export default function LotteryScreen() {
     }
 
     const levelFilteredCol1 = lotteryData.col1.filter((c: any) => c.level <= selectedLevel);
-    const levelFilteredCol2 = lotteryData.col2.filter((c: any) => c.level <= selectedLevel);
-    const baseCol3 = lotteryData.col3.filter((c: any) => c.level <= selectedLevel);
+    const levelFilteredCol2 = lotteryData.col2.filter((c: any) => c.level === selectedLevel);
+    const baseCol3 = lotteryData.col3.filter((c: any) => c.level === selectedLevel);
     
     // If no items match the level (e.g. database setup issues), fallback to all items
     const col1List = levelFilteredCol1.length > 0 ? levelFilteredCol1 : lotteryData.col1;

@@ -5,7 +5,7 @@ import { View, Text, Pressable, ScrollView, Animated, Easing } from "react-nativ
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
@@ -106,7 +106,7 @@ export default function ProfileScreen() {
 
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, paddingHorizontal: 22 }}>
-        <Pressable onPress={() => router.back()} style={{ borderRadius: 20, overflow: "hidden", marginRight: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
+        <Pressable onPress={() => router.back()} style={{ borderRadius: 20, marginRight: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="arrow-back" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>
@@ -157,28 +157,28 @@ export default function ProfileScreen() {
 
         {/* Stats cards */}
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
-          <View style={{ width: "48%", borderRadius: 16, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
+          <View style={{ width: "48%", borderRadius: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 16, padding: 12, alignItems: "center" }}>
               <Ionicons name="image-outline" size={20} color={isDark ? "#60a5fa" : "#2563eb"} style={{ marginBottom: 6 }} />
               <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold", flexShrink: 1 }} numberOfLines={1}>{imageCount}</Text>
               <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 10, marginTop: 2, fontWeight: "700" }}>Image Scratch</Text>
             </BlurView>
           </View>
-          <View style={{ width: "48%", borderRadius: 16, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
+          <View style={{ width: "48%", borderRadius: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 16, padding: 12, alignItems: "center" }}>
               <Ionicons name="document-text-outline" size={20} color={isDark ? "#10b981" : "#059669"} style={{ marginBottom: 6 }} />
               <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold", flexShrink: 1 }} numberOfLines={1}>{taskCount}</Text>
               <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 10, marginTop: 2, fontWeight: "700" }}>Task Scratch</Text>
             </BlurView>
           </View>
-          <View style={{ width: "48%", borderRadius: 16, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
+          <View style={{ width: "48%", borderRadius: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 16, padding: 12, alignItems: "center" }}>
               <Ionicons name="disc-outline" size={20} color={isDark ? "#f59e0b" : "#d97706"} style={{ marginBottom: 6 }} />
               <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold", flexShrink: 1 }} numberOfLines={1}>{spinCount}</Text>
               <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 10, marginTop: 2, fontWeight: "700" }}>Spins</Text>
             </BlurView>
           </View>
-          <View style={{ width: "48%", borderRadius: 16, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
+          <View style={{ width: "48%", borderRadius: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 16, padding: 12, alignItems: "center" }}>
               <Ionicons name="dice-outline" size={20} color={isDark ? "#f953c6" : "#db2777"} style={{ marginBottom: 6 }} />
               <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold", flexShrink: 1 }} numberOfLines={1}>{lotteryCount}</Text>
@@ -188,7 +188,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Partner A card */}
-        <View style={{ borderRadius: 20, overflow: "hidden", marginBottom: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 8 }}>
+        <View style={{ borderRadius: 20, marginBottom: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 8 }}>
           <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 20, padding: 20 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "rgba(233,30,140,0.1)", alignItems: "center", justifyContent: "center" }}>
@@ -212,7 +212,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Partner B card */}
-        <View style={{ borderRadius: 20, overflow: "hidden", marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 8 }}>
+        <View style={{ borderRadius: 20, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 8 }}>
           <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 20, padding: 20 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "rgba(168,85,247,0.1)", alignItems: "center", justifyContent: "center" }}>
@@ -236,7 +236,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Account */}
-        <View style={{ borderRadius: 20, overflow: "hidden", marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 5 }}>
+        <View style={{ borderRadius: 20, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 5 }}>
           <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 20, padding: 18 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <Ionicons name="mail-outline" size={18} color={isDark ? "#ffffff" : "#4c0519"} />

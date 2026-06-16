@@ -5,7 +5,7 @@ import { View, Text, Pressable, Animated, Image, Easing, ActivityIndicator } fro
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
+import { BlurView } from "@/components/CustomBlurView";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
@@ -534,7 +534,7 @@ export default function ImageScratchScreen() {
 
         {/* ── TOP HEADER: Close × top-right ── */}
         <View style={{ alignItems: "flex-end", marginBottom: 12 }}>
-          <Pressable onPress={handleGoBack} style={{ borderRadius: 18, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
+          <Pressable onPress={handleGoBack} style={{ borderRadius: 18, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}>
             <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" }}>
               <Ionicons name="close" size={18} color={isDark ? "#ffffff" : "#042f2e"} />
             </BlurView>
@@ -542,7 +542,7 @@ export default function ImageScratchScreen() {
         </View>
 
         {/* ── SCRATCH COUNTER BAR ── */}
-        <View style={{ borderRadius: 18, overflow: "hidden", marginBottom: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 5 }}>
+        <View style={{ borderRadius: 18, marginBottom: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 5 }}>
           <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flexDirection: "row", alignItems: "center", borderRadius: 18, paddingVertical: 10, paddingHorizontal: 16 }}>
             {/* Partner A */}
             <View style={{ flex: 1, alignItems: "center" }}>
@@ -588,7 +588,7 @@ export default function ImageScratchScreen() {
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           {/* Scratcher → Performer pill */}
           {imageTask && (
-            <View style={{ borderRadius: 999, overflow: "hidden", marginBottom: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 4 }}>
+            <View style={{ borderRadius: 999, marginBottom: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 4 }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{
                 flexDirection: "row",
                 alignItems: "center",

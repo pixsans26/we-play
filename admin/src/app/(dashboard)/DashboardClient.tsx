@@ -30,7 +30,7 @@ export default function DashboardClient({ stats, recentUsers }: { stats: any, re
   ];
 
   return (
-    <div className="space-y-10 max-w-[1200px]">
+    <div className="space-y-10 w-full">
       
       {/* ── Header ─────────────────────────────────────── */}
       <div className="flex items-center gap-8">
