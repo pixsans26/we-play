@@ -108,9 +108,9 @@ const PRESET_AVATARS_LOCAL = [
 ];
 
 const PREFERENCE_CHIPS = [
-  "Travel ✈️", "Foodie 🍔", "Movie Nights 🍿", "Outdoors 🏕️", "Gaming 🎮",
-  "Fitness 💪", "Reading 📚", "Art & Culture 🎨", "Music 🎵", "Coffee ☕",
-  "Wine Tasting 🍷", "Photography 📸", "Cooking 🍳", "Pets 🐕"
+  "Romantic Dates", "Spicy Challenges", "Foreplay", "Roleplay", "Deep Conversations",
+  "Massage & Spa", "Adventures", "Kinky", "Gentle Romance", "Weekend Getaways",
+  "Pillow Talk", "Surprises"
 ];
 
 export default function ProfileSetupScreen() {
@@ -386,8 +386,8 @@ export default function ProfileSetupScreen() {
                       style={{
                         paddingHorizontal: 20, paddingVertical: 12,
                         borderRadius: 32, borderWidth: 2,
-                        backgroundColor: selected ? theme.accent : "transparent",
-                        borderColor: selected ? theme.accent : theme.input.border,
+                        backgroundColor: selected ? theme.accent : (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)"),
+                        borderColor: selected ? theme.accent : (isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)"),
                       }}
                     >
                       <Text style={{
