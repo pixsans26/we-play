@@ -271,14 +271,14 @@ export default function SpinWheelScreen() {
 
           {/* Top Pointer */}
           <View style={styles.pointerContainer}>
-            <Svg width={40} height={40} viewBox="0 0 24 24">
+            <Svg width={48} height={48} viewBox="0 0 24 24">
               <Defs>
                 <SvgLinearGradient id="pointer-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <Stop offset="0%" stopColor="#f43f5e" />
                   <Stop offset="100%" stopColor="#e11d48" />
                 </SvgLinearGradient>
               </Defs>
-              <Path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#pointer-grad)" stroke="#be123c" strokeWidth="1" />
+              <Path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#pointer-grad)" stroke="#ffffff" strokeWidth="1.5" />
             </Svg>
           </View>
 
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
 
   purpleContainer: { backgroundColor: "#5b21b6", borderRadius: 32, width: width * 0.9, alignItems: "center", paddingTop: 24, paddingBottom: 24, position: "relative", shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 15, elevation: 10, borderWidth: 1, borderColor: "#7c3aed" },
 
-  pointerContainer: { position: "absolute", top: -20, zIndex: 30, alignSelf: "center" },
+  pointerContainer: { position: "absolute", top: -8, zIndex: 40, alignSelf: "center" },
 
   wheelWrapper: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2, backgroundColor: "#000", position: "relative", zIndex: 20 },
   wheelTransform: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2 },
