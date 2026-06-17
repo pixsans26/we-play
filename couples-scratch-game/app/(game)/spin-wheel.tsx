@@ -48,7 +48,7 @@ export default function SpinWheelScreen() {
   const { playLevelUp } = useSound();
 
   const rawTasks = useGameStore((s) => s.spinTasks);
-  
+
   const spinTasks = React.useMemo(() => {
     if (!rawTasks || rawTasks.length === 0) return [];
     if (rawTasks.length === 9) return rawTasks;
@@ -97,12 +97,12 @@ export default function SpinWheelScreen() {
       Animated.timing(spinBtnAnim, { toValue: 1, duration: 100, useNativeDriver: true })
     ]).start();
 
-    const extraRotations = 360 * 5; 
+    const extraRotations = 360 * 5;
     const randomSliceIndex = Math.floor(Math.random() * NUM_SLICES);
-    
+
     // We want the selected slice to end up at the TOP (0 degrees).
     const targetAngle = extraRotations + (360 - (randomSliceIndex * ANGLE_PER_SLICE));
-    
+
     rotation.setValue(0);
     Animated.timing(rotation, {
       toValue: targetAngle,
@@ -119,7 +119,7 @@ export default function SpinWheelScreen() {
     const task = spinTasks[index];
     setResult(task);
     playLevelUp();
-    
+
     Animated.timing(overlayOpacity, {
       toValue: 1,
       duration: 500,
@@ -200,7 +200,7 @@ export default function SpinWheelScreen() {
       </View>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.contentArea} showsVerticalScrollIndicator={false}>
-        
+
         {/* Who is spinning */}
         <View style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
           <Text style={{ color: "#facc15", fontSize: 14, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" }}>
@@ -210,7 +210,7 @@ export default function SpinWheelScreen() {
 
         {/* The "spin the wheel" Sparkle Title */}
         <View style={styles.titleWrapper}>
-          <Text style={styles.mainTitle}>spin</Text>
+          <Text style={styles.mainTitle}>Spin</Text>
           <Text style={styles.subTitle}>the wheel</Text>
           <Ionicons name="sparkles" size={16} color="#fef08a" style={{ position: "absolute", top: -5, left: -15 }} />
           <Ionicons name="sparkles" size={12} color="#fef08a" style={{ position: "absolute", bottom: 0, right: -15 }} />
@@ -218,7 +218,7 @@ export default function SpinWheelScreen() {
 
         {/* The Purple 3D Container */}
         <View style={styles.purpleContainer}>
-          
+
           {/* Top Pointer */}
           <View style={styles.pointerContainer}>
             <Svg width={40} height={40} viewBox="0 0 40 40">
@@ -242,17 +242,17 @@ export default function SpinWheelScreen() {
                     const startAngle = -ANGLE_PER_SLICE / 2;
                     const endAngle = ANGLE_PER_SLICE / 2;
                     const slicePath = getWedgePath(startAngle, endAngle);
-                    
+
                     const fallbackColors = ["#14b8a6", "#f472b6", "#fb923c", "#facc15"];
                     const color = task.color || fallbackColors[i % fallbackColors.length];
-                    
+
                     return (
                       <G key={`${task.id}-${i}`} rotation={i * ANGLE_PER_SLICE} origin={`${CENTER}, ${CENTER}`}>
                         <Path d={slicePath} fill={color} stroke="#000000" strokeWidth={1} />
                       </G>
                     );
                   })}
-                  
+
                   {/* Outer Rim (Thick Black with Yellow Stroke inside) */}
                   <Circle cx={CENTER} cy={CENTER} r={WHEEL_SIZE / 2 - 4} fill="none" stroke="#000" strokeWidth={10} />
                   <Circle cx={CENTER} cy={CENTER} r={WHEEL_SIZE / 2 - 8} fill="none" stroke="#facc15" strokeWidth={3} />
@@ -304,7 +304,7 @@ export default function SpinWheelScreen() {
               <View style={[styles.dot, isSpinning ? styles.dotDim : null]} />
               <View style={[styles.dot, isSpinning ? styles.dotDim : null]} />
             </View>
-            
+
             <Animated.View style={{ transform: [{ scale: spinBtnAnim }] }}>
               <Pressable onPress={handleSpin} disabled={isSpinning || !!result} style={styles.arcadeBtnWrapper}>
                 <View style={[styles.arcadeBtnBase, (isSpinning || !!result) && { backgroundColor: "#854d0e" }]} />
@@ -351,28 +351,28 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 22, marginBottom: 20, zIndex: 10 },
   backButton: { width: 44, height: 44, borderRadius: 32, overflow: "hidden" },
   contentArea: { flexGrow: 1, alignItems: "center", justifyContent: "flex-start", paddingTop: 10, paddingBottom: 40, zIndex: 10 },
-  
-  titleWrapper: { alignItems: "center", marginBottom: 16, zIndex: 20 },
-  mainTitle: { fontSize: 48, color: "#fff", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#c084fc", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10, letterSpacing: -1, lineHeight: 52 },
-  subTitle: { fontSize: 36, color: "#fef08a", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#ca8a04", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10, lineHeight: 40 },
-  
+
+  titleWrapper: { alignItems: "center", marginBottom: 16, zIndex: 20, overflow: "visible" },
+  mainTitle: { fontSize: 48, color: "#fff", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#c084fc", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10, letterSpacing: -1, overflow: "visible", paddingBottom: 10 },
+  subTitle: { fontSize: 36, color: "#fef08a", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#ca8a04", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10, overflow: "visible", paddingBottom: 10, marginTop: -15 },
+
   purpleContainer: { backgroundColor: "#5b21b6", borderRadius: 32, width: width * 0.9, alignItems: "center", paddingTop: 24, paddingBottom: 24, position: "relative", shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 15, elevation: 10, borderWidth: 1, borderColor: "#7c3aed" },
-  
+
   pointerContainer: { position: "absolute", top: -20, zIndex: 30, alignSelf: "center" },
-  
+
   wheelWrapper: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2, backgroundColor: "#000", position: "relative", zIndex: 20 },
   wheelTransform: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2 },
-  
+
   wheelOverlay: { ...StyleSheet.absoluteFillObject, borderRadius: WHEEL_SIZE / 2, backgroundColor: "rgba(0,0,0,0.85)", zIndex: 30 },
   overlayInner: { flex: 1, alignItems: "center", justifyContent: "center", position: "relative" },
   centerResult: { position: "absolute", width: "70%", alignItems: "center" },
   resultMainText: { color: "#fff", fontSize: 26, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", textShadowColor: "rgba(0,0,0,0.8)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 },
-  
+
   containerBottom: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-evenly", marginTop: 24, paddingHorizontal: 20, zIndex: 20 },
   dotsRow: { flexDirection: "column", gap: 12 },
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#a78bfa", shadowColor: "#a78bfa", shadowOffset: { width: 0, height: 0 }, shadowRadius: 5, shadowOpacity: 1 },
   dotDim: { backgroundColor: "#4c1d95", shadowOpacity: 0 },
-  
+
   arcadeBtnWrapper: { width: 180, height: 55 },
   arcadeBtnBase: { position: "absolute", width: "100%", height: "100%", borderRadius: 16, backgroundColor: "#a16207", top: 6 },
   arcadeBtnTop: { position: "absolute", width: "100%", height: "100%", borderRadius: 16, backgroundColor: "#facc15", alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fef08a" },
