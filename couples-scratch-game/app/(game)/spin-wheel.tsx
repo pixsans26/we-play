@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet, Dimensions, Animated, Easing, Modal,
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import Svg, { Path, G, Text as SvgText, Circle, Polygon, Defs, LinearGradient as SvgLinearGradient, Stop, Filter, FeGaussianBlur, FeMerge, FeMergeNode } from "react-native-svg";
+import Svg, { Path, G, Text as SvgText, Circle, Polygon, Defs, LinearGradient as SvgLinearGradient, RadialGradient as SvgRadialGradient, Stop, Filter, FeGaussianBlur, FeMerge, FeMergeNode } from "react-native-svg";
 import { BlurView } from "@/components/CustomBlurView";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { useThemeStore, getTheme } from "@/store/themeStore";
@@ -208,12 +208,14 @@ export default function SpinWheelScreen() {
       {/* Light Rays Background when won */}
       {result && (
         <Animated.View style={[styles.lightRaysContainer, { transform: [{ rotate: rayRotateInterpolate }] }]}>
-          <Svg width="150%" height="150%" viewBox="-100 -100 200 200">
+          <Svg width="100%" height="100%" viewBox="-500 -500 1000 1000">
             <Defs>
-              <SvgLinearGradient id="rayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <Stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
-                <Stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-              </SvgLinearGradient>
+              <SvgRadialGradient id="rayGrad" cx="0" cy="0" rx="500" ry="500" gradientUnits="userSpaceOnUse">
+                <Stop offset="0%" stopColor="#10b981" stopOpacity="0" />
+                <Stop offset="30%" stopColor="#10b981" stopOpacity="0" />
+                <Stop offset="45%" stopColor="#10b981" stopOpacity="0.8" />
+                <Stop offset="75%" stopColor="#10b981" stopOpacity="0" />
+              </SvgRadialGradient>
               <Filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                 <FeGaussianBlur stdDeviation="8" result="blur" />
                 <FeMerge>
@@ -226,7 +228,7 @@ export default function SpinWheelScreen() {
               {Array.from({ length: 16 }).map((_, i) => {
                 const angle = (i * 22.5 * Math.PI) / 180;
                 const nextAngle = ((i * 22.5 + 11.25) * Math.PI) / 180;
-                const r = 200;
+                const r = 500;
                 const x1 = r * Math.cos(angle);
                 const y1 = r * Math.sin(angle);
                 const x2 = r * Math.cos(nextAngle);
