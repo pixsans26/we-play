@@ -198,23 +198,22 @@ export default function TaskScratchScreen() {
   const loadScratchCounts = useCallback(async () => {
     if (!coupleProfile) return;
     try {
+      const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
       const history = await getAllHistory(
         coupleProfile.partnerAUid,
-        coupleProfile.partnerBUid
+        partnerBUidFallback
       );
-      const textHistory = history.filter((h) => h.taskType === "text");
+      const textHistory = history.filter((h) => h.taskType === "text" && h.completed);
 
       const countA = textHistory.filter(
         (h) => h.userUid === coupleProfile.partnerAUid
       ).length;
       setScratchCountA(countA);
 
-      if (coupleProfile.partnerBUid) {
-        const countB = textHistory.filter(
-          (h) => h.userUid === coupleProfile.partnerBUid
-        ).length;
-        setScratchCountB(countB);
-      }
+      const countB = textHistory.filter(
+        (h) => h.userUid === partnerBUidFallback
+      ).length;
+      setScratchCountB(countB);
     } catch { }
   }, [coupleProfile, getAllHistory]);
 
@@ -223,8 +222,8 @@ export default function TaskScratchScreen() {
     if (!user || !coupleProfile) return 1;
     try {
       const scratcherUid = currentTurn === "A"
-        ? coupleProfile.partnerAUid ?? user.email!
-        : coupleProfile.partnerBUid ?? user.email!;
+        ? coupleProfile.partnerAUid
+        : coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
 
       const BASE_URL = env.EXPO_PUBLIC_API_URL;
       const res = await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}`);
@@ -246,8 +245,8 @@ export default function TaskScratchScreen() {
 
       // Use the current scratcher's UID so seen-task filtering is per-scratcher
       const scratcherUid = currentTurn === "A"
-        ? coupleProfile.partnerAUid ?? user.email!
-        : coupleProfile.partnerBUid ?? user.email!;
+        ? coupleProfile.partnerAUid
+        : coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
 
       const task = await getNextTask(scratcherUid, "text", level);
 
@@ -352,10 +351,10 @@ export default function TaskScratchScreen() {
       : 0;
 
     const scratcherUid = currentTurn === "A"
-      ? coupleProfile?.partnerAUid ?? user.email!
-      : coupleProfile?.partnerBUid ?? user.email!;
+      ? (coupleProfile?.partnerAUid ?? user.email!)
+      : (coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`);
     const performerUid = currentTurn === "A"
-      ? coupleProfile?.partnerBUid ?? null
+      ? coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`
       : coupleProfile?.partnerAUid ?? null;
 
     const result = await safeDbWrite(
@@ -396,10 +395,10 @@ export default function TaskScratchScreen() {
     }
 
     const scratcherUid = currentTurn === "A"
-      ? coupleProfile?.partnerAUid ?? user.email!
-      : coupleProfile?.partnerBUid ?? user.email!;
+      ? (coupleProfile?.partnerAUid ?? user.email!)
+      : (coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`);
     const performerUid = currentTurn === "A"
-      ? coupleProfile?.partnerBUid ?? null
+      ? coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`
       : coupleProfile?.partnerAUid ?? null;
 
     const nextTask = await getNextTask(scratcherUid, "text", currentLevel);
@@ -409,22 +408,7 @@ export default function TaskScratchScreen() {
       return;
     }
 
-    const result = await safeDbWrite(
-      () =>
-        logScratch({
-          userUid: scratcherUid,
-          taskId: currentTask.id,
-          taskType: "text",
-          category: currentTask.category,
-          completed: false,
-          skipped: true,
-          timeTaken: 0,
-          performerUid: performerUid ?? undefined,
-        }),
-      "Skip could not be saved. Please try again."
-    );
-
-    if (result === null) return;
+    // Do not save skip to server
 
     await loadScratchCounts();
     setPreviousTask(currentTask);

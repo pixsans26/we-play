@@ -128,10 +128,10 @@ const GenderSelector = ({ value, onChange, theme }: { value: string, onChange: (
 );
 
 const PRESET_AVATARS_LOCAL = [
-  { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.png") },
-  { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.png") },
-  { url: "/uploads/presets/avatar_cat.png", source: require("@/assets/images/avatars/avatar_cat.png") },
-  { url: "/uploads/presets/avatar_dog.png", source: require("@/assets/images/avatars/avatar_dog.png") },
+  { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.jpg") },
+  { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.jpg") },
+  { url: "/uploads/presets/avatar_cat.png", source: require("@/assets/images/avatars/avatar_cat.jpg") },
+  { url: "/uploads/presets/avatar_dog.png", source: require("@/assets/images/avatars/avatar_dog.jpg") },
 ];
 
 const PREFERENCE_CHIPS = [
@@ -198,14 +198,9 @@ export default function ProfileSetupScreen() {
     }
   };
 
-  const selectPreset = async (source: any) => {
-    try {
-      const [asset] = await Asset.loadAsync(source);
-      setAvatarA(asset.localUri || asset.uri);
-      setAvatarPickerVisible(false);
-    } catch (e) {
-      console.warn("Failed to load preset asset", e);
-    }
+  const selectPreset = (url: string) => {
+    setAvatarA(url);
+    setAvatarPickerVisible(false);
   };
 
   const toggleChip = (chip: string) => {
@@ -261,12 +256,18 @@ export default function ProfileSetupScreen() {
       if (prefsStr) formData.append("whatALikes", prefsStr);
 
       if (avatarA) {
-        const ext = avatarA.substring(avatarA.lastIndexOf(".") + 1) || "jpg";
-        formData.append("partnerAAvatar", {
-          uri: avatarA,
-          name: `avatar_A.${ext}`,
-          type: `image/${ext}`
-        } as any);
+        if (avatarA.startsWith("file://") || avatarA.startsWith("http")) {
+          const dotIndex = avatarA.lastIndexOf(".");
+          let ext = dotIndex !== -1 && dotIndex > avatarA.lastIndexOf("/") ? avatarA.substring(dotIndex + 1).toLowerCase() : "jpeg";
+          if (ext === "jpg") ext = "jpeg";
+          formData.append("partnerAAvatar", {
+            uri: Platform.OS === "ios" && avatarA.startsWith("file://") ? avatarA.replace("file://", "") : avatarA,
+            name: `avatar_A.${ext}`,
+            type: `image/${ext}`
+          } as any);
+        } else {
+          formData.append("partnerAAvatar", avatarA);
+        }
       }
 
       // Create couple profile
@@ -324,13 +325,13 @@ export default function ProfileSetupScreen() {
           <View style={{ marginBottom: 32, marginTop: 20 }}>
             {/* Top Left Back Button */}
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => {
                   if (step > 1) setStep(s => s - 1);
                   else router.back();
                 }}
-                style={{ 
-                  width: 44, height: 44, borderRadius: 22, 
+                style={{
+                  width: 44, height: 44, borderRadius: 22,
                   backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
                   alignItems: "center", justifyContent: "center",
                   marginLeft: -8
@@ -400,9 +401,9 @@ export default function ProfileSetupScreen() {
 
             {step === 3 && (
               <View style={{ alignItems: "center", marginVertical: 40 }}>
-                <TouchableOpacity onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.8} style={{ width: 140, height: 140, borderRadius: 70, backgroundColor: theme.input.bg, borderWidth: 3, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                <TouchableOpacity onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.8} style={{ width: 160, height: 160, borderRadius: 80, backgroundColor: theme.input.bg, borderWidth: 3, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {avatarA ? (
-                    <Image source={PRESET_AVATARS_LOCAL.find(p => p.url === avatarA)?.source || { uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "120%", height: "120%" }} />
+                    <Image source={PRESET_AVATARS_LOCAL.find(p => p.url === avatarA)?.source || { uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%", borderRadius: 80 }} resizeMode="cover" />
                   ) : (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                       <Ionicons name="camera-outline" size={48} color={theme.input.placeholder} />
@@ -499,10 +500,10 @@ export default function ProfileSetupScreen() {
         <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }} onPress={() => setAvatarPickerVisible(false)}>
           <Pressable style={{ width: "100%", backgroundColor: theme.card.bg, borderRadius: 24, padding: 24, alignItems: "center", borderWidth: 1, borderColor: theme.card.border }}>
             <Text style={{ color: theme.card.text, fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24, }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
               {PRESET_AVATARS_LOCAL.map((preset, i) => (
-                <Pressable key={i} onPress={() => selectPreset(preset.source)} style={{ width: 64, height: 64, borderRadius: 32, alignItems: "center", justifyContent: "center", overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
-                  <Image source={preset.source} style={{ width: "120%", height: "120%", }} />
+                <Pressable key={i} onPress={() => selectPreset(preset.url)} style={{ width: 80, height: 80, borderRadius: 40, overflow: "hidden", borderWidth: 2, borderColor: theme.accent }}>
+                  <Image source={preset.source} style={{ width: "100%", height: "100%", borderRadius: 40 }} resizeMode="cover" />
                 </Pressable>
               ))}
             </View>

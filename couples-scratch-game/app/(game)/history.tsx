@@ -97,9 +97,10 @@ export default function HistoryScreen() {
   const loadHistory = useCallback(async () => {
     if (!coupleProfile) return;
     try {
+      const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
       const entries = await getAllHistory(
         coupleProfile.partnerAUid,
-        coupleProfile.partnerBUid
+        partnerBUidFallback
       );
       setHistoryAll(entries);
     } catch {
@@ -121,9 +122,8 @@ export default function HistoryScreen() {
           onPress: async () => {
             try {
               await resetHistory(coupleProfile.partnerAUid);
-              if (coupleProfile.partnerBUid) {
-                await resetHistory(coupleProfile.partnerBUid);
-              }
+              const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
+              await resetHistory(partnerBUidFallback);
               setHistoryAll([]);
             } catch {
               Alert.alert("Error", "History could not be cleared. Please try again.");

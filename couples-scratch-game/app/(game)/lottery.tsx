@@ -77,22 +77,23 @@ export default function LotteryScreen() {
 
   async function fetchSeenCombos() {
     if (!coupleProfile) return;
-    const history = await getAllHistory(coupleProfile.partnerAUid, coupleProfile.partnerBUid);
-    const lotteryHistory = history.filter(h => h.taskType === "lottery");
+    const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
+    const history = await getAllHistory(coupleProfile.partnerAUid, partnerBUidFallback);
+    const lotteryHistory = history.filter(h => h.taskType === "lottery" && h.completed);
     setLvl1Count(lotteryHistory.filter(h => h.taskId.includes("_1_")).length);
     setLvl2Count(lotteryHistory.filter(h => h.taskId.includes("_2_")).length);
     setSeenCombos(new Set(lotteryHistory.map(h => h.taskId)));
 
+    
+    
     setStatsA({
       rolls: lotteryHistory.filter(h => h.userUid === coupleProfile.partnerAUid).length,
       performs: lotteryHistory.filter(h => h.performerUid === coupleProfile.partnerAUid).length,
     });
-    if (coupleProfile.partnerBUid) {
-      setStatsB({
-        rolls: lotteryHistory.filter(h => h.userUid === coupleProfile.partnerBUid).length,
-        performs: lotteryHistory.filter(h => h.performerUid === coupleProfile.partnerBUid).length,
-      });
-    }
+    setStatsB({
+      rolls: lotteryHistory.filter(h => h.userUid === partnerBUidFallback).length,
+      performs: lotteryHistory.filter(h => h.performerUid === partnerBUidFallback).length,
+    });
   }
 
   const handleSelectLevel = (lvl: number) => {
@@ -242,8 +243,8 @@ export default function LotteryScreen() {
 
   const handleDone = async () => {
     if (currentComboId && coupleProfile) {
-      const rollerUid = currentTurn === "A" ? coupleProfile.partnerAUid : coupleProfile.partnerBUid;
-      const performerUid = currentTurn === "A" ? coupleProfile.partnerBUid : coupleProfile.partnerAUid;
+      const rollerUid = currentTurn === "A" ? coupleProfile.partnerAUid : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+      const performerUid = currentTurn === "A" ? (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`) : coupleProfile.partnerAUid;
       if (rollerUid && performerUid) {
         await logScratch({
           userUid: rollerUid,

@@ -909,6 +909,23 @@ app.post("/api/progress", authenticateToken, async (req: Request, res: Response)
 // ─────────────────────────────────────────────────────────────────────────────
 // APP CONFIG (CONTENT MANAGEMENT)
 // ─────────────────────────────────────────────────────────────────────────────
+// Public GET (no auth) — used by app for FAQ, support, privacy, help, about
+app.get("/api/config/public/:key", async (req: Request, res: Response) => {
+  try {
+    const key = String(req.params.key);
+    const [config] = await db.select().from(appConfig).where(eq(appConfig.key, key));
+    if (!config) {
+      res.status(404).json({ error: "Config not found", value: "" });
+      return;
+    }
+    res.json(config);
+  } catch (err) {
+    console.error("[GET /api/config/public/:key]", err);
+    res.status(500).json({ error: "Failed to fetch config" });
+  }
+});
+
+// Admin GET (with auth)
 app.get("/api/config/:key", authenticateToken, async (req: Request, res: Response) => {
   try {
     const key = String(req.params.key);

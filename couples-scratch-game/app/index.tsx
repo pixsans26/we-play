@@ -126,9 +126,10 @@ export default function EntryScreen() {
     run();
   }, [run]);
 
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#150025" }}>
-      <ActivityIndicator size="large" color="#f953c6" />
-    </View>
-  );
+  // While resolving auth, show the animated splash screen
+  if (isLoading) {
+    return null; // splash.tsx is the initial route
+  }
+
+  return null;
 }

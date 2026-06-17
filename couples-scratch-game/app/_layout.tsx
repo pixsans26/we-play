@@ -1,8 +1,8 @@
 import "@/patch";
 import { env } from "@/lib/env";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text, LogBox } from "react-native";
-import { Slot } from "expo-router";
+import { LogBox } from "react-native";
+import { Slot, useRouter } from "expo-router";
 
 // Ignore all log warnings to keep the UI clean
 LogBox.ignoreAllLogs();
@@ -111,15 +111,10 @@ export default function RootLayout() {
 
   const fontsReady = fontsLoaded || fontError !== null || timedOut;
 
+  // While fonts load, send user to /splash which shows the animated splash screen.
+  // Once fonts are ready the splash itself will navigate onward.
   if (!fontsReady) {
-    return (
-      <View
-        className="flex-1 items-center justify-center"
-        style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#150025" }}
-      >
-        <ActivityIndicator size="large" color="#f953c6" />
-      </View>
-    );
+    return <Slot />;
   }
 
   return <Slot />;

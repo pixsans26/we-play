@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { Slot, useRouter, usePathname } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
+import { getAvatarUrl, apiFetch } from "@/lib/apiClient";
+import { env } from "@/lib/env";
 
 // Screens that should hide the tab bar
 const HIDDEN_TAB_SCREENS = ["/image-scratch", "/task-scratch", "/history", "/spin-wheel", "/lottery"];
@@ -15,14 +17,15 @@ type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
 interface TabConfig {
   route: string;
-  icon: IoniconName;
+  icon: string;
   label: string;
+  imageUrl?: string | null;
 }
 
-function getProfileIcon(gender: string | null | undefined): IoniconName {
-  if (gender === "female") return "woman";
-  if (gender === "male") return "man";
-  return "people";
+function getProfileIcon(gender: string | null | undefined): string {
+  if (gender?.toLowerCase() === "female") return "face-woman";
+  if (gender?.toLowerCase() === "male") return "face-man";
+  return "account";
 }
 
 function TabItem({
@@ -73,11 +76,23 @@ function TabItem({
             ]}
           />
         )}
-        <Ionicons
-          name={tab.icon}
-          size={isActive ? 26 : 24}
-          color={isActive ? theme.nav.active : theme.nav.inactive}
-        />
+        {tab.imageUrl ? (
+          <View style={{ width: isActive ? 34 : 30, height: isActive ? 34 : 30, borderRadius: isActive ? 17 : 15, overflow: "hidden", borderWidth: 2, borderColor: isActive ? theme.nav.active : theme.nav.inactive }}>
+            <Image source={{ uri: tab.imageUrl }} style={{ width: "100%", height: "100%", borderRadius: isActive ? 17 : 15 }} resizeMode="cover" />
+          </View>
+        ) : tab.icon.startsWith("face-") || tab.icon === "account" ? (
+          <MaterialCommunityIcons
+            name={tab.icon as any}
+            size={isActive ? 28 : 26}
+            color={isActive ? theme.nav.active : theme.nav.inactive}
+          />
+        ) : (
+          <Ionicons
+            name={tab.icon as any}
+            size={isActive ? 26 : 24}
+            color={isActive ? theme.nav.active : theme.nav.inactive}
+          />
+        )}
         {/* Active dot indicator */}
         {isActive && (
           <View
@@ -109,10 +124,12 @@ export default function GameLayout() {
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const isDark = useThemeStore((s) => s.isDark);
   const theme = getTheme(isDark);
-  
+  const isPartnerA = useAuthStore((s) => s.isPartnerA);
   const isDataLoaded = useGameStore((s) => s.isDataLoaded);
   const fetchData = useGameStore((s) => s.fetchData);
   const [dataError, setDataError] = useState<string | null>(null);
+
+  const setCoupleProfile = useAuthStore((s) => s.setCoupleProfile);
 
   useEffect(() => {
     if (isLoading || !user || !coupleProfile?.partnerAName) return;
@@ -120,6 +137,28 @@ export default function GameLayout() {
       fetchData().catch((err) => setDataError(err.message));
     }
   }, [isLoading, user, coupleProfile, isDataLoaded, fetchData]);
+
+  // Background real-time sync for couple profile
+  useEffect(() => {
+    if (!user || !user.email) return;
+
+    const fetchProfile = () => {
+      apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/couple/${user.email}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data) setCoupleProfile(data);
+        })
+        .catch(err => console.warn("Background sync profile failed:", err));
+    };
+
+    // Initial fetch
+    fetchProfile();
+
+    // Poll every 5 seconds for real-time updates across devices
+    const interval = setInterval(fetchProfile, 5000);
+
+    return () => clearInterval(interval);
+  }, [user, setCoupleProfile]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -167,12 +206,16 @@ export default function GameLayout() {
     .split(" ")[0]
     .slice(0, 10);
 
+  const myGender = isPartnerA ? coupleProfile.partnerAGender : coupleProfile.partnerBGender;
+  const myAvatarUrl = isPartnerA ? coupleProfile.partnerAAvatar : coupleProfile.partnerBAvatar;
+
   const TABS: TabConfig[] = [
     { route: "/(game)", label: "Home", icon: "home" },
     {
       route: "/(game)/profile",
       label: partnerFirstName,
-      icon: "person",
+      icon: getProfileIcon(myGender) as IoniconName,
+      imageUrl: getAvatarUrl(myAvatarUrl),
     },
     { route: "/(game)/settings", label: "Settings", icon: "settings-outline" },
   ];

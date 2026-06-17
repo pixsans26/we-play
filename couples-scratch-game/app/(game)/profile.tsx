@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Animated, Easing, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 
 import { useAuthStore } from "@/store/authStore";
@@ -79,14 +79,18 @@ export default function ProfileScreen() {
       setCurrentLevel(activeProgress.currentLevel);
       setCompletedCount(activeProgress.completedCount);
 
-      const history = await getAllHistory(coupleProfile.partnerAUid, coupleProfile.partnerBUid);
-      const activeUid = isPartnerA ? coupleProfile.partnerAUid : coupleProfile.partnerBUid;
-      const myHistory = history.filter(h => h.userUid === activeUid);
-      
-      setImageCount(myHistory.filter((h) => h.taskType === "image").length);
-      setTaskCount(myHistory.filter((h) => h.taskType === "text").length);
-      setSpinCount(myHistory.filter((h) => h.taskType === "spin_wheel").length);
-      setLotteryCount(myHistory.filter((h) => h.taskType === "lottery").length);
+      const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
+      const history = await getAllHistory(coupleProfile.partnerAUid, partnerBUidFallback);
+
+      const myUid = isPartnerA
+        ? coupleProfile.partnerAUid
+        : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+
+      // Per-game totals = A + B combined (total couple plays)
+      setImageCount(history.filter((h) => h.taskType === "image" && h.completed).length);
+      setTaskCount(history.filter((h) => h.taskType === "text" && h.completed).length);
+      setSpinCount(history.filter((h) => h.taskType === "spin_wheel" && h.completed).length);
+      setLotteryCount(history.filter((h) => h.taskType === "lottery" && h.completed).length);
     } catch (err) {
       console.error("Failed to load progress", err);
     }
@@ -143,9 +147,9 @@ export default function ProfileScreen() {
               <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 14 }}>
                 <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
-                    <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                    <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%", borderRadius: 30 }} resizeMode="cover" />
                   ) : (
-                    <Text style={{ fontSize: 26 }}>👤</Text>
+                    <MaterialCommunityIcons name={coupleProfile?.partnerAGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerAGender?.toLowerCase() === "male" ? "face-man" : "account"} size={36} color="rgba(255,255,255,0.7)" style={{ marginTop: 2 }} />
                   )}
                 </View>
                 <View style={{ marginHorizontal: -8, width: 36, height: 36, borderRadius: 32, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.4)", alignItems: "center", justifyContent: "center", zIndex: 1 }}>
@@ -153,9 +157,9 @@ export default function ProfileScreen() {
                 </View>
                 <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
-                    <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                    <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%", borderRadius: 30 }} resizeMode="cover" />
                   ) : (
-                    <Text style={{ fontSize: 26 }}>👤</Text>
+                    <MaterialCommunityIcons name={coupleProfile?.partnerBGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerBGender?.toLowerCase() === "male" ? "face-man" : "account"} size={36} color="rgba(255,255,255,0.7)" style={{ marginTop: 2 }} />
                   )}
                 </View>
               </View>
@@ -211,7 +215,7 @@ export default function ProfileScreen() {
                   {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
                     <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
                   ) : (
-                    <Ionicons name="person" size={24} color={isDark ? "#fbcfe8" : "#db2777"} />
+                    <MaterialCommunityIcons name={coupleProfile?.partnerAGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerAGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#fbcfe8" : "#db2777"} />
                   )}
                 </View>
                 <View style={{ flex: 1 }}>
@@ -262,7 +266,7 @@ export default function ProfileScreen() {
                   {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
                     <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
                   ) : (
-                    <Ionicons name="person" size={24} color={isDark ? "#e9d5ff" : "#9333ea"} />
+                    <MaterialCommunityIcons name={coupleProfile?.partnerBGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerBGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#e9d5ff" : "#9333ea"} />
                   )}
                 </View>
                 <View style={{ flex: 1 }}>

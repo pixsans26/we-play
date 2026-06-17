@@ -75,6 +75,9 @@ export default function SpinWheelScreen() {
   const { logScratch, getAllHistory } = useScratchHistory();
   const { playLevelUp } = useSound();
 
+  const [spinCountA, setSpinCountA] = React.useState(0);
+  const [spinCountB, setSpinCountB] = React.useState(0);
+
   const rawTasks = useGameStore((s) => s.spinTasks);
 
   const spinTasks = React.useMemo(() => {
@@ -123,9 +126,17 @@ export default function SpinWheelScreen() {
     // Sync individual spin count from server when turn changes
     const syncCount = async () => {
       if (coupleProfile) {
-        const history = await getAllHistory(coupleProfile.partnerAUid, coupleProfile.partnerBUid);
-        const activeUid = currentTurn === "A" ? coupleProfile.partnerAUid : coupleProfile.partnerBUid;
-        const spins = history.filter((h) => h.taskType === "spin_wheel" && h.userUid === activeUid).length;
+        const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
+        const history = await getAllHistory(coupleProfile.partnerAUid, partnerBUidFallback);
+        
+        const spinsA = history.filter((h) => h.taskType === "spin_wheel" && h.userUid === coupleProfile.partnerAUid && h.completed).length;
+        const spinsB = history.filter((h) => h.taskType === "spin_wheel" && h.userUid === partnerBUidFallback && h.completed).length;
+        
+        setSpinCountA(spinsA);
+        setSpinCountB(spinsB);
+        
+        const activeUid = currentTurn === "A" ? coupleProfile.partnerAUid : partnerBUidFallback;
+        const spins = history.filter((h) => h.taskType === "spin_wheel" && h.userUid === activeUid && h.completed).length;
         setSpinCount(spins);
       }
     };
@@ -179,8 +190,8 @@ export default function SpinWheelScreen() {
 
   const handleDone = () => {
     if (result && coupleProfile) {
-      const rollerUid = currentTurn === "A" ? coupleProfile.partnerAUid : coupleProfile.partnerBUid;
-      const performerUid = currentTurn === "A" ? coupleProfile.partnerBUid : coupleProfile.partnerAUid;
+      const rollerUid = currentTurn === "A" ? coupleProfile.partnerAUid : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+      const performerUid = currentTurn === "A" ? (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`) : coupleProfile.partnerAUid;
       if (rollerUid && performerUid) {
         logScratch({
           userUid: rollerUid,
@@ -268,7 +279,9 @@ export default function SpinWheelScreen() {
         
         <View style={{ backgroundColor: "rgba(0,0,0,0.3)", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Ionicons name="sync" size={16} color="#facc15" />
-          <Text style={{ color: "#fff", fontWeight: "bold", fontFamily: "DynaPuff_700Bold", fontSize: 16 }}>Spins: {spinCount}</Text>
+          <Text style={{ color: "#fff", fontWeight: "bold", fontFamily: "DynaPuff_700Bold", fontSize: 13 }}>
+            {coupleProfile?.partnerAName?.split(' ')[0] || "A"}: {spinCountA}  •  {coupleProfile?.partnerBName?.split(' ')[0] || "B"}: {spinCountB}
+          </Text>
         </View>
         
         <View style={{ width: 44 }} />

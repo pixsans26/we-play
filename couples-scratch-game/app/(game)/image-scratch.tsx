@@ -143,23 +143,22 @@ export default function ImageScratchScreen() {
   const loadScratchCounts = useCallback(async () => {
     if (!coupleProfile) return;
     try {
+      const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
       const history = await getAllHistory(
         coupleProfile.partnerAUid,
-        coupleProfile.partnerBUid
+        partnerBUidFallback
       );
-      const imageHistory = history.filter((h) => h.taskType === "image");
+      const imageHistory = history.filter((h) => h.taskType === "image" && h.completed);
 
       const countA = imageHistory.filter(
         (h) => h.userUid === coupleProfile.partnerAUid
       ).length;
       setScratchCountA(countA);
 
-      if (coupleProfile.partnerBUid) {
-        const countB = imageHistory.filter(
-          (h) => h.userUid === coupleProfile.partnerBUid
-        ).length;
-        setScratchCountB(countB);
-      }
+      const countB = imageHistory.filter(
+        (h) => h.userUid === partnerBUidFallback
+      ).length;
+      setScratchCountB(countB);
     } catch { }
   }, [coupleProfile, getAllHistory]);
 
@@ -167,8 +166,8 @@ export default function ImageScratchScreen() {
     if (!user || !coupleProfile) return 1;
     try {
       const scratcherUid = currentTurn === "A"
-        ? coupleProfile.partnerAUid ?? user.email!
-        : coupleProfile.partnerBUid ?? user.email!;
+        ? coupleProfile.partnerAUid
+        : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
 
       const BASE_URL = env.EXPO_PUBLIC_API_URL;
       const res = await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}`);
@@ -197,8 +196,8 @@ export default function ImageScratchScreen() {
 
       // Use the current scratcher's UID so seen-task filtering is per-scratcher
       const scratcherUid = currentTurn === "A"
-        ? coupleProfile.partnerAUid ?? user.email!
-        : coupleProfile.partnerBUid ?? user.email!;
+        ? coupleProfile.partnerAUid
+        : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
 
       const task = await getNextTask(scratcherUid, "image", level);
       if (task) {
@@ -284,23 +283,13 @@ export default function ImageScratchScreen() {
   const handleSkip = useCallback(async () => {
     if (!user || !currentTask || !coupleProfile) return;
     const scratcherUid = currentTurn === "A"
-      ? coupleProfile.partnerAUid ?? user.email!
-      : coupleProfile.partnerBUid ?? user.email!;
+      ? coupleProfile.partnerAUid
+      : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
 
-    await safeDbWrite(
-      () =>
-        logScratch({
-          userUid: scratcherUid,
-          taskId: currentTask.id,
-          taskType: "image",
-          completed: false,
-          skipped: true,
-        }),
-      "Skip event could not be saved."
-    );
+    // Do not save skip to server
     await loadScratchCounts();
     await loadNextTask();
-  }, [user, currentTask, coupleProfile, currentTurn, logScratch, loadNextTask]);
+  }, [user, currentTask, coupleProfile, currentTurn, logScratch, loadNextTask, switchTurn]);
 
   const handleScratchComplete = useCallback(async () => {
     setIsScratched(true);
@@ -325,51 +314,49 @@ export default function ImageScratchScreen() {
       start();
     }, 10000);
 
-    if (user && currentTask && coupleProfile) {
-      const scratcherUid = currentTurn === "A"
-        ? coupleProfile.partnerAUid ?? user.email!
-        : coupleProfile.partnerBUid ?? user.email!;
-      const performerUid = currentTurn === "A"
-        ? coupleProfile.partnerBUid ?? null
-        : coupleProfile.partnerAUid ?? null;
-
-      await safeDbWrite(
-        () =>
-          logScratch({
-            userUid: scratcherUid,
-            taskId: currentTask.id,
-            taskType: "image",
-            completed: false,
-            skipped: false,
-            performerUid: performerUid ?? undefined,
-          }),
-        "Scratch event could not be saved. Please try again."
-      );
-      await loadScratchCounts();
-    }
-  }, [user, coupleProfile, currentTurn, currentTask, setIsScratched, logScratch, playScratch, revealOpacity, start]);
+      // Count is saved on Done, not here
+  }, [setIsScratched, playScratch, revealOpacity, start]);
 
   const handleDone = useCallback(async () => {
     if (!user || !currentTask || !coupleProfile) return;
 
     const scratcherUid = currentTurn === "A"
-      ? coupleProfile.partnerAUid ?? user.email!
-      : coupleProfile.partnerBUid ?? user.email!;
+      ? coupleProfile.partnerAUid
+      : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+    const performerUid = currentTurn === "A"
+      ? (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`)
+      : coupleProfile.partnerAUid;
 
-    const result = await safeDbWrite(async () => {
+    // Log completed task to server
+    await safeDbWrite(
+      () =>
+        logScratch({
+          userUid: scratcherUid,
+          taskId: currentTask.id,
+          taskType: "image",
+          completed: true,
+          skipped: false,
+          performerUid: performerUid ?? undefined,
+        }),
+      "Scratch event could not be saved. Please try again."
+    );
+
+    // Update progress counter on server
+    try {
       const BASE_URL = env.EXPO_PUBLIC_API_URL;
       await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}/increment-completed`, {
-        method: "PATCH"
+        method: "PATCH",
       });
-    }, "Progress could not be saved. Please try again.");
-
-    if (result !== null) {
-      switchTurn();
-      updateStreak();
-      await loadScratchCounts();
-      await loadNextTask();
+    } catch (err) {
+      console.error("Failed to increment completed count", err);
     }
-  }, [user, coupleProfile, currentTurn, currentTask, loadNextTask, switchTurn, updateStreak, loadScratchCounts]);
+
+    // Reload counts from server (realtime)
+    await loadScratchCounts();
+    switchTurn();
+    updateStreak();
+    await loadNextTask();
+  }, [user, coupleProfile, currentTurn, currentTask, loadNextTask, switchTurn, updateStreak, loadScratchCounts, logScratch]);
 
   function handlePrevious() {
     setShowPrevious(true);

@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { View, Text, Pressable, ScrollView, Image, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 
 import { useAuthStore } from "@/store/authStore";
@@ -96,6 +96,9 @@ export default function MainGameScreen() {
   const partnerAName = coupleProfile?.partnerAName ?? "You";
   const partnerBName = coupleProfile?.partnerBName ?? "Partner";
   const turnName = currentTurn === "A" ? partnerAName : partnerBName;
+  const myGender = isPartnerA ? coupleProfile?.partnerAGender : coupleProfile?.partnerBGender;
+  const myAvatarIcon = myGender?.toLowerCase() === "female" ? "face-woman" : myGender?.toLowerCase() === "male" ? "face-man" : "account";
+
   const progressInLevel = completedCount % 10;
 
   const heartColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.25)";
@@ -127,9 +130,9 @@ export default function MainGameScreen() {
         <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden" }}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
             {getAvatarUrl(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) ? (
-              <Image source={{ uri: getAvatarUrl(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+              <Image source={{ uri: getAvatarUrl(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%", borderRadius: 32 }} resizeMode="cover" />
             ) : (
-              <Ionicons name="person" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
+              <MaterialCommunityIcons name={myAvatarIcon} size={24} color={isDark ? "#ffffff" : "#4c0519"} style={{ marginTop: 2 }} />
             )}
           </BlurView>
         </Pressable>
