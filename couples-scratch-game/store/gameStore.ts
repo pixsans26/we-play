@@ -14,6 +14,7 @@ interface GameState {
   currentTurn: "A" | "B";
   lastPlayedDate: string | null;
   streak: number;
+  spinCount: number;
   setMode: (m: "image" | "text") => void;
   setCurrentTask: (t: Task | ImageTask | null) => void;
   setPreviousTask: (t: Task | ImageTask | null) => void;
@@ -26,6 +27,7 @@ interface GameState {
   setLastPlayedDate: (date: string | null) => void;
   setStreak: (n: number) => void;
   updateStreak: () => void;
+  incrementSpinCount: () => void;
   textTasks: Task[];
   imageTasks: ImageTask[];
   spinTasks: any[];
@@ -46,6 +48,7 @@ const initialState = {
   currentTurn: "A" as "A" | "B",
   lastPlayedDate: null as string | null,
   streak: 0,
+  spinCount: 0,
   textTasks: [],
   imageTasks: [],
   spinTasks: [],
@@ -71,6 +74,7 @@ export const useGameStore = create<GameState>()(
       switchTurn: () => set((s) => ({ currentTurn: s.currentTurn === "A" ? "B" : "A" })),
       setLastPlayedDate: (date) => set({ lastPlayedDate: date }),
       setStreak: (n) => set({ streak: n }),
+      incrementSpinCount: () => set((state) => ({ spinCount: state.spinCount + 1 })),
       updateStreak: () => {
         const today = new Date().toISOString().split("T")[0];
         const { lastPlayedDate, streak } = get();
@@ -116,6 +120,7 @@ export const useGameStore = create<GameState>()(
         currentTurn: state.currentTurn, 
         lastPlayedDate: state.lastPlayedDate, 
         streak: state.streak, 
+        spinCount: state.spinCount,
         textTasks: state.textTasks,
         imageTasks: state.imageTasks,
         spinTasks: state.spinTasks,
@@ -131,6 +136,7 @@ export const useGameStore = create<GameState>()(
         currentTurn: state.currentTurn,
         lastPlayedDate: state.lastPlayedDate,
         streak: state.streak,
+        spinCount: state.spinCount,
         textTasks: state.textTasks,
         imageTasks: state.imageTasks,
         spinTasks: state.spinTasks,

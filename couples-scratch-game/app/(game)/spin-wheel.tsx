@@ -68,6 +68,8 @@ export default function SpinWheelScreen() {
   const theme = getTheme(isDark);
   const currentTurn = useGameStore((s) => s.currentTurn);
   const switchTurn = useGameStore((s) => s.switchTurn);
+  const spinCount = useGameStore((s) => s.spinCount);
+  const incrementSpinCount = useGameStore((s) => s.incrementSpinCount);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const { logScratch } = useScratchHistory();
   const { playLevelUp } = useSound();
@@ -175,6 +177,7 @@ export default function SpinWheelScreen() {
         });
       }
     }
+    incrementSpinCount();
     setResult(null);
     overlayOpacity.setValue(0);
     switchTurn();
@@ -247,7 +250,12 @@ export default function SpinWheelScreen() {
             <Ionicons name="close" size={24} color="#ffffff" />
           </BlurView>
         </Pressable>
-        {/* Removed "Fate Wheel" text to match design, title is below */}
+        
+        <View style={{ backgroundColor: "rgba(0,0,0,0.3)", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="sync" size={16} color="#facc15" />
+          <Text style={{ color: "#fff", fontWeight: "bold", fontFamily: "DynaPuff_700Bold", fontSize: 16 }}>Spins: {spinCount}</Text>
+        </View>
+        
         <View style={{ width: 44 }} />
       </View>
 
