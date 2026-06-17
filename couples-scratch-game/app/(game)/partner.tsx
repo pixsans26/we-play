@@ -8,7 +8,7 @@ import { Calendar } from "react-native-calendars";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { useCycleStore } from "@/store/cycleStore";
-import { calculateCyclePredictions, CyclePredictions } from "@/lib/cycleCalculations";
+import { calculateCyclePredictions, generatePredictionCalendarMarks, CyclePredictions } from "@/lib/cycleCalculations";
 import { getAvatarUrl } from "@/lib/apiClient";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
@@ -79,20 +79,50 @@ export default function PartnerScreen() {
     setIsModalOpen(false);
   };
 
-  const handleDayPress = (day: any) => {
+  const handleDayPress = async (day: any) => {
     const dateStr = day.dateString;
+    let newStart = lastPeriodStart;
+    let newEnd = lastPeriodEnd;
+
     if (!lastPeriodStart || (lastPeriodStart && lastPeriodEnd)) {
-      setLastPeriodStart(dateStr);
-      setLastPeriodEnd("");
+      newStart = dateStr;
+      newEnd = "";
+      setLastPeriodStart(newStart);
+      setLastPeriodEnd(newEnd);
     } else {
       const start = new Date(lastPeriodStart);
       const selected = new Date(dateStr);
       if (selected >= start) {
-        setLastPeriodEnd(dateStr);
+        newEnd = dateStr;
+        setLastPeriodEnd(newEnd);
       } else {
-        setLastPeriodStart(dateStr);
-        setLastPeriodEnd("");
+        newStart = dateStr;
+        newEnd = "";
+        setLastPeriodStart(newStart);
+        setLastPeriodEnd(newEnd);
       }
+    }
+
+    // Auto-sync
+    const parsedLength = parseInt(cycleLength, 10);
+    if (!isNaN(parsedLength) && parsedLength >= 20 && parsedLength <= 45) {
+      await updateCycleConfig({
+        lastPeriodStart: newStart,
+        lastPeriodEnd: newEnd || null,
+        averageCycleLength: parsedLength,
+      });
+    }
+  };
+
+  const handleCycleLengthChange = async (lenStr: string) => {
+    setCycleLength(lenStr);
+    const parsedLength = parseInt(lenStr, 10);
+    if (lastPeriodStart && !isNaN(parsedLength) && parsedLength >= 20 && parsedLength <= 45) {
+      await updateCycleConfig({
+        lastPeriodStart,
+        lastPeriodEnd: lastPeriodEnd || null,
+        averageCycleLength: parsedLength,
+      });
     }
   };
 
@@ -185,7 +215,30 @@ export default function PartnerScreen() {
               {predictions && (
                 <>
                   <Text style={{ fontFamily: "DynaPuff_600SemiBold", fontSize: 18, color: theme.card.text, marginBottom: 16 }}>
-                    Predictions & Insights
+                    Predictions Calendar
+                  </Text>
+                  
+                  {/* Dashboard Visual Calendar */}
+                  <View style={{ borderRadius: 24, overflow: "hidden", borderWidth: 1, borderColor: theme.card.border, marginBottom: 16, backgroundColor: theme.card.bg }}>
+                    <Calendar
+                      markingType={'period'}
+                      markedDates={generatePredictionCalendarMarks(predictions, cycleConfig.averagePeriodLength)}
+                      theme={{
+                        calendarBackground: "transparent",
+                        textSectionTitleColor: theme.card.subtext,
+                        dayTextColor: theme.card.text,
+                        todayTextColor: "#ec4899",
+                        monthTextColor: theme.card.text,
+                        arrowColor: "#ec4899",
+                        textDayFontFamily: "Nunito_600SemiBold",
+                        textMonthFontFamily: "DynaPuff_600SemiBold",
+                        textDayHeaderFontFamily: "Nunito_700Bold",
+                      }}
+                    />
+                  </View>
+
+                  <Text style={{ fontFamily: "DynaPuff_600SemiBold", fontSize: 18, color: theme.card.text, marginBottom: 16, marginTop: 8 }}>
+                    Insights
                   </Text>
                   
                   {/* Next Period Widget */}
@@ -326,7 +379,7 @@ export default function PartnerScreen() {
                     return (
                       <Pressable 
                         key={len} 
-                        onPress={() => setCycleLength(String(len))}
+                        onPress={() => handleCycleLengthChange(String(len))}
                         style={{ 
                           width: 50, 
                           height: 50, 

@@ -115,3 +115,69 @@ export function calculateCyclePredictions(
     partnerDesires,
   };
 }
+
+/**
+ * Generates marked dates object for react-native-calendars
+ * Uses `markingType="period"` compatible objects.
+ */
+export function generatePredictionCalendarMarks(predictions: CyclePredictions | null, averagePeriodLength: number = 5): any {
+  const marked: any = {};
+  if (!predictions) return marked;
+
+  const dateToKey = (d: Date) => d.toISOString().split("T")[0];
+
+  // 1. Mark Next Period predicted days
+  const periodStart = predictions.nextPeriodDate;
+  const periodEnd = new Date(periodStart);
+  periodEnd.setDate(periodStart.getDate() + averagePeriodLength - 1);
+
+  let curr = new Date(periodStart);
+  while (curr <= periodEnd) {
+    const key = dateToKey(curr);
+    marked[key] = {
+      color: "#ec4899", // Pink
+      textColor: "#fff",
+      startingDay: key === dateToKey(periodStart),
+      endingDay: key === dateToKey(periodEnd),
+    };
+    curr.setDate(curr.getDate() + 1);
+  }
+
+  // 2. Mark Fertile Window
+  const fertileStart = predictions.fertileWindowStart;
+  const fertileEnd = predictions.fertileWindowEnd;
+  const ovDateStr = dateToKey(predictions.nextOvulationDate);
+
+  let fCurr = new Date(fertileStart);
+  while (fCurr <= fertileEnd) {
+    const key = dateToKey(fCurr);
+    const isOvulation = key === ovDateStr;
+
+    marked[key] = {
+      color: isOvulation ? "#9333ea" : "#d8b4fe", // Dark purple for ovulation, light purple for fertile
+      textColor: isOvulation ? "#fff" : "#6b21a8",
+      startingDay: key === dateToKey(fertileStart),
+      endingDay: key === dateToKey(fertileEnd),
+    };
+    fCurr.setDate(fCurr.getDate() + 1);
+  }
+
+  // Mark today
+  const todayKey = dateToKey(new Date());
+  if (!marked[todayKey]) {
+    marked[todayKey] = {
+      customStyles: {
+        container: {
+          borderWidth: 2,
+          borderColor: "#3b82f6"
+        },
+        text: {
+          color: "#3b82f6",
+          fontWeight: "bold"
+        }
+      }
+    };
+  }
+
+  return marked;
+}
