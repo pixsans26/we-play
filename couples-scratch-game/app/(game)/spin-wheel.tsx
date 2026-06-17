@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, Pressable, StyleSheet, Dimensions, Animated, Easing, Modal } from "react-native";
+import { View, Text, Pressable, StyleSheet, Dimensions, Animated, Easing, Modal, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -199,7 +199,7 @@ export default function SpinWheelScreen() {
         <View style={{ width: 44 }} />
       </View>
 
-      <View style={styles.contentArea}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.contentArea} showsVerticalScrollIndicator={false}>
         
         {/* Who is spinning */}
         <View style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
@@ -340,7 +340,7 @@ export default function SpinWheelScreen() {
           </View>
         )}
 
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -350,15 +350,15 @@ const styles = StyleSheet.create({
   lightRaysContainer: { position: "absolute", top: "50%", left: "50%", width: 1000, height: 1000, marginLeft: -500, marginTop: -500, alignItems: "center", justifyContent: "center", zIndex: 0 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 22, marginBottom: 20, zIndex: 10 },
   backButton: { width: 44, height: 44, borderRadius: 32, overflow: "hidden" },
-  contentArea: { flex: 1, alignItems: "center", justifyContent: "flex-start", paddingTop: 0, zIndex: 10 },
+  contentArea: { flexGrow: 1, alignItems: "center", justifyContent: "flex-start", paddingTop: 10, paddingBottom: 40, zIndex: 10 },
   
-  titleWrapper: { alignItems: "center", marginBottom: -10, zIndex: 20 },
+  titleWrapper: { alignItems: "center", marginBottom: 16, zIndex: 20 },
   mainTitle: { fontSize: 48, color: "#fff", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#c084fc", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10, letterSpacing: -1, lineHeight: 52 },
   subTitle: { fontSize: 36, color: "#fef08a", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#ca8a04", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10, lineHeight: 40 },
   
   purpleContainer: { backgroundColor: "#5b21b6", borderRadius: 32, width: width * 0.9, alignItems: "center", paddingTop: 24, paddingBottom: 24, position: "relative", shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 15, elevation: 10, borderWidth: 1, borderColor: "#7c3aed" },
   
-  pointerContainer: { position: "absolute", top: -10, zIndex: 30, alignItems: "center" },
+  pointerContainer: { position: "absolute", top: -20, zIndex: 30, alignSelf: "center" },
   
   wheelWrapper: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2, backgroundColor: "#000", position: "relative", zIndex: 20 },
   wheelTransform: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2 },
