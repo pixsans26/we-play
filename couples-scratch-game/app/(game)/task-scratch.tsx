@@ -687,7 +687,7 @@ export default function TaskScratchScreen() {
 
   // ─── RENDER: Main game screen ─────────────────────────────────────────────
   const textTask = currentTask as Task & { emoji: string };
-  const bgColors = (isDark ? ["#1e1b4b", "#312e81"] : ["#c7d2fe", "#4f46e5"]) as any;
+  const bgColors = (isDark ? ["#2e1065", "#831843"] : ["#fce4f3", "#fbcfe8"]) as any;
   const iconColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.25)";
 
   return (
@@ -733,10 +733,10 @@ export default function TaskScratchScreen() {
             {/* Partner A */}
             <View style={{ flex: 1, alignItems: "center" }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                <Ionicons name="star" size={11} color={currentTurn === "A" ? "#facc15" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(30,27,75,0.5)")} />
-                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerAName}</Text>
+                <Ionicons name="star" size={13} color={currentTurn === "A" ? "#facc15" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(30,27,75,0.5)")} />
+                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 15, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerAName}</Text>
               </View>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 11 }}>
+              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 14 }}>
                 {scratchCountA} <Text style={{ color: "#facc15" }}>★</Text>
               </Text>
             </View>
@@ -751,7 +751,7 @@ export default function TaskScratchScreen() {
                 paddingHorizontal: 8,
                 paddingVertical: 2
               }}>
-                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 9, fontWeight: "700" }}>
+                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 11, fontWeight: "700" }}>
                   {turnName}'s turn
                 </Text>
               </View>
@@ -760,10 +760,10 @@ export default function TaskScratchScreen() {
             {/* Partner B */}
             <View style={{ flex: 1, alignItems: "center" }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                <Ionicons name="star" size={11} color={currentTurn === "B" ? "#a855f7" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(30,27,75,0.5)")} />
-                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerBName}</Text>
+                <Ionicons name="star" size={13} color={currentTurn === "B" ? "#a855f7" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(30,27,75,0.5)")} />
+                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 15, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerBName}</Text>
               </View>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 11 }}>
+              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 14 }}>
                 {scratchCountB} <Text style={{ color: "#a855f7" }}>★</Text>
               </Text>
             </View>
@@ -785,15 +785,15 @@ export default function TaskScratchScreen() {
                 paddingVertical: 7,
               }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <Ionicons name="flash" size={12} color={isDark ? "#facc15" : "#d97706"} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 12, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{turnName}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 11 }}>scratches</Text>
+                  <Ionicons name="flash" size={14} color={isDark ? "#facc15" : "#d97706"} />
+                  <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 14, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{turnName}</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 13 }}>scratches</Text>
                 </View>
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(30,27,75,0.6)", fontSize: 12 }}>→</Text>
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(30,27,75,0.6)", fontSize: 14 }}>→</Text>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <Ionicons name="flash-outline" size={12} color={isDark ? "#ffffff" : "#1e1b4b"} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 12, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{getPerformingPartnerName()}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 11 }}>performs</Text>
+                  <Ionicons name="flash-outline" size={14} color={isDark ? "#ffffff" : "#1e1b4b"} />
+                  <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 14, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{getPerformingPartnerName()}</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 13 }}>performs</Text>
                 </View>
               </BlurView>
             </View>

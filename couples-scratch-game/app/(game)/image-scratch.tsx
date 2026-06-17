@@ -390,7 +390,7 @@ export default function ImageScratchScreen() {
 
   // ─── Loading state ──────────────────────────────────────────────────────────
   const imageTask = currentTask as ImageTask;
-  const bgColors = (isDark ? ["#042f2e", "#134e4a"] : ["#99f6e4", "#0d9488"]) as any;
+  const bgColors = (isDark ? ["#2e1065", "#831843"] : ["#fce4f3", "#fbcfe8"]) as any;
   const iconColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.25)";
 
   // ─── RENDER: Loading state ────────────────────────────────────────────────
@@ -549,10 +549,10 @@ export default function ImageScratchScreen() {
             {/* Partner A */}
             <View style={{ flex: 1, alignItems: "center" }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                <Ionicons name="camera" size={11} color={currentTurn === "A" ? "#2dd4bf" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(4,47,46,0.5)")} />
-                <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerAName}</Text>
+                <Ionicons name="camera" size={13} color={currentTurn === "A" ? "#2dd4bf" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(4,47,46,0.5)")} />
+                <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 15, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerAName}</Text>
               </View>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 11 }}>
+              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 14 }}>
                 {scratchCountA} <Text style={{ color: "#2dd4bf" }}>📸</Text>
               </Text>
             </View>
@@ -567,7 +567,7 @@ export default function ImageScratchScreen() {
                 paddingHorizontal: 8,
                 paddingVertical: 2
               }}>
-                <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 9, fontWeight: "700" }}>
+                <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 11, fontWeight: "700" }}>
                   {turnName}'s turn
                 </Text>
               </View>
@@ -576,10 +576,10 @@ export default function ImageScratchScreen() {
             {/* Partner B */}
             <View style={{ flex: 1, alignItems: "center" }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                <Ionicons name="camera" size={11} color={currentTurn === "B" ? "#a855f7" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(4,47,46,0.5)")} />
-                <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerBName}</Text>
+                <Ionicons name="camera" size={13} color={currentTurn === "B" ? "#a855f7" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(4,47,46,0.5)")} />
+                <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 15, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerBName}</Text>
               </View>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 11 }}>
+              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 14 }}>
                 {scratchCountB} <Text style={{ color: "#a855f7" }}>📸</Text>
               </Text>
             </View>
@@ -601,15 +601,15 @@ export default function ImageScratchScreen() {
                 paddingVertical: 7,
               }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <Ionicons name="camera" size={12} color={isDark ? "#2dd4bf" : "#0f766e"} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 12, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{turnName}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 11 }}>scratches</Text>
+                  <Ionicons name="camera" size={14} color={isDark ? "#2dd4bf" : "#0f766e"} />
+                  <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 14, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{turnName}</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 13 }}>scratches</Text>
                 </View>
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(4,47,46,0.6)", fontSize: 12 }}>→</Text>
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(4,47,46,0.6)", fontSize: 14 }}>→</Text>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <Ionicons name="camera-outline" size={12} color={isDark ? "#ffffff" : "#042f2e"} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 12, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{getPerformingPartnerName()}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 11 }}>performs</Text>
+                  <Ionicons name="camera-outline" size={14} color={isDark ? "#ffffff" : "#042f2e"} />
+                  <Text style={{ color: isDark ? "#ffffff" : "#042f2e", fontSize: 14, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{getPerformingPartnerName()}</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(4,47,46,0.8)", fontSize: 13 }}>performs</Text>
                 </View>
               </BlurView>
             </View>

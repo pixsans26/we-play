@@ -194,9 +194,9 @@ export function ScratchCard({
             <Svg width="100%" height="100%">
               <Defs>
                 <LinearGradient id="scratchGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <Stop offset="0%" stopColor="#d1d5db" />
-                  <Stop offset="50%" stopColor="#9ca3af" />
-                  <Stop offset="100%" stopColor="#6b7280" />
+                  <Stop offset="0%" stopColor="#f43f5e" />
+                  <Stop offset="50%" stopColor="#ec4899" />
+                  <Stop offset="100%" stopColor="#a855f7" />
                 </LinearGradient>
                 <Mask id="scratchMask" x="0" y="0" width="100%" height="100%" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">
                   <Rect x="0" y="0" width="100%" height="100%" fill="white" />
@@ -226,7 +226,7 @@ export function ScratchCard({
           {/* Hint text */}
           {pathData.length === 0 && (
             <View style={styles.hintContainer} pointerEvents="none">
-              <Text style={styles.hintText}>Scratch to reveal</Text>
+              <Text style={styles.hintText}>Scratch to Reveal ❤️</Text>
             </View>
           )}
         </Animated.View>
