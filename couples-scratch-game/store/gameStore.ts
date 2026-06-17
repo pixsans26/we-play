@@ -28,6 +28,7 @@ interface GameState {
   setStreak: (n: number) => void;
   updateStreak: () => void;
   incrementSpinCount: () => void;
+  setSpinCount: (n: number) => void;
   textTasks: Task[];
   imageTasks: ImageTask[];
   spinTasks: any[];
@@ -75,6 +76,7 @@ export const useGameStore = create<GameState>()(
       setLastPlayedDate: (date) => set({ lastPlayedDate: date }),
       setStreak: (n) => set({ streak: n }),
       incrementSpinCount: () => set((state) => ({ spinCount: state.spinCount + 1 })),
+      setSpinCount: (n) => set({ spinCount: n }),
       updateStreak: () => {
         const today = new Date().toISOString().split("T")[0];
         const { lastPlayedDate, streak } = get();

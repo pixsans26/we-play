@@ -70,8 +70,9 @@ export default function SpinWheelScreen() {
   const switchTurn = useGameStore((s) => s.switchTurn);
   const spinCount = useGameStore((s) => s.spinCount);
   const incrementSpinCount = useGameStore((s) => s.incrementSpinCount);
+  const setSpinCount = useGameStore((s) => s.setSpinCount);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
-  const { logScratch } = useScratchHistory();
+  const { logScratch, getAllHistory } = useScratchHistory();
   const { playLevelUp } = useSound();
 
   const rawTasks = useGameStore((s) => s.spinTasks);
@@ -115,6 +116,16 @@ export default function SpinWheelScreen() {
         Animated.timing(colorAnim, { toValue: 0, duration: 3000, useNativeDriver: false })
       ])
     ).start();
+
+    // Sync spin count from server
+    const syncCount = async () => {
+      if (coupleProfile) {
+        const history = await getAllHistory(coupleProfile.partnerAUid, coupleProfile.partnerBUid);
+        const spins = history.filter((h) => h.taskType === "spin_wheel").length;
+        setSpinCount(spins);
+      }
+    };
+    syncCount();
   }, []);
 
   const turnName = currentTurn === "A"
