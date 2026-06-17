@@ -37,6 +37,31 @@ function getWedgePath(startAngle: number, endAngle: number) {
   ].join(" ");
 }
 
+const FloatingHeart = ({ delay }: { delay: number }) => {
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 6000 + Math.random() * 4000,
+        delay,
+        useNativeDriver: true,
+        easing: Easing.linear
+      })
+    ).start();
+  }, [delay]);
+
+  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [height, -100] });
+  const scale = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.5, 1.2, 0.5] });
+  const xOffset = useRef(Math.random() * width).current;
+
+  return (
+    <Animated.View style={{ position: 'absolute', left: xOffset, top: 0, transform: [{ translateY }, { scale }], opacity: 0.1, zIndex: 0 }}>
+      <Ionicons name="heart" size={30} color="#ec4899" />
+    </Animated.View>
+  );
+};
+
 export default function SpinWheelScreen() {
   const router = useRouter();
   const isDark = useThemeStore((s) => s.isDark);
@@ -70,6 +95,7 @@ export default function SpinWheelScreen() {
   const spinBtnAnim = useRef(new Animated.Value(1)).current;
   const rayRotation = useRef(new Animated.Value(0)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const colorAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.loop(
@@ -79,6 +105,13 @@ export default function SpinWheelScreen() {
         easing: Easing.linear,
         useNativeDriver: true,
       })
+    ).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(colorAnim, { toValue: 1, duration: 3000, useNativeDriver: false }),
+        Animated.timing(colorAnim, { toValue: 0, duration: 3000, useNativeDriver: false })
+      ])
     ).start();
   }, []);
 
@@ -158,10 +191,20 @@ export default function SpinWheelScreen() {
     outputRange: ["0deg", "360deg"]
   });
 
+  const cardBgColor = colorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["#5b21b6", "#7c3aed"]
+  });
+
   const bgColors = ["#172554", "#4c1d95"]; // Dark blue to deep purple
 
   return (
     <LinearGradient colors={bgColors as any} style={styles.container}>
+      {/* Background Hearts Doodle */}
+      {!result && Array.from({ length: 15 }).map((_, i) => (
+        <FloatingHeart key={i} delay={i * 400} />
+      ))}
+      
       {/* Light Rays Background when won */}
       {result && (
         <Animated.View style={[styles.lightRaysContainer, { transform: [{ rotate: rayRotateInterpolate }] }]}>
@@ -224,18 +267,18 @@ export default function SpinWheelScreen() {
         </View>
 
         {/* The Purple 3D Container */}
-        <View style={styles.purpleContainer}>
+        <Animated.View style={[styles.purpleContainer, { backgroundColor: cardBgColor }]}>
 
           {/* Top Pointer */}
           <View style={styles.pointerContainer}>
-            <Svg width={40} height={40} viewBox="0 0 40 40">
+            <Svg width={40} height={40} viewBox="0 0 24 24">
               <Defs>
                 <SvgLinearGradient id="pointer-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <Stop offset="0%" stopColor="#ffffff" />
-                  <Stop offset="100%" stopColor="#fef08a" />
+                  <Stop offset="0%" stopColor="#f43f5e" />
+                  <Stop offset="100%" stopColor="#e11d48" />
                 </SvgLinearGradient>
               </Defs>
-              <Path d="M20 40 L5 15 L20 0 L35 15 Z" fill="url(#pointer-grad)" stroke="#ca8a04" strokeWidth="1" />
+              <Path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#pointer-grad)" stroke="#be123c" strokeWidth="1" />
             </Svg>
           </View>
 
@@ -323,7 +366,7 @@ export default function SpinWheelScreen() {
             )}
           </View>
 
-        </View>
+        </Animated.View>
 
       </ScrollView>
     </LinearGradient>
