@@ -82,10 +82,21 @@ interface ThemeState {
   toggleTheme: () => void;
 }
 
-export const useThemeStore = create<ThemeState>((set) => ({
-  isDark: true,
-  toggleTheme: () => set((s) => ({ isDark: !s.isDark })),
-}));
+import { persist, createJSONStorage } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export const useThemeStore = create<ThemeState>()(
+  persist(
+    (set) => ({
+      isDark: true,
+      toggleTheme: () => set((s) => ({ isDark: !s.isDark })),
+    }),
+    {
+      name: "theme-storage",
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
 
 export function getTheme(isDark: boolean): AppTheme {
   return isDark ? darkTheme : lightTheme;

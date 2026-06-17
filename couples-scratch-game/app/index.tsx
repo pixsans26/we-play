@@ -47,46 +47,78 @@ export default function EntryScreen() {
       return;
     }
 
-    // 3. User authenticated — check couple profile from API
-    setCheckingProfile(true);
-    try {
-      const BASE_URL = env.EXPO_PUBLIC_API_URL;
-      const res = await apiFetch(`${BASE_URL}/api/couple/${encodeURIComponent(user.email || "")}`);
-      if (!res.ok) {
-        setCoupleProfile(null);
-        router.replace("/(onboarding)/profile-setup");
-        return;
-      }
-      
-      const record = await res.json();
-      if (!record || !record.partnerAName) {
-        setCoupleProfile(null);
-        router.replace("/(onboarding)/profile-setup");
+      // 3. User authenticated — check couple profile from API
+      // If we already have the profile locally, route instantly and fetch in background
+      const currentProfile = useAuthStore.getState().coupleProfile;
+      if (currentProfile) {
+        router.replace("/(game)");
+        
+        // Background revalidation
+        apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/couple/${encodeURIComponent(user.email || "")}`)
+          .then(res => res.ok ? res.json() : null)
+          .then(record => {
+            if (record && record.partnerAName) {
+              const isA = record.partnerAUid === user.email;
+              setIsPartnerA(isA);
+              setCoupleProfile({
+                id: record.id,
+                partnerAUid: record.partnerAUid,
+                partnerBUid: record.partnerBUid ?? null,
+                partnerAName: record.partnerAName,
+                partnerBName: record.partnerBName ?? null,
+                partnerAAge: record.partnerAAge ?? null,
+                partnerBAge: record.partnerBAge ?? null,
+                partnerAGender: record.partnerAGender ?? null,
+                partnerBGender: record.partnerBGender ?? null,
+                whatALikes: record.whatALikes ?? null,
+                whatBLikes: record.whatBLikes ?? null,
+              });
+            }
+          })
+          .catch(() => console.log("[Background sync] Failed to fetch latest profile"));
         return;
       }
 
-      const isA = record.partnerAUid === user.email;
-      setIsPartnerA(isA);
-      setCoupleProfile({
-        id: record.id,
-        partnerAUid: record.partnerAUid,
-        partnerBUid: record.partnerBUid ?? null,
-        partnerAName: record.partnerAName,
-        partnerBName: record.partnerBName ?? null,
-        partnerAAge: record.partnerAAge ?? null,
-        partnerBAge: record.partnerBAge ?? null,
-        partnerAGender: record.partnerAGender ?? null,
-        partnerBGender: record.partnerBGender ?? null,
-        whatALikes: record.whatALikes ?? null,
-        whatBLikes: record.whatBLikes ?? null,
-      });
+      // 4. No local profile, we MUST block and fetch
+      setCheckingProfile(true);
+      try {
+        const BASE_URL = env.EXPO_PUBLIC_API_URL;
+        const res = await apiFetch(`${BASE_URL}/api/couple/${encodeURIComponent(user.email || "")}`);
+        if (!res.ok) {
+          setCoupleProfile(null);
+          router.replace("/(onboarding)/profile-setup");
+          return;
+        }
+        
+        const record = await res.json();
+        if (!record || !record.partnerAName) {
+          setCoupleProfile(null);
+          router.replace("/(onboarding)/profile-setup");
+          return;
+        }
 
-      router.replace("/(game)");
-    } catch {
-      router.replace("/(onboarding)/profile-setup");
-    } finally {
-      setCheckingProfile(false);
-    }
+        const isA = record.partnerAUid === user.email;
+        setIsPartnerA(isA);
+        setCoupleProfile({
+          id: record.id,
+          partnerAUid: record.partnerAUid,
+          partnerBUid: record.partnerBUid ?? null,
+          partnerAName: record.partnerAName,
+          partnerBName: record.partnerBName ?? null,
+          partnerAAge: record.partnerAAge ?? null,
+          partnerBAge: record.partnerBAge ?? null,
+          partnerAGender: record.partnerAGender ?? null,
+          partnerBGender: record.partnerBGender ?? null,
+          whatALikes: record.whatALikes ?? null,
+          whatBLikes: record.whatBLikes ?? null,
+        });
+
+        router.replace("/(game)");
+      } catch {
+        router.replace("/(onboarding)/profile-setup");
+      } finally {
+        setCheckingProfile(false);
+      }
   }, [isLoading, user, sessionToken]);
 
   // Run on mount AND whenever auth state changes
