@@ -353,8 +353,8 @@ const styles = StyleSheet.create({
   contentArea: { flexGrow: 1, alignItems: "center", justifyContent: "flex-start", paddingTop: 10, paddingBottom: 40, zIndex: 10 },
 
   titleWrapper: { alignItems: "center", marginBottom: 10, zIndex: 20, overflow: "visible" },
-  mainTitle: { fontSize: 48, color: "#fff", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#c084fc", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, letterSpacing: -1, overflow: "visible", paddingHorizontal: 20, paddingTop: 15, paddingBottom: 5 },
-  subTitle: { fontSize: 36, color: "#fef08a", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#ca8a04", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, overflow: "visible", paddingHorizontal: 20, paddingBottom: 15, marginTop: -20 },
+  mainTitle: { fontSize: 48, color: "#fff", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#c084fc", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, letterSpacing: -1, overflow: "visible", paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24 },
+  subTitle: { fontSize: 36, color: "#fef08a", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#ca8a04", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, overflow: "visible", paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24, marginTop: -40 },
 
   purpleContainer: { backgroundColor: "#5b21b6", borderRadius: 32, width: width * 0.9, alignItems: "center", paddingTop: 24, paddingBottom: 24, position: "relative", shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 15, elevation: 10, borderWidth: 1, borderColor: "#7c3aed" },
 
