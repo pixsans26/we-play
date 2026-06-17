@@ -249,7 +249,7 @@ export default function SpinWheelScreen() {
         <View style={{ width: 44 }} />
       </View>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.contentArea} showsVerticalScrollIndicator={false}>
+      <View style={styles.contentArea}>
 
         {/* Who is spinning */}
         <View style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
@@ -368,7 +368,7 @@ export default function SpinWheelScreen() {
 
         </Animated.View>
 
-      </ScrollView>
+      </View>
     </LinearGradient>
   );
 }
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   lightRaysContainer: { position: "absolute", top: "50%", left: "50%", width: 1000, height: 1000, marginLeft: -500, marginTop: -500, alignItems: "center", justifyContent: "center", zIndex: 0 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 22, marginBottom: 20, zIndex: 10 },
   backButton: { width: 44, height: 44, borderRadius: 32, overflow: "hidden" },
-  contentArea: { flexGrow: 1, alignItems: "center", justifyContent: "flex-start", paddingTop: 10, paddingBottom: 40, zIndex: 10 },
+  contentArea: { flex: 1, alignItems: "center", justifyContent: "flex-start", paddingTop: 10, paddingBottom: 20, zIndex: 10 },
 
   titleWrapper: { alignItems: "center", marginBottom: 10, zIndex: 20, overflow: "visible" },
   mainTitle: { fontSize: 48, color: "#fff", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#c084fc", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, letterSpacing: -1, overflow: "visible", paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24 },
