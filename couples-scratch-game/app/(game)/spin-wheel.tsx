@@ -196,7 +196,7 @@ export default function SpinWheelScreen() {
     outputRange: ["#5b21b6", "#7c3aed"]
   });
 
-  const bgColors = ["#172554", "#4c1d95"]; // Dark blue to deep purple
+  const bgColors = ["#ec4899", "#4c1d95"]; // Hot pink to deep purple
 
   return (
     <LinearGradient colors={bgColors as any} style={styles.container}>
