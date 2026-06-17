@@ -158,7 +158,7 @@ export default function SpinWheelScreen() {
     outputRange: ["0deg", "360deg"]
   });
 
-  const bgColors = ["#09090b", "#18181b"]; // Dark background
+  const bgColors = ["#172554", "#4c1d95"]; // Dark blue to deep purple
 
   return (
     <LinearGradient colors={bgColors as any} style={styles.container}>
