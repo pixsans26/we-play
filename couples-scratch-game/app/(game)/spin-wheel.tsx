@@ -14,7 +14,7 @@ import { useSound } from "@/hooks/useSound";
 const { width, height } = Dimensions.get("window");
 const WHEEL_SIZE = width * 0.82;
 const CENTER = WHEEL_SIZE / 2;
-const RIM_WIDTH = 12;
+const RIM_WIDTH = 14;
 const RADIUS = (WHEEL_SIZE / 2) - RIM_WIDTH;
 
 function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
@@ -261,9 +261,9 @@ export default function SpinWheelScreen() {
                   })}
 
                   {/* Outer Rim (Thick Black with Yellow Stroke inside) */}
-                  <Circle cx={CENTER} cy={CENTER} r={WHEEL_SIZE / 2 - 4} fill="none" stroke="#000" strokeWidth={10} />
-                  <Circle cx={CENTER} cy={CENTER} r={WHEEL_SIZE / 2 - 8} fill="none" stroke="#facc15" strokeWidth={3} />
-                  <Circle cx={CENTER} cy={CENTER} r={WHEEL_SIZE / 2} fill="none" stroke="#ffffff" strokeWidth={2} />
+                  <Circle cx={CENTER} cy={CENTER} r={WHEEL_SIZE / 2 - 7} fill="none" stroke="#000" strokeWidth={14} />
+                  <Circle cx={CENTER} cy={CENTER} r={WHEEL_SIZE / 2 - 7} fill="none" stroke="#facc15" strokeWidth={4} />
+                  <Circle cx={CENTER} cy={CENTER} r={WHEEL_SIZE / 2 - 1} fill="none" stroke="#ffffff" strokeWidth={2} />
 
                   {/* Center Knob */}
                   <Circle cx={CENTER} cy={CENTER} r={36} fill="#65a30d" stroke="#fef08a" strokeWidth={4} />
@@ -277,25 +277,8 @@ export default function SpinWheelScreen() {
             {/* Dark Overlay inside the Wheel for Result */}
             <Animated.View pointerEvents="none" style={[styles.wheelOverlay, { opacity: overlayOpacity }]}>
               <View style={styles.overlayInner}>
-                <Svg width={WHEEL_SIZE} height={WHEEL_SIZE} style={StyleSheet.absoluteFill}>
-                  <G origin={`${CENTER}, ${CENTER}`}>
-                    <SvgText
-                      x={CENTER}
-                      y={45}
-                      fontSize={32}
-                      fill="#4ade80"
-                      fontWeight="900"
-                      fontFamily="DynaPuff_700Bold"
-                      textAnchor="middle"
-                    >
-                      YOU WON!
-                    </SvgText>
-                  </G>
-                </Svg>
-
-                <View style={styles.centerResult}>
-                  <Text style={styles.resultMainText}>{result?.label}</Text>
-                </View>
+                <Text style={styles.youWonText}>YOU WON!</Text>
+                <Text style={styles.resultMainText}>{result?.label}</Text>
               </View>
             </Animated.View>
 
@@ -366,8 +349,8 @@ const styles = StyleSheet.create({
   wheelTransform: { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2 },
 
   wheelOverlay: { ...StyleSheet.absoluteFillObject, borderRadius: WHEEL_SIZE / 2, backgroundColor: "rgba(0,0,0,0.85)", zIndex: 30 },
-  overlayInner: { flex: 1, alignItems: "center", justifyContent: "center", position: "relative" },
-  centerResult: { position: "absolute", width: "70%", alignItems: "center" },
+  overlayInner: { flex: 1, alignItems: "center", justifyContent: "center", padding: 20 },
+  youWonText: { color: "#4ade80", fontSize: 28, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: "#166534", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 },
   resultMainText: { color: "#fff", fontSize: 26, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", textShadowColor: "rgba(0,0,0,0.8)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 },
 
   containerBottom: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-evenly", marginTop: 24, paddingHorizontal: 20, zIndex: 20 },
