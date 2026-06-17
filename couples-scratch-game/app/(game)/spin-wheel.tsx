@@ -117,16 +117,20 @@ export default function SpinWheelScreen() {
       ])
     ).start();
 
-    // Sync spin count from server
+  }, []);
+
+  useEffect(() => {
+    // Sync individual spin count from server when turn changes
     const syncCount = async () => {
       if (coupleProfile) {
         const history = await getAllHistory(coupleProfile.partnerAUid, coupleProfile.partnerBUid);
-        const spins = history.filter((h) => h.taskType === "spin_wheel").length;
+        const activeUid = currentTurn === "A" ? coupleProfile.partnerAUid : coupleProfile.partnerBUid;
+        const spins = history.filter((h) => h.taskType === "spin_wheel" && h.userUid === activeUid).length;
         setSpinCount(spins);
       }
     };
     syncCount();
-  }, []);
+  }, [currentTurn, coupleProfile]);
 
   const turnName = currentTurn === "A"
     ? coupleProfile?.partnerAName ?? "Partner A"

@@ -80,10 +80,13 @@ export default function ProfileScreen() {
       setCompletedCount(activeProgress.completedCount);
 
       const history = await getAllHistory(coupleProfile.partnerAUid, coupleProfile.partnerBUid);
-      setImageCount(history.filter((h) => h.taskType === "image").length);
-      setTaskCount(history.filter((h) => h.taskType === "text").length);
-      setSpinCount(history.filter((h) => h.taskType === "spin_wheel").length);
-      setLotteryCount(history.filter((h) => h.taskType === "lottery").length);
+      const activeUid = isPartnerA ? coupleProfile.partnerAUid : coupleProfile.partnerBUid;
+      const myHistory = history.filter(h => h.userUid === activeUid);
+      
+      setImageCount(myHistory.filter((h) => h.taskType === "image").length);
+      setTaskCount(myHistory.filter((h) => h.taskType === "text").length);
+      setSpinCount(myHistory.filter((h) => h.taskType === "spin_wheel").length);
+      setLotteryCount(myHistory.filter((h) => h.taskType === "lottery").length);
     } catch (err) {
       console.error("Failed to load progress", err);
     }
