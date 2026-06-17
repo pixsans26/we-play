@@ -3,7 +3,7 @@ import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Animated, Easing, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 
@@ -31,15 +31,20 @@ export default function ProfileScreen() {
 
   const bgAnim = useRef(new Animated.Value(0)).current;
 
+  useFocusEffect(
+    React.useCallback(() => {
+      loadProgress();
+    }, [coupleProfile, isPartnerA])
+  );
+
   useEffect(() => {
-    loadProgress();
     Animated.loop(
       Animated.sequence([
         Animated.timing(bgAnim, { toValue: 1, duration: 4000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
         Animated.timing(bgAnim, { toValue: 0, duration: 4000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
       ])
     ).start();
-  }, [coupleProfile, isPartnerA]);
+  }, []);
 
   async function loadProgress() {
     if (!coupleProfile) return;
