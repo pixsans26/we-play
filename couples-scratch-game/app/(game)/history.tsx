@@ -616,7 +616,7 @@ export default function HistoryScreen() {
       style={{ flex: 1 }}
     >
       <View
-        style={{ flex: 1, paddingHorizontal: 22, paddingTop: 56, paddingBottom: 120 }}
+        style={{ flex: 1, paddingHorizontal: 22, paddingTop: 56, paddingBottom: 40 }}
       >
         {/* Header */}
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>

@@ -2,7 +2,7 @@ import { env } from "@/lib/env";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View, Text, Pressable, ScrollView, Animated, Easing,
-  ActivityIndicator, useWindowDimensions, LayoutAnimation, Platform, UIManager
+  ActivityIndicator, useWindowDimensions, LayoutAnimation, Platform, UIManager, Image
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -179,6 +179,7 @@ export default function ContentScreen() {
 
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
+  const [branding, setBranding] = useState<any>(null);
   const bgAnim = useRef(new Animated.Value(0)).current;
   const headerScale = useRef(new Animated.Value(0.95)).current;
   const headerOpacity = useRef(new Animated.Value(0)).current;
@@ -203,7 +204,18 @@ export default function ContentScreen() {
 
     async function loadContent() {
       try {
-        const res = await apiFetch(`${BASE_URL}/api/config/public/${key}`);
+        const [res, brandRes] = await Promise.all([
+          apiFetch(`${BASE_URL}/api/config/public/${key}`),
+          apiFetch(`${BASE_URL}/api/config/public/app_branding`)
+        ]);
+
+        if (brandRes.ok) {
+          const brandData = await brandRes.json();
+          if (brandData.value) {
+            try { setBranding(JSON.parse(brandData.value)); } catch {}
+          }
+        }
+
         if (res.ok) {
           const data = await res.json();
           setContent(data.value && data.value.trim() ? data.value : (DEFAULT_CONTENT[key ?? ""] ?? ""));
@@ -342,6 +354,28 @@ export default function ContentScreen() {
               shadowRadius: 12,
               elevation: 4,
             }}>
+              {key === "about" && branding?.logoUrl && (
+                <View style={{ alignItems: "center", marginBottom: 24 }}>
+                  <Image source={{ uri: branding.logoUrl }} style={{ width: 100, height: 100, borderRadius: 20 }} resizeMode="contain" />
+                  <Text style={{ fontSize: 24, fontFamily: "DynaPuff_700Bold", color: isDark ? "#fff" : "#000", marginTop: 12 }}>
+                    {branding.appName || "WePlay"}
+                  </Text>
+                  <Text style={{ fontSize: 14, fontFamily: "Nunito_600SemiBold", color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)", marginTop: 4 }}>
+                    Version {branding.appVersion || "1.0.0"}
+                  </Text>
+                </View>
+              )}
+              {key === "support" && branding?.supportEmail && (
+                <View style={{ marginBottom: 24, backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)", padding: 16, borderRadius: 16, flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: meta.accentColor + "20", alignItems: "center", justifyContent: "center" }}>
+                    <Ionicons name="mail" size={24} color={meta.accentColor} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: isDark ? "#fff" : "#000", fontFamily: "Nunito_700Bold", fontSize: 16 }}>Email Support</Text>
+                    <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)", fontFamily: "Nunito_400Regular", fontSize: 14 }}>{branding.supportEmail}</Text>
+                  </View>
+                </View>
+              )}
               <RenderHtml
                 contentWidth={width - 92}
                 source={{ html: content }}
@@ -410,11 +444,11 @@ export default function ContentScreen() {
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                 <Ionicons name="heart" size={14} color={meta.accentColor} />
                 <Text style={{ color: meta.accentColor, fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>
-                  WePlay
+                  {branding?.appName || "WePlay"}
                 </Text>
               </View>
               <Text style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(15,23,42,0.4)", fontSize: 11, fontFamily: "Nunito_400Regular" }}>
-                Version 1.0.0 • WePlay
+                Version {branding?.appVersion || "1.0.0"} • {branding?.appName || "WePlay"}
               </Text>
             </View>
           )}

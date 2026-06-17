@@ -204,18 +204,18 @@ export default function SettingsScreen() {
             <Ionicons name="arrow-back" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
           </BlurView>
         </Pressable>
-        <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
+        <View>
+          <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
+          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_600SemiBold" }}>Customize your experience</Text>
+        </View>
       </View>
 
       <FadingEdgeMask style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 8, paddingBottom: 120 }}
+          contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 16, paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
-          <View style={{ marginBottom: 32 }}>
-            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1 }}>Customize your experience</Text>
-          </View>
 
           {/* Account */}
           <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 10, marginLeft: 4, letterSpacing: 1 }}>
@@ -346,14 +346,7 @@ export default function SettingsScreen() {
             />
           </View>
 
-          {/* App version */}
-          <View style={{ alignItems: "center", marginTop: 24 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-              <Ionicons name="heart" size={14} color={theme.accent} />
-              <Text style={{ color: theme.accent, fontSize: 13, fontWeight: "800" }}>WePlay</Text>
-            </View>
-            <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 11 }}>Version 1.0.0</Text>
-          </View>
+
 
           {/* Logout & Delete Buttons */}
           <View style={{ alignItems: "center", marginTop: 32, gap: 16 }}>

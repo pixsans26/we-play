@@ -28,6 +28,25 @@ import { auth } from "@/lib/firebase";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, View, Text } from "react-native";
+import packageJson from "../package.json";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+
+const LOCAL_APP_VERSION = packageJson.version || "1.0.0";
+
+function isVersionHigher(latest: string, current: string) {
+  const l = latest.split('.').map(Number);
+  const c = current.split('.').map(Number);
+  for(let i=0; i<Math.max(l.length, c.length); i++) {
+    const lVal = l[i] || 0;
+    const cVal = c[i] || 0;
+    if (lVal > cVal) return true;
+    if (lVal < cVal) return false;
+  }
+  return false;
+}
+
 const FONT_LOAD_TIMEOUT_MS = 3000;
 
 export default function RootLayout() {
@@ -44,10 +63,53 @@ export default function RootLayout() {
   });
 
   const [timedOut, setTimedOut] = useState(false);
+  const [updateRequired, setUpdateRequired] = useState(false);
+  const [latestVersion, setLatestVersion] = useState("");
+  const [brandingAppName, setBrandingAppName] = useState("WePlay");
 
   const setUser = useAuthStore((s) => s.setUser);
   const setSessionToken = useAuthStore((s) => s.setSessionToken);
   const setIsLoading = useAuthStore((s) => s.setIsLoading);
+  
+  const { expoPushToken } = usePushNotifications();
+  const sessionToken = useAuthStore((s) => s.sessionToken);
+  const user = useAuthStore((s) => s.user);
+
+  useEffect(() => {
+    if (user && sessionToken && expoPushToken) {
+      fetch(`${env.EXPO_PUBLIC_API_URL}/api/users/push-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({
+          userUid: user.uid,
+          pushToken: expoPushToken,
+        }),
+      }).catch(console.error);
+    }
+  }, [user, sessionToken, expoPushToken]);
+
+  useEffect(() => {
+    async function checkVersion() {
+      try {
+        const res = await fetch(`${env.EXPO_PUBLIC_API_URL}/api/config/public/app_branding`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.value) {
+            const parsed = JSON.parse(data.value);
+            if (parsed.appName) setBrandingAppName(parsed.appName);
+            if (parsed.appVersion && isVersionHigher(parsed.appVersion, LOCAL_APP_VERSION)) {
+              setLatestVersion(parsed.appVersion);
+              setUpdateRequired(true);
+            }
+          }
+        }
+      } catch (e) {}
+    }
+    checkVersion();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -111,10 +173,26 @@ export default function RootLayout() {
 
   const fontsReady = fontsLoaded || fontError !== null || timedOut;
 
-  // While fonts load, send user to /splash which shows the animated splash screen.
-  // Once fonts are ready the splash itself will navigate onward.
   if (!fontsReady) {
     return <Slot />;
+  }
+
+  if (updateRequired) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#150025", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <Ionicons name="cloud-download-outline" size={80} color="#f953c6" style={{ marginBottom: 20 }} />
+        <Text style={{ fontFamily: "DynaPuff_700Bold", fontSize: 28, color: "#fff", marginBottom: 12, textAlign: "center" }}>Update Available</Text>
+        <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 16, color: "rgba(255,255,255,0.7)", textAlign: "center", marginBottom: 32 }}>
+          A new version of {brandingAppName} ({latestVersion}) is available. Please update to continue.
+        </Text>
+        <Pressable 
+          style={{ backgroundColor: "#f953c6", paddingHorizontal: 32, paddingVertical: 16, borderRadius: 30 }}
+          onPress={() => alert("Redirect to App Store / Play Store")}
+        >
+          <Text style={{ fontFamily: "Nunito_700Bold", color: "#fff", fontSize: 18 }}>Update Now</Text>
+        </Pressable>
+      </View>
+    );
   }
 
   return <Slot />;

@@ -75,6 +75,7 @@ export const couple = pgTable("couple", {
 export const userProgress = pgTable("user_progress", {
   id: serial("id").primaryKey(),
   userUid: text("user_uid").notNull().unique(),
+  pushToken: text("push_token"),
   scratchCount: integer("scratch_count").default(0),
   completedCount: integer("completed_count").default(0),
   currentLevel: integer("current_level").default(1),

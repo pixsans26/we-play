@@ -247,11 +247,10 @@ export default function AppContentPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setPreview((p) => !p)}
-            className={`flex items-center gap-2 font-medium px-4 py-2.5 rounded-xl border transition-all text-sm ${
-              preview
+            className={`flex items-center gap-2 font-medium px-4 py-2.5 rounded-xl border transition-all text-sm ${preview
                 ? "bg-slate-800 text-white border-slate-800"
                 : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
-            }`}
+              }`}
           >
             {preview ? <Edit3 className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {preview ? "Edit" : "Preview"}
@@ -294,11 +293,10 @@ export default function AppContentPage() {
               <button
                 key={item.key}
                 onClick={() => { setActiveTab(item.key); setSuccessMsg(""); setErrorMsg(""); setPreview(false); }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-left relative ${
-                  isActive
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-left relative ${isActive
                     ? `${item.activeBg} text-white shadow-md`
                     : `text-slate-600 hover:${item.bgLight} hover:${item.textColor}`
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -309,13 +307,12 @@ export default function AppContentPage() {
                 </div>
                 {hasContent && (
                   <div
-                    className={`w-2 h-2 rounded-full shrink-0 ${
-                      isActive
+                    className={`w-2 h-2 rounded-full shrink-0 ${isActive
                         ? "bg-white/60"
                         : savedKeys.has(item.key)
-                        ? "bg-emerald-400"
-                        : "bg-amber-400"
-                    }`}
+                          ? "bg-emerald-400"
+                          : "bg-amber-400"
+                      }`}
                     title={savedKeys.has(item.key) ? "Custom saved" : "Showing app default"}
                   />
                 )}
@@ -339,24 +336,23 @@ export default function AppContentPage() {
         {/* Right editor/preview pane */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Pane header */}
-          <div className={`flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r ${activeMeta.gradient} bg-opacity-5`}>
+          <div className={`flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-gradient-to-r ${activeMeta.gradient}`}>
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${activeMeta.gradient} flex items-center justify-center shadow-sm`}>
-                <activeMeta.icon className="w-4 h-4 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shadow-sm backdrop-blur-sm border border-white/10">
+                <activeMeta.icon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-800">
+                <h2 className="text-lg font-bold text-white tracking-wide">
                   {preview ? "Preview:" : "Editing:"} {activeMeta.label}
                 </h2>
-                <p className="text-xs text-slate-500">{activeMeta.description}</p>
+                <p className="text-sm text-white/80 font-medium">{activeMeta.description}</p>
               </div>
             </div>
-            <div className={`text-xs font-semibold px-3 py-1.5 rounded-lg ${
-              savedKeys.has(activeTab)
-                ? `${activeMeta.bgLight} ${activeMeta.textColor}`
-                : "bg-amber-50 text-amber-700"
-            }`}>
-              {savedKeys.has(activeTab) ? "Custom saved" : "Showing app default"}
+            <div className={`text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm ${savedKeys.has(activeTab)
+                ? "bg-white/20 text-white border border-white/30 backdrop-blur-sm"
+                : "bg-white text-amber-500 shadow-md"
+              }`}>
+              {savedKeys.has(activeTab) ? "✓ Custom saved" : "Showing app default"}
             </div>
           </div>
 

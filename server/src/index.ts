@@ -968,6 +968,79 @@ app.post("/api/config/:key", authenticateToken, async (req: Request, res: Respon
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+app.post("/api/users/push-token", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { userUid, pushToken } = req.body;
+    if (!userUid || !pushToken) return res.status(400).json({ error: "Missing userUid or pushToken" });
+
+    const [existing] = await db.select().from(userProgress).where(eq(userProgress.userUid, userUid));
+    if (existing) {
+      await db.update(userProgress).set({ pushToken, updatedAt: new Date() }).where(eq(userProgress.userUid, userUid));
+      res.json({ success: true });
+    } else {
+      await db.insert(userProgress).values({ userUid, pushToken, scratchCount: 0, completedCount: 0, currentLevel: 1 });
+      res.json({ success: true });
+    }
+  } catch (err) {
+    console.error("[POST /api/users/push-token]", err);
+    res.status(500).json({ error: "Failed to save push token" });
+  }
+});
+
+app.post("/api/notifications/send", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userPayload = (req as any).user;
+    if (userPayload.role !== "superadmin" && userPayload.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const { title, body } = req.body;
+    if (!title || !body) return res.status(400).json({ error: "Missing title or body" });
+
+    const allProgress = await db.select({ pushToken: userProgress.pushToken }).from(userProgress);
+    const tokens = allProgress.map(p => p.pushToken).filter(t => t && t.startsWith("ExponentPushToken"));
+    const uniqueTokens = Array.from(new Set(tokens));
+
+    if (uniqueTokens.length === 0) {
+      return res.status(400).json({ error: "No users with registered push tokens found" });
+    }
+
+    const messages = uniqueTokens.map(token => ({
+      to: token,
+      sound: 'default',
+      title,
+      body,
+    }));
+
+    const chunks = [];
+    for (let i = 0; i < messages.length; i += 100) {
+      chunks.push(messages.slice(i, i + 100));
+    }
+
+    let successCount = 0;
+    for (const chunk of chunks) {
+      const expoRes = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Accept-encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(chunk),
+      });
+      if (expoRes.ok) successCount += chunk.length;
+    }
+
+    res.json({ success: true, count: successCount });
+  } catch (err) {
+    console.error("[POST /api/notifications/send]", err);
+    res.status(500).json({ error: "Failed to send notifications" });
+  }
+});
+
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("[Unhandled Error]", err.message);

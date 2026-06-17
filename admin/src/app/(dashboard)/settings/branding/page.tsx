@@ -10,6 +10,8 @@ const API = `${env.NEXT_PUBLIC_API_URL}/api/config/app_branding`;
 
 interface BrandingConfig {
   appName: string;
+  appVersion: string;
+  supportEmail: string;
   primaryColor: string;
   secondaryColor: string;
   logoUrl: string;
@@ -17,6 +19,8 @@ interface BrandingConfig {
 
 const defaultConfig: BrandingConfig = {
   appName: "WePlay",
+  appVersion: "1.0.0",
+  supportEmail: "support@weplay.app",
   primaryColor: "#5e51d9",
   secondaryColor: "#ffffff",
   logoUrl: "",
@@ -118,21 +122,47 @@ export default function BrandingSettings() {
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-8">
         
-        {/* App Name Section */}
+        {/* App Identity Section */}
         <div>
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Type className="w-4 h-4 text-slate-400" /> Identity
+            <Type className="w-4 h-4 text-slate-400" /> Identity & Contact
           </h3>
-          <div className="max-w-md">
-            <label className="text-xs font-semibold text-slate-500 mb-2 block">App Name</label>
-            <input 
-              type="text" 
-              value={config.appName}
-              onChange={(e) => updateField('appName', e.target.value)}
-              placeholder="e.g. WePlay"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#5e51d9] focus:ring-1 focus:ring-[#5e51d9] transition-all"
-            />
-            <p className="text-xs text-slate-400 mt-2">This name will appear on the splash screen and headers.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="text-xs font-semibold text-slate-500 mb-2 block">App Name</label>
+              <input 
+                type="text" 
+                value={config.appName}
+                onChange={(e) => updateField('appName', e.target.value)}
+                placeholder="e.g. WePlay"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#5e51d9] focus:ring-1 focus:ring-[#5e51d9] transition-all"
+              />
+              <p className="text-xs text-slate-400 mt-2">Appears on splash screen and headers.</p>
+            </div>
+            
+            <div>
+              <label className="text-xs font-semibold text-slate-500 mb-2 block">App Version</label>
+              <input 
+                type="text" 
+                value={config.appVersion}
+                onChange={(e) => updateField('appVersion', e.target.value)}
+                placeholder="e.g. 1.0.0"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#5e51d9] focus:ring-1 focus:ring-[#5e51d9] transition-all"
+              />
+              <p className="text-xs text-slate-400 mt-2">Displayed in the About page.</p>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-xs font-semibold text-slate-500 mb-2 block">Support Email</label>
+              <input 
+                type="email" 
+                value={config.supportEmail}
+                onChange={(e) => updateField('supportEmail', e.target.value)}
+                placeholder="e.g. support@weplay.app"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#5e51d9] focus:ring-1 focus:ring-[#5e51d9] transition-all"
+              />
+              <p className="text-xs text-slate-400 mt-2">Dedicated email shown on the Support page.</p>
+            </div>
           </div>
         </div>
 

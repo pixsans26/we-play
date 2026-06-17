@@ -11,7 +11,7 @@ import { getAvatarUrl, apiFetch } from "@/lib/apiClient";
 import { env } from "@/lib/env";
 
 // Screens that should hide the tab bar
-const HIDDEN_TAB_SCREENS = ["/image-scratch", "/task-scratch", "/history", "/spin-wheel", "/lottery"];
+const HIDDEN_TAB_SCREENS = ["/image-scratch", "/task-scratch", "/history", "/spin-wheel", "/lottery", "/content/", "/edit-profile"];
 
 type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 

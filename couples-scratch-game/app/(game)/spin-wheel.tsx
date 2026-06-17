@@ -207,7 +207,7 @@ export default function SpinWheelScreen() {
     setResult(null);
     overlayOpacity.setValue(0);
     switchTurn();
-    router.replace("/(game)/");
+    router.replace("/");
   };
 
   const rotateInterpolate = rotation.interpolate({
