@@ -201,6 +201,13 @@ export default function SpinWheelScreen() {
 
       <View style={styles.contentArea}>
         
+        {/* Who is spinning */}
+        <View style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
+          <Text style={{ color: "#facc15", fontSize: 14, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" }}>
+            {turnName} is spinning!
+          </Text>
+        </View>
+
         {/* The "spin the wheel" Sparkle Title */}
         <View style={styles.titleWrapper}>
           <Text style={styles.mainTitle}>spin</Text>
@@ -242,19 +249,6 @@ export default function SpinWheelScreen() {
                     return (
                       <G key={`${task.id}-${i}`} rotation={i * ANGLE_PER_SLICE} origin={`${CENTER}, ${CENTER}`}>
                         <Path d={slicePath} fill={color} stroke="#000000" strokeWidth={1} />
-                        <G rotation={-90} origin={`${CENTER + RADIUS * 0.65}, ${CENTER}`}>
-                          <SvgText
-                            x={CENTER + RADIUS * 0.65}
-                            y={CENTER}
-                            fontSize={14}
-                            fill="#000000"
-                            fontWeight="800"
-                            textAnchor="middle"
-                            alignmentBaseline="middle"
-                          >
-                            {task.label ? task.label.substring(0, 15) : "🎯"}
-                          </SvgText>
-                        </G>
                       </G>
                     );
                   })}
