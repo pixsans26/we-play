@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Plus, Image as ImageIcon, Loader2, X, Trash2, Edit2, Search, Filter } from "lucide-react";
 import ConfirmModal from "@/components/ConfirmModal";
+import ModalPortal from "@/components/ModalPortal";
 
 interface ImageTask {
   id: string; imageSource: string; title: string;
@@ -152,7 +153,8 @@ export default function ImageTasksPage() {
 
       {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalPortal>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
               <h2 className="text-lg font-bold text-slate-800">{editing ? "Edit Image Task" : "Upload Image Task"}</h2>
@@ -204,6 +206,7 @@ export default function ImageTasksPage() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {loading ? (

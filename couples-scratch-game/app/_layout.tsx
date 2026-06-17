@@ -3,6 +3,10 @@ import { env } from "@/lib/env";
 import { useEffect, useState } from "react";
 import { LogBox } from "react-native";
 import { Slot, useRouter } from "expo-router";
+import * as SplashScreen from 'expo-splash-screen';
+
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
 // Ignore all log warnings to keep the UI clean
 LogBox.ignoreAllLogs();
@@ -171,10 +175,18 @@ export default function RootLayout() {
     };
   }, [setUser, setIsLoading, setSessionToken]);
 
+  const authIsLoading = useAuthStore((s) => s.isLoading);
   const fontsReady = fontsLoaded || fontError !== null || timedOut;
+  const appIsReady = fontsReady && !authIsLoading;
 
-  if (!fontsReady) {
-    return <Slot />;
+  useEffect(() => {
+    if (appIsReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
   }
 
   if (updateRequired) {

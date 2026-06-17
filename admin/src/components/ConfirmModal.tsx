@@ -1,6 +1,7 @@
 "use client";
 
 import { X, AlertTriangle } from "lucide-react";
+import ModalPortal from "@/components/ModalPortal";
 
 interface Props {
   isOpen: boolean;
@@ -24,7 +25,8 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+    <ModalPortal>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
       <div 
         className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200"
       >
@@ -52,5 +54,6 @@ export default function ConfirmModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

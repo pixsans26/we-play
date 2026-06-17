@@ -94,3 +94,24 @@ export const taskHistory = pgTable("task_history", {
   completed: boolean("completed").notNull().default(false),
   timeTaken: integer("time_taken"),
 });
+
+export const cycleTracking = pgTable("cycle_tracking", {
+  id: serial("id").primaryKey(),
+  coupleId: integer("couple_id").notNull().unique(),
+  averageCycleLength: integer("average_cycle_length").default(28).notNull(),
+  averagePeriodLength: integer("average_period_length").default(5).notNull(),
+  lastPeriodStart: text("last_period_start"),
+  lastPeriodEnd: text("last_period_end"),
+  isLocked: boolean("is_locked").default(false).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const cycleHistory = pgTable("cycle_history", {
+  id: serial("id").primaryKey(),
+  coupleId: integer("couple_id").notNull(),
+  periodStart: text("period_start").notNull(),
+  periodEnd: text("period_end"),
+  cycleLength: integer("cycle_length").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+

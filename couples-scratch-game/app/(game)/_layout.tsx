@@ -11,7 +11,7 @@ import { getAvatarUrl, apiFetch } from "@/lib/apiClient";
 import { env } from "@/lib/env";
 
 // Screens that should hide the tab bar
-const HIDDEN_TAB_SCREENS = ["/image-scratch", "/task-scratch", "/history", "/spin-wheel", "/lottery", "/content/", "/edit-profile"];
+const HIDDEN_TAB_SCREENS = ["/image-scratch", "/task-scratch", "/spin-wheel", "/lottery", "/content/", "/edit-profile", "/cycle-sync"];
 
 type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -210,14 +210,20 @@ export default function GameLayout() {
   const myAvatarUrl = isPartnerA ? coupleProfile.partnerAAvatar : coupleProfile.partnerBAvatar;
 
   const TABS: TabConfig[] = [
+    { route: "/(game)/history", label: "History", icon: "time" },
+    {
+      route: "/(game)/partner",
+      label: "Partner",
+      icon: "heart",
+    },
     { route: "/(game)", label: "Home", icon: "home" },
+    { route: "/(game)/settings", label: "Settings", icon: "settings-outline" },
     {
       route: "/(game)/profile",
       label: partnerFirstName,
       icon: getProfileIcon(myGender) as IoniconName,
       imageUrl: getAvatarUrl(myAvatarUrl),
     },
-    { route: "/(game)/settings", label: "Settings", icon: "settings-outline" },
   ];
 
   // Check if current screen should hide tabs
@@ -233,7 +239,7 @@ export default function GameLayout() {
           style={[
             styles.navContainer,
             {
-              backgroundColor: isDark ? "rgba(30,0,53,0.65)" : "rgba(255,255,255,0.65)",
+              backgroundColor: isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(30, 58, 138, 0.85)", // dark blue
               overflow: "hidden",
             },
           ]}

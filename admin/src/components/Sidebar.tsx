@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Image, RotateCcw, Heart,
-  Users, Settings, LogOut, HelpCircle, MessageSquare, History, FileEdit, Bell
+  Users, Settings, LogOut, HelpCircle, MessageSquare, History, FileEdit, Bell, Activity
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +19,7 @@ const navItems = [
 ];
 
 const secondaryNav = [
+  { href: "/cycles", label: "Cycle Analytics", icon: Activity },
   { href: "/notifications", label: "Push Notifications", icon: Bell },
   { href: "/history", label: "Task History", icon: History },
   { href: "/content", label: "App Content", icon: FileEdit },

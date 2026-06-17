@@ -48,6 +48,20 @@ export function usePushNotifications() {
   return { expoPushToken, notification };
 }
 
+export async function scheduleLocalNotification(title: string, body: string, secondsFromNow: number = 60) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title,
+      body,
+      sound: true,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: secondsFromNow,
+    },
+  });
+}
+
 async function registerForPushNotificationsAsync() {
   let token;
 

@@ -8,7 +8,11 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db/client";
-import { textTasks, imageTasks, spinWheelItems, lotteryItems, adminUsers, couple, userProgress, taskHistory, appConfig } from "./db/schema";
+import { textTasks, imageTasks, spinWheelItems, lotteryItems, adminUsers, couple, userProgress,  taskHistory,
+  cycleTracking,
+  cycleHistory,
+  appConfig,
+} from "./db/schema";
 import { sql } from "drizzle-orm";
 
 const app = express();
@@ -547,6 +551,38 @@ app.delete("/api/tasks/lottery/:id", authenticateToken, async (req: Request, res
 
 // Removed api/profile because it was just returning all admin profiles which isn't used
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CYCLE ANALYTICS (ADMIN)
+// ─────────────────────────────────────────────────────────────────────────────
+
+app.get("/api/admin/cycles", authenticateToken, async (_req: Request, res: Response) => {
+  try {
+    const cycles = await db
+      .select({
+        couple: couple,
+        cycleTracking: cycleTracking,
+      })
+      .from(cycleTracking)
+      .leftJoin(couple, eq(cycleTracking.coupleId, couple.id));
+    res.json(cycles);
+  } catch (err) {
+    console.error("[GET /api/admin/cycles]", err);
+    res.status(500).json({ error: "Failed to fetch cycle analytics" });
+  }
+});
+
+app.get("/api/admin/cycles/:coupleId/history", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const coupleId = Number(req.params.coupleId);
+    if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
+
+    const history = await db.select().from(cycleHistory).where(eq(cycleHistory.coupleId, coupleId)).orderBy(sql`${cycleHistory.createdAt} DESC`);
+    res.json(history);
+  } catch (err) {
+    console.error("[GET /api/admin/cycles/:coupleId/history]", err);
+    res.status(500).json({ error: "Failed to fetch cycle history" });
+  }
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HISTORY
@@ -905,6 +941,85 @@ app.post("/api/progress", authenticateToken, async (req: Request, res: Response)
     res.status(500).json({ error: "Failed to save user progress" });
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CYCLE TRACKING
+// ─────────────────────────────────────────────────────────────────────────────
+app.get("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const coupleId = Number(req.params.coupleId);
+    if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
+
+    const [existing] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+    if (!existing) {
+      // Return default values
+      return res.json({
+        coupleId,
+        averageCycleLength: 28,
+        averagePeriodLength: 5,
+        lastPeriodStart: null,
+        lastPeriodEnd: null,
+        isLocked: false,
+      });
+    }
+    res.json(existing);
+  } catch (err) {
+    console.error("[GET /api/cycle]", err);
+    res.status(500).json({ error: "Failed to fetch cycle data" });
+  }
+});
+
+app.put("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const coupleId = Number(req.params.coupleId);
+    if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
+
+    const { averageCycleLength, averagePeriodLength, lastPeriodStart, lastPeriodEnd, isLocked } = req.body;
+
+    const [existing] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+
+    if (existing) {
+      // If the period start date changed, log the previous cycle for analytics
+      if (existing.lastPeriodStart && lastPeriodStart && existing.lastPeriodStart !== lastPeriodStart) {
+        await db.insert(cycleHistory).values({
+          coupleId,
+          periodStart: existing.lastPeriodStart,
+          periodEnd: existing.lastPeriodEnd,
+          cycleLength: existing.averageCycleLength,
+        });
+      }
+
+      const [updated] = await db.update(cycleTracking)
+        .set({
+          averageCycleLength: averageCycleLength ?? existing.averageCycleLength,
+          averagePeriodLength: averagePeriodLength ?? existing.averagePeriodLength,
+          lastPeriodStart: lastPeriodStart !== undefined ? lastPeriodStart : existing.lastPeriodStart,
+          lastPeriodEnd: lastPeriodEnd !== undefined ? lastPeriodEnd : existing.lastPeriodEnd,
+          isLocked: isLocked !== undefined ? isLocked : existing.isLocked,
+          updatedAt: new Date(),
+        })
+        .where(eq(cycleTracking.coupleId, coupleId))
+        .returning();
+      res.json(updated);
+    } else {
+      const [inserted] = await db.insert(cycleTracking)
+        .values({
+          coupleId,
+          averageCycleLength: averageCycleLength ?? 28,
+          averagePeriodLength: averagePeriodLength ?? 5,
+          lastPeriodStart: lastPeriodStart ?? null,
+          lastPeriodEnd: lastPeriodEnd ?? null,
+          isLocked: isLocked ?? false,
+        })
+        .returning();
+      res.status(201).json(inserted);
+    }
+  } catch (err) {
+    console.error("[PUT /api/cycle]", err);
+    res.status(500).json({ error: "Failed to update cycle data" });
+  }
+});
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // APP CONFIG (CONTENT MANAGEMENT)

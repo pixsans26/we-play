@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import DataTable from "@/components/DataTable";
+import ConfirmModal from "@/components/ConfirmModal";
+import ModalPortal from "@/components/ModalPortal";
 import { Plus, FileText, Loader2, X, Filter, Search } from "lucide-react";
 import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css";
@@ -144,7 +146,8 @@ export default function TextTasksPage() {
 
       {/* Add/Edit Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalPortal>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50 shrink-0">
               <h2 className="text-lg font-bold text-slate-800">{editing ? "Edit Text Task" : "Add New Text Task"}</h2>
@@ -219,6 +222,7 @@ export default function TextTasksPage() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {loading ? (

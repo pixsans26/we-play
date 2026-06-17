@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Pressable, ScrollView, Animated, Easing, Image } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, Easing, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -221,11 +221,6 @@ export default function ProfileScreen() {
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
-                    {coupleProfile?.partnerAGender?.trim().toLowerCase() === "female" && (
-                      <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                        <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
-                      </View>
-                    )}
                   </View>
                   <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
                     {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
@@ -239,22 +234,6 @@ export default function ProfileScreen() {
                   </View>
                 )}
               </View>
-              {coupleProfile?.partnerAGender?.trim().toLowerCase() === "female" && (
-                <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
-                  <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
-                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
-                      <Ionicons name="calendar" size={16} color="#ec4899" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
-                      <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(76,5,25,0.6)", fontSize: 11, marginTop: 2, fontWeight: "600" }}>Track your cycle</Text>
-                    </View>
-                    <View style={{ backgroundColor: "rgba(236,72,153,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ color: "#ec4899", fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Coming Soon</Text>
-                    </View>
-                  </View>
-                </View>
-              )}
             </BlurView>
           </View>
 
@@ -272,11 +251,6 @@ export default function ProfileScreen() {
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
-                    {coupleProfile?.partnerBGender?.trim().toLowerCase() === "female" && (
-                      <View style={{ backgroundColor: "rgba(236,72,153,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                        <Text style={{ color: "#ec4899", fontSize: 9, fontWeight: "800", textTransform: "uppercase" }}>Period Calendar</Text>
-                      </View>
-                    )}
                   </View>
                   <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(76,5,25,0.7)", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
                     {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
@@ -290,22 +264,6 @@ export default function ProfileScreen() {
                   </View>
                 )}
               </View>
-              {coupleProfile?.partnerBGender?.trim().toLowerCase() === "female" && (
-                <View style={{ marginTop: 16, borderRadius: 16, overflow: "hidden" }}>
-                  <View style={{ padding: 12, flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "rgba(236,72,153,0.1)" }}>
-                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(236,72,153,0.2)", alignItems: "center", justifyContent: "center" }}>
-                      <Ionicons name="calendar" size={16} color="#ec4899" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Period Calendar</Text>
-                      <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(76,5,25,0.6)", fontSize: 11, marginTop: 2, fontWeight: "600" }}>Track your cycle</Text>
-                    </View>
-                    <View style={{ backgroundColor: "rgba(236,72,153,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ color: "#ec4899", fontSize: 10, fontWeight: "800", textTransform: "uppercase" }}>Coming Soon</Text>
-                    </View>
-                  </View>
-                </View>
-              )}
             </BlurView>
           </View>
 

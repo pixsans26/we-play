@@ -3,6 +3,7 @@ import { env } from "@/lib/env";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import ModalPortal from "@/components/ModalPortal";
 import { Loader2, Search, History, Clock, CheckCircle2, XCircle } from "lucide-react";
 
 interface TaskHistory {
@@ -171,7 +172,8 @@ export default function HistoryPage() {
 
       {/* View Record Modal */}
       {selectedRecord && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalPortal>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -256,6 +258,7 @@ export default function HistoryPage() {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

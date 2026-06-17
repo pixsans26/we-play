@@ -20,6 +20,7 @@ import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { HistoryEntry, CoupleProfile, Task, ImageTask } from "@/types";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
+import { BlurView } from "@/components/CustomBlurView";
 
 // ---------------------------------------------------------------------------
 // Helpers (outside component for stable references)
@@ -88,6 +89,7 @@ export default function HistoryScreen() {
 
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
   const [filter, setFilter] = useState<"all" | "scratch" | "lottery" | "spin_wheel">("all");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Load combined history on mount / when coupleProfile changes
   useEffect(() => {
@@ -619,18 +621,28 @@ export default function HistoryScreen() {
         style={{ flex: 1, paddingHorizontal: 22, paddingTop: 56, paddingBottom: 40 }}
       >
         {/* Header */}
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
-          <Pressable
-            onPress={() => router.back()}
-            style={{ width: 40, height: 40, borderRadius: 32, overflow: "hidden", backgroundColor: theme.glass.bg, borderWidth: 1, borderColor: theme.glass.border, alignItems: "center", justifyContent: "center", marginRight: 14 }}
-          >
-            <Ionicons name="arrow-back" size={20} color={theme.card.text} />
-          </Pressable>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, zIndex: 10 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>Our History</Text>
             <Text style={{ color: theme.card.subtext, fontSize: 13, marginTop: 1 }}>Your past moments</Text>
           </View>
-          <Ionicons name="heart" size={24} color="#ec4899" />
+          <View style={{ position: "relative" }}>
+            <Pressable onPress={() => setIsMenuOpen(!isMenuOpen)} style={{ padding: 8 }}>
+              <Ionicons name="ellipsis-vertical" size={24} color={theme.card.text} />
+            </Pressable>
+            {isMenuOpen && (
+              <>
+                {/* Backdrop to close menu */}
+                <Pressable onPress={() => setIsMenuOpen(false)} style={{ position: "absolute", top: -100, right: -100, bottom: -1000, left: -1000, zIndex: 9 }} />
+                <BlurView intensity={80} tint={isDark ? "dark" : "light"} style={{ position: "absolute", top: 40, right: 0, backgroundColor: isDark ? "rgba(30,0,53,0.85)" : "rgba(255,255,255,0.85)", borderRadius: 12, padding: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5, minWidth: 150, zIndex: 10, overflow: "hidden" }}>
+                  <Pressable onPress={() => { setIsMenuOpen(false); handleReset(); }} style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 8 }}>
+                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                    <Text style={{ color: "#ef4444", fontSize: 14, fontWeight: "bold" }}>Reset History</Text>
+                  </Pressable>
+                </BlurView>
+              </>
+            )}
+          </View>
         </View>
 
         {/* Filter Tabs */}
@@ -674,27 +686,6 @@ export default function HistoryScreen() {
           />
         </FadingEdgeMask>
 
-        {/* Reset Button */}
-        <Pressable
-          onPress={handleReset}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            marginTop: 16,
-            borderRadius: 999, overflow: "hidden",
-            backgroundColor: theme.glass.bg,
-            borderWidth: 1,
-            borderColor: theme.glass.border,
-            paddingVertical: 16,
-          }}
-        >
-          <Ionicons name="trash-outline" size={20} color="#ef4444" />
-          <Text style={{ color: "#ef4444", fontSize: 16, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" }}>
-            Reset History
-          </Text>
-        </Pressable>
       </View>
 
       {/* Detail Modal */}
