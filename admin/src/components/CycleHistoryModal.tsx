@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { X, Calendar as CalendarIcon, Clock, Activity, Loader2 } from "lucide-react";
 
 interface CycleHistoryRecord {
@@ -21,23 +22,27 @@ interface Props {
 }
 
 export default function CycleHistoryModal({ coupleId, coupleName, isOpen, onClose }: Props) {
+  const { data: session } = useSession();
+  const token = session?.user ? (session.user as any).backendToken : "";
+
   const [history, setHistory] = useState<CycleHistoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && token) {
       fetchHistory();
     }
-  }, [isOpen, coupleId]);
+  }, [isOpen, coupleId, token]);
 
   const fetchHistory = async () => {
+    if (!token) return;
     setLoading(true);
     setError("");
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cycles/${coupleId}/history`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (!res.ok) throw new Error("Failed to fetch history");

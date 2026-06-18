@@ -26,6 +26,7 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const setCoupleProfile = useAuthStore((s) => s.setCoupleProfile);
+  const isPartnerA = useAuthStore((s) => s.isPartnerA);
   const isDark = useThemeStore((s) => s.isDark);
   const theme = getTheme(isDark);
 
@@ -153,52 +154,121 @@ export default function EditProfileScreen() {
         <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
           {/* Partner A */}
           <View style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.6)", borderRadius: 24, padding: 20, marginBottom: 20 }}>
-            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "800", marginBottom: 16 }}>PARTNER A (YOU)</Text>
+            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "800", marginBottom: 16 }}>
+              {isPartnerA ? "PARTNER A (YOU)" : "PARTNER A"}
+            </Text>
 
             <View style={{ alignItems: "center", marginBottom: 12 }}>
-              <Pressable onPress={() => { setActivePartnerAvatar("A"); setAvatarPickerVisible(true); }} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+              <Pressable
+                onPress={() => {
+                  if (isPartnerA) {
+                    setActivePartnerAvatar("A");
+                    setAvatarPickerVisible(true);
+                  }
+                }}
+                style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
+              >
                 {avatarA ? (
                   <Image source={{ uri: getAvatarUrl(avatarA) as string }} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
                 ) : (
                   <Ionicons name="camera-outline" size={32} color={isDark ? "rgba(255,255,255,0.5)" : "#9333ea"} />
                 )}
               </Pressable>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 8 }}>Tap to change</Text>
+              {isPartnerA && (
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 8 }}>Tap to change</Text>
+              )}
             </View>
 
             <View style={{ gap: 12 }}>
               <View>
                 <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Name</Text>
-                <TextInput value={nameA} onChangeText={setNameA} placeholder="Your Name" placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#0f172a", paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16, fontSize: 16, fontWeight: "600" }} />
+                <TextInput
+                  value={nameA}
+                  onChangeText={setNameA}
+                  editable={isPartnerA}
+                  placeholder="Your Name"
+                  placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
+                  style={{
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                    color: isPartnerA ? (isDark ? "#fff" : "#0f172a") : (isDark ? "rgba(255,255,255,0.4)" : "rgba(15,23,42,0.4)"),
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                    borderRadius: 16,
+                    fontSize: 16,
+                    fontWeight: "600"
+                  }}
+                />
               </View>
               <View>
                 <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Gender</Text>
-                <TextInput value={genderA} onChangeText={setGenderA} placeholder="Male / Female" placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#0f172a", paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16, fontSize: 16, fontWeight: "600" }} />
+                <TextInput
+                  value={genderA}
+                  onChangeText={setGenderA}
+                  editable={isPartnerA}
+                  placeholder="Male / Female"
+                  placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
+                  style={{
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                    color: isPartnerA ? (isDark ? "#fff" : "#0f172a") : (isDark ? "rgba(255,255,255,0.4)" : "rgba(15,23,42,0.4)"),
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                    borderRadius: 16,
+                    fontSize: 16,
+                    fontWeight: "600"
+                  }}
+                />
               </View>
               <View>
                 <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Likes (comma separated)</Text>
-                <TextInput value={likesA} onChangeText={setLikesA} placeholder="e.g. Coffee, Movies, Hiking" placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#0f172a", paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16, fontSize: 16, fontWeight: "600" }} />
+                <TextInput
+                  value={likesA}
+                  onChangeText={setLikesA}
+                  editable={isPartnerA}
+                  placeholder="e.g. Coffee, Movies, Hiking"
+                  placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
+                  style={{
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                    color: isPartnerA ? (isDark ? "#fff" : "#0f172a") : (isDark ? "rgba(255,255,255,0.4)" : "rgba(15,23,42,0.4)"),
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                    borderRadius: 16,
+                    fontSize: 16,
+                    fontWeight: "600"
+                  }}
+                />
               </View>
             </View>
           </View>
 
           {/* Partner B */}
           <View style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.6)", borderRadius: 24, padding: 20, marginBottom: 24 }}>
-            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "800", marginBottom: 16 }}>PARTNER B</Text>
+            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "800", marginBottom: 16 }}>
+              {!isPartnerA ? "PARTNER B (YOU)" : "PARTNER B"}
+            </Text>
 
             <View style={{ alignItems: "center", marginBottom: 12 }}>
-              <Pressable onPress={() => { setActivePartnerAvatar("B"); setAvatarPickerVisible(true); }} style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+              <Pressable
+                onPress={() => {
+                  if (!isPartnerA) {
+                    setActivePartnerAvatar("B");
+                    setAvatarPickerVisible(true);
+                  }
+                }}
+                style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
+              >
                 {avatarB ? (
                   <Image source={{ uri: getAvatarUrl(avatarB) as string }} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
                 ) : (
                   <Ionicons name="camera-outline" size={32} color={isDark ? "rgba(255,255,255,0.5)" : "#9333ea"} />
                 )}
               </Pressable>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 8 }}>Tap to change</Text>
+              {!isPartnerA && (
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 8 }}>Tap to change</Text>
+              )}
             </View>
 
             <View style={{ gap: 12 }}>
-              {isPartnerBPending && (
+              {isPartnerBPending && isPartnerA && (
                 <View>
                   <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Partner Email to Link (Optional)</Text>
                   <TextInput value={partnerBEmail} onChangeText={setPartnerBEmail} placeholder="partner@email.com" keyboardType="email-address" autoCapitalize="none" placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#0f172a", paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16, fontSize: 16, fontWeight: "600" }} />
@@ -207,15 +277,60 @@ export default function EditProfileScreen() {
               )}
               <View>
                 <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Name</Text>
-                <TextInput value={nameB} onChangeText={setNameB} placeholder="Partner Name" placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#0f172a", paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16, fontSize: 16, fontWeight: "600" }} />
+                <TextInput
+                  value={nameB}
+                  onChangeText={setNameB}
+                  editable={!isPartnerA}
+                  placeholder="Partner Name"
+                  placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
+                  style={{
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                    color: !isPartnerA ? (isDark ? "#fff" : "#0f172a") : (isDark ? "rgba(255,255,255,0.4)" : "rgba(15,23,42,0.4)"),
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                    borderRadius: 16,
+                    fontSize: 16,
+                    fontWeight: "600"
+                  }}
+                />
               </View>
               <View>
                 <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Gender</Text>
-                <TextInput value={genderB} onChangeText={setGenderB} placeholder="Male / Female" placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#0f172a", paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16, fontSize: 16, fontWeight: "600" }} />
+                <TextInput
+                  value={genderB}
+                  onChangeText={setGenderB}
+                  editable={!isPartnerA}
+                  placeholder="Male / Female"
+                  placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
+                  style={{
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                    color: !isPartnerA ? (isDark ? "#fff" : "#0f172a") : (isDark ? "rgba(255,255,255,0.4)" : "rgba(15,23,42,0.4)"),
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                    borderRadius: 16,
+                    fontSize: 16,
+                    fontWeight: "600"
+                  }}
+                />
               </View>
               <View>
                 <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Likes (comma separated)</Text>
-                <TextInput value={likesB} onChangeText={setLikesB} placeholder="e.g. Coffee, Movies, Hiking" placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#0f172a", paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16, fontSize: 16, fontWeight: "600" }} />
+                <TextInput
+                  value={likesB}
+                  onChangeText={setLikesB}
+                  editable={!isPartnerA}
+                  placeholder="e.g. Coffee, Movies, Hiking"
+                  placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
+                  style={{
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                    color: !isPartnerA ? (isDark ? "#fff" : "#0f172a") : (isDark ? "rgba(255,255,255,0.4)" : "rgba(15,23,42,0.4)"),
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                    borderRadius: 16,
+                    fontSize: 16,
+                    fontWeight: "600"
+                  }}
+                />
               </View>
             </View>
           </View>

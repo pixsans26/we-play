@@ -14,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 const AGES = Array.from({ length: 103 }, (_, i) => i + 18); // 18 to 120
 
@@ -245,8 +247,6 @@ export default function ProfileSetupScreen() {
         body: JSON.stringify({
           uid: user.uid,
           email: user.email,
-          displayName: user.displayName,
-          photoUrl: user.photoURL,
           name: name.trim(),
           age,
           gender,
@@ -368,8 +368,8 @@ export default function ProfileSetupScreen() {
 
           {/* Header & Progress */}
           <View style={{ marginBottom: 32, marginTop: 20 }}>
-            {/* Top Left Back Button */}
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
+            {/* Top Back/SignOut Row */}
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
               <TouchableOpacity
                 onPress={() => {
                   if (step > 1) setStep(s => s - 1);
@@ -383,6 +383,29 @@ export default function ProfileSetupScreen() {
                 }}
               >
                 <Ionicons name="arrow-back" size={24} color={theme.card.text} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={async () => {
+                  try {
+                    await signOut(auth);
+                    setCoupleProfile(null);
+                  } catch (e) {
+                    console.error("Sign out failed", e);
+                  }
+                }}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  paddingHorizontal: 16,
+                  paddingVertical: 10,
+                  borderRadius: 20,
+                  backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)",
+                }}
+              >
+                <Ionicons name="log-out-outline" size={18} color="#ef4444" />
+                <Text style={{ color: "#ef4444", fontWeight: "700", fontSize: 13 }}>Sign Out</Text>
               </TouchableOpacity>
             </View>
 

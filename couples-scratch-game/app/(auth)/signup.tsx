@@ -5,11 +5,12 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, Link } from "expo-router";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { auth } from "@/lib/firebase";
+import { env } from "@/lib/env";
 
 interface FormErrors {
   name?: string;
@@ -49,7 +50,24 @@ export default function SignupScreen() {
     setErrors({});
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email.trim(), password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      const user = userCredential.user;
+
+      // Update Firebase display name
+      await updateProfile(user, { displayName: name.trim() });
+
+      // Save user details to server immediately
+      const API_URL = env.EXPO_PUBLIC_API_URL;
+      await fetch(`${API_URL}/api/user/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: name.trim(),
+        }),
+      }).catch(console.error);
+
       router.replace("/(onboarding)/profile-setup");
     } catch (error: any) {
       if (error?.code === "auth/email-already-in-use") setErrors({ email: "Email already in use" });

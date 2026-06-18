@@ -7,6 +7,7 @@ import fs from "fs";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { eq, and } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "./db/client";
 import { textTasks, imageTasks, spinWheelItems, lotteryItems, adminUsers, couple, userProgress, taskHistory,
   cycleTracking,
@@ -417,7 +418,8 @@ app.delete("/api/tasks/image/:id", authenticateToken, async (req: Request, res: 
 // ─────────────────────────────────────────────────────────────────────────────
 app.get("/api/stats", authenticateToken, async (_req: Request, res: Response) => {
   try {
-    const [couplesResult] = await db.select({ count: sql<number>`count(*)` }).from(couple);
+    const [couplesResult] = await db.select({ count: sql<number>`count(*)` }).from(couple).where(eq(couple.status, "active"));
+    const [usersResult] = await db.select({ count: sql<number>`count(*)` }).from(appUsers);
     const [txtResult] = await db.select({ count: sql<number>`count(*)` }).from(textTasks);
     const [imgResult] = await db.select({ count: sql<number>`count(*)` }).from(imageTasks);
     const [spinResult] = await db.select({ count: sql<number>`count(*)` }).from(spinWheelItems);
@@ -432,11 +434,9 @@ app.get("/api/stats", authenticateToken, async (_req: Request, res: Response) =>
       .from(taskHistory)
       .where(sql`${taskHistory.taskType} IN ('spin_wheel', 'lottery')`);
 
-    const totalCouples = Number(couplesResult.count);
-
     res.json({
-      totalCouples,
-      totalUsers: totalCouples * 2,
+      totalCouples: Number(couplesResult.count),
+      totalUsers: Number(usersResult.count),
       totalScratches: Number(scratchesResult.count),
       totalImageGames: Number(imgResult.count),
       totalTaskGames: Number(txtResult.count),
@@ -559,15 +559,13 @@ app.delete("/api/tasks/lottery/:id", authenticateToken, async (req: Request, res
 // Called on every Firebase auth state change; upserts email + full profile
 app.post("/api/user/register", async (req: Request, res: Response) => {
   try {
-    const { uid, email, displayName, photoUrl, name, age, gender, avatar, whatLikes } = req.body;
+    const { uid, email, name, age, gender, avatar, whatLikes } = req.body;
     if (!uid) return res.status(400).json({ error: "uid is required" });
 
     const [existing] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
     if (existing) {
       const updates: Record<string, any> = { updatedAt: new Date() };
       if (email !== undefined) updates.email = email;
-      if (displayName !== undefined) updates.displayName = displayName;
-      if (photoUrl !== undefined) updates.photoUrl = photoUrl;
       if (name !== undefined) updates.name = name;
       if (age !== undefined) updates.age = age;
       if (gender !== undefined) updates.gender = gender;
@@ -577,7 +575,7 @@ app.post("/api/user/register", async (req: Request, res: Response) => {
       return res.json(updated);
     }
 
-    const [inserted] = await db.insert(appUsers).values({ uid, email, displayName, photoUrl, name, age, gender, avatar, whatLikes }).returning();
+    const [inserted] = await db.insert(appUsers).values({ uid, email, name, age, gender, avatar, whatLikes }).returning();
     res.status(201).json(inserted);
   } catch (err) {
     console.error("[POST /api/user/register]", err);
@@ -586,14 +584,19 @@ app.post("/api/user/register", async (req: Request, res: Response) => {
 });
 
 // Get own full profile from appUsers
-app.get("/api/user/profile/:uid", authenticateToken, async (req: Request, res: Response) => {
+app.get("/api/user/profile/:identifier", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const uid = String(req.params.uid);
-    const [user] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
+    const identifier = String(req.params.identifier);
+    let user;
+    if (identifier.includes("@")) {
+      [user] = await db.select().from(appUsers).where(eq(appUsers.email, identifier.toLowerCase()));
+    } else {
+      [user] = await db.select().from(appUsers).where(eq(appUsers.uid, identifier));
+    }
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
   } catch (err) {
-    console.error("[GET /api/user/profile/:uid]", err);
+    console.error("[GET /api/user/profile/:identifier]", err);
     res.status(500).json({ error: "Failed to fetch user profile" });
   }
 });
@@ -668,7 +671,7 @@ app.get("/api/admin/cycles", authenticateToken, async (_req: Request, res: Respo
         couple: couple,
         cycleTracking: cycleTracking,
         femaleEmail: appUsers.email,
-        femaleName: appUsers.displayName,
+        femaleName: appUsers.name,
       })
       .from(cycleTracking)
       .leftJoin(couple, eq(cycleTracking.coupleId, couple.id))
@@ -845,7 +848,7 @@ app.get("/api/admin/cycles/:coupleId", authenticateToken, async (req: Request, r
           couple: null,
           cycleTracking: row,
           femaleEmail: userRow?.email || null,
-          femaleName: userRow?.displayName || null,
+          femaleName: userRow?.name || null,
         };
       }
     }
@@ -955,8 +958,35 @@ app.delete("/api/history/reset", authenticateToken, async (req: Request, res: Re
 
 app.get("/api/couples", authenticateToken, async (_req: Request, res: Response) => {
   try {
-    const couples = await db.select().from(couple).orderBy(couple.createdAt);
-    res.json(couples);
+    const partnerA = alias(appUsers, "partner_a");
+    const partnerB = alias(appUsers, "partner_b");
+    const result = await db
+      .select({
+        couple: couple,
+        partnerA: partnerA,
+        partnerB: partnerB,
+      })
+      .from(couple)
+      .leftJoin(partnerA, eq(couple.partnerAUid, partnerA.uid))
+      .leftJoin(partnerB, eq(couple.partnerBUid, partnerB.uid))
+      .orderBy(couple.createdAt);
+
+    const formatted = result.map((r) => ({
+      ...r.couple,
+      partnerAName: r.partnerA?.name || null,
+      partnerBName: r.partnerB?.name || null,
+      partnerAAvatar: r.partnerA?.avatar || null,
+      partnerBAvatar: r.partnerB?.avatar || null,
+      partnerAAge: r.partnerA?.age || null,
+      partnerBAge: r.partnerB?.age || null,
+      partnerAGender: r.partnerA?.gender || null,
+      partnerBGender: r.partnerB?.gender || null,
+      whatALikes: r.partnerA?.whatLikes || null,
+      whatBLikes: r.partnerB?.whatLikes || null,
+      partnerAUser: r.partnerA,
+      partnerBUser: r.partnerB,
+    }));
+    res.json(formatted);
   } catch (err) {
     console.error("[GET /api/couples]", err);
     res.status(500).json({ error: "Failed to fetch couples" });
@@ -966,12 +996,39 @@ app.get("/api/couples", authenticateToken, async (_req: Request, res: Response) 
 app.get("/api/couples/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
-    const [coupleData] = await db.select().from(couple).where(eq(couple.id, id));
-    if (!coupleData) {
+    const partnerA = alias(appUsers, "partner_a");
+    const partnerB = alias(appUsers, "partner_b");
+    const [row] = await db
+      .select({
+        couple: couple,
+        partnerA: partnerA,
+        partnerB: partnerB,
+      })
+      .from(couple)
+      .where(eq(couple.id, id))
+      .leftJoin(partnerA, eq(couple.partnerAUid, partnerA.uid))
+      .leftJoin(partnerB, eq(couple.partnerBUid, partnerB.uid));
+
+    if (!row) {
       res.status(404).json({ error: "Couple not found" });
       return;
     }
-    res.json(coupleData);
+
+    res.json({
+      ...row.couple,
+      partnerAName: row.partnerA?.name || null,
+      partnerBName: row.partnerB?.name || null,
+      partnerAAvatar: row.partnerA?.avatar || null,
+      partnerBAvatar: row.partnerB?.avatar || null,
+      partnerAAge: row.partnerA?.age || null,
+      partnerBAge: row.partnerB?.age || null,
+      partnerAGender: row.partnerA?.gender || null,
+      partnerBGender: row.partnerB?.gender || null,
+      whatALikes: row.partnerA?.whatLikes || null,
+      whatBLikes: row.partnerB?.whatLikes || null,
+      partnerAUser: row.partnerA,
+      partnerBUser: row.partnerB,
+    });
   } catch (err) {
     console.error("[GET /api/couples/:id]", err);
     res.status(500).json({ error: "Failed to fetch couple" });
@@ -980,39 +1037,53 @@ app.get("/api/couples/:id", authenticateToken, async (req: Request, res: Respons
 // ─────────────────────────────────────────────────────────────────────────────
 // COUPLE PROFILE
 // ─────────────────────────────────────────────────────────────────────────────
-app.get("/api/couple/:uid", authenticateToken, async (req: Request, res: Response) => {
+app.get("/api/couple/:identifier", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const uid = String(req.params.uid);
-    const partnerA = db.select().from(appUsers).as("partnerA");
-    const partnerB = db.select().from(appUsers).as("partnerB");
-    
-    const profiles = await db
+    const identifier = String(req.params.identifier);
+    let uid = identifier;
+    if (identifier.includes("@")) {
+      const [user] = await db.select().from(appUsers).where(eq(appUsers.email, identifier.toLowerCase()));
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      uid = user.uid;
+    }
+    const partnerA = alias(appUsers, "partner_a");
+    const partnerB = alias(appUsers, "partner_b");
+    const [row] = await db
       .select({
         couple: couple,
-        partnerAUser: { uid: appUsers.uid, name: appUsers.name, email: appUsers.email, gender: appUsers.gender, age: appUsers.age, avatar: appUsers.avatar, whatLikes: appUsers.whatLikes },
+        partnerA: partnerA,
+        partnerB: partnerB,
       })
       .from(couple)
       .where(sql`${couple.partnerAUid} = ${uid} OR ${couple.partnerBUid} = ${uid}`)
-      .leftJoin(appUsers, eq(appUsers.uid, couple.partnerAUid));
+      .leftJoin(partnerA, eq(couple.partnerAUid, partnerA.uid))
+      .leftJoin(partnerB, eq(couple.partnerBUid, partnerB.uid));
 
-    if (profiles.length === 0) {
+    if (!row) {
       res.status(404).json({ error: "Couple profile not found" });
       return;
     }
-    
-    const row = profiles[0];
-    const coupleData = row.couple;
-    
-    // Also fetch partner B's appUser record if linked
-    let partnerBUser = null;
-    if (coupleData.partnerBUid) {
-      const [pb] = await db.select().from(appUsers).where(eq(appUsers.uid, coupleData.partnerBUid));
-      partnerBUser = pb || null;
-    }
-    
-    res.json({ ...coupleData, partnerAUser: row.partnerAUser, partnerBUser });
+
+    res.json({
+      ...row.couple,
+      partnerAName: row.partnerA?.name || null,
+      partnerBName: row.partnerB?.name || null,
+      partnerAAvatar: row.partnerA?.avatar || null,
+      partnerBAvatar: row.partnerB?.avatar || null,
+      partnerAAge: row.partnerA?.age || null,
+      partnerBAge: row.partnerB?.age || null,
+      partnerAGender: row.partnerA?.gender || null,
+      partnerBGender: row.partnerB?.gender || null,
+      whatALikes: row.partnerA?.whatLikes || null,
+      whatBLikes: row.partnerB?.whatLikes || null,
+      partnerAUser: row.partnerA,
+      partnerBUser: row.partnerB,
+    });
   } catch (err) {
-    console.error("[GET /api/couple/:uid]", err);
+    console.error("[GET /api/couple/:identifier]", err);
     res.status(500).json({ error: "Failed to fetch couple profile" });
   }
 });
@@ -1036,12 +1107,8 @@ app.post("/api/couple", authenticateToken, upload.fields([{ name: "partnerAAvata
     }
 
     const dataToSave = {
-      partnerAUid, partnerBUid, partnerAName, partnerBName,
-      partnerAAge: partnerAAge ? Number(partnerAAge) : null,
-      partnerBAge: partnerBAge ? Number(partnerBAge) : null,
-      partnerAGender, partnerBGender, whatALikes, whatBLikes,
-      ...(partnerAAvatar && { partnerAAvatar }),
-      ...(partnerBAvatar && { partnerBAvatar })
+      partnerAUid,
+      partnerBUid: partnerBUid || null,
     };
 
     let targetId = id ? Number(id) : null;
@@ -1119,7 +1186,35 @@ app.post("/api/couple", authenticateToken, upload.fields([{ name: "partnerAAvata
       }
     }
 
-    res.status(targetId ? 200 : 201).json(responseRecord);
+    // Fetch and format the response record
+    const partnerA = alias(appUsers, "partner_a");
+    const partnerB = alias(appUsers, "partner_b");
+    const [finalRecord] = await db
+      .select({
+        couple: couple,
+        partnerA: partnerA,
+        partnerB: partnerB,
+      })
+      .from(couple)
+      .where(eq(couple.id, responseRecord.id))
+      .leftJoin(partnerA, eq(couple.partnerAUid, partnerA.uid))
+      .leftJoin(partnerB, eq(couple.partnerBUid, partnerB.uid));
+
+    res.status(targetId ? 200 : 201).json({
+      ...finalRecord.couple,
+      partnerAName: finalRecord.partnerA?.name || null,
+      partnerBName: finalRecord.partnerB?.name || null,
+      partnerAAvatar: finalRecord.partnerA?.avatar || null,
+      partnerBAvatar: finalRecord.partnerB?.avatar || null,
+      partnerAAge: finalRecord.partnerA?.age || null,
+      partnerBAge: finalRecord.partnerB?.age || null,
+      partnerAGender: finalRecord.partnerA?.gender || null,
+      partnerBGender: finalRecord.partnerB?.gender || null,
+      whatALikes: finalRecord.partnerA?.whatLikes || null,
+      whatBLikes: finalRecord.partnerB?.whatLikes || null,
+      partnerAUser: finalRecord.partnerA,
+      partnerBUser: finalRecord.partnerB,
+    });
   } catch (err) {
     console.error("[POST /api/couple]", err);
     res.status(500).json({ error: "Failed to save couple profile" });
@@ -1165,11 +1260,6 @@ app.post("/api/couple/invite/join", authenticateToken, async (req: Request, res:
       .set({ 
         partnerBUid: uid, 
         status: 'active',
-        partnerBName: userRecord?.name || null,
-        partnerBAge: userRecord?.age || null,
-        partnerBGender: userRecord?.gender || null,
-        partnerBAvatar: userRecord?.avatar || null,
-        whatBLikes: userRecord?.whatLikes || null,
       })
       .where(eq(couple.id, targetCouple.id))
       .returning();
@@ -1191,7 +1281,36 @@ app.post("/api/couple/invite/join", authenticateToken, async (req: Request, res:
     }
 
     broadcastAdminEvent({ type: "NEW_USER", message: `A partner just joined a couple!` });
-    res.json(updated);
+
+    // Fetch and format the response record
+    const partnerA = alias(appUsers, "partner_a");
+    const partnerB = alias(appUsers, "partner_b");
+    const [finalRecord] = await db
+      .select({
+        couple: couple,
+        partnerA: partnerA,
+        partnerB: partnerB,
+      })
+      .from(couple)
+      .where(eq(couple.id, updated.id))
+      .leftJoin(partnerA, eq(couple.partnerAUid, partnerA.uid))
+      .leftJoin(partnerB, eq(couple.partnerBUid, partnerB.uid));
+
+    res.json({
+      ...finalRecord.couple,
+      partnerAName: finalRecord.partnerA?.name || null,
+      partnerBName: finalRecord.partnerB?.name || null,
+      partnerAAvatar: finalRecord.partnerA?.avatar || null,
+      partnerBAvatar: finalRecord.partnerB?.avatar || null,
+      partnerAAge: finalRecord.partnerA?.age || null,
+      partnerBAge: finalRecord.partnerB?.age || null,
+      partnerAGender: finalRecord.partnerA?.gender || null,
+      partnerBGender: finalRecord.partnerB?.gender || null,
+      whatALikes: finalRecord.partnerA?.whatLikes || null,
+      whatBLikes: finalRecord.partnerB?.whatLikes || null,
+      partnerAUser: finalRecord.partnerA,
+      partnerBUser: finalRecord.partnerB,
+    });
   } catch (err) {
     console.error("[POST /api/couple/invite/join]", err);
     res.status(500).json({ error: "Failed to join couple" });
@@ -1211,16 +1330,59 @@ app.patch("/api/couple/:uid", authenticateToken, async (req: Request, res: Respo
       return res.status(404).json({ error: "Couple profile not found" });
     }
 
-    const updates: Record<string, any> = {};
-    if (partnerAName !== undefined) updates.partnerAName = partnerAName;
-    if (partnerBName !== undefined) updates.partnerBName = partnerBName;
-    if (partnerAAge !== undefined) updates.partnerAAge = partnerAAge === null ? null : Number(partnerAAge);
-    if (partnerBAge !== undefined) updates.partnerBAge = partnerBAge === null ? null : Number(partnerBAge);
-    if (partnerAGender !== undefined) updates.partnerAGender = partnerAGender;
-    if (partnerBGender !== undefined) updates.partnerBGender = partnerBGender;
+    // Update partner A in appUsers if creator
+    if (existing.partnerAUid) {
+      const pAUpdates: Record<string, any> = { updatedAt: new Date() };
+      if (partnerAName !== undefined) pAUpdates.name = partnerAName;
+      if (partnerAAge !== undefined) pAUpdates.age = partnerAAge === null ? null : Number(partnerAAge);
+      if (partnerAGender !== undefined) pAUpdates.gender = partnerAGender;
+      
+      if (Object.keys(pAUpdates).length > 1) {
+        await db.update(appUsers).set(pAUpdates).where(eq(appUsers.uid, existing.partnerAUid));
+      }
+    }
 
-    const [updated] = await db.update(couple).set(updates).where(eq(couple.id, existing.id)).returning();
-    res.json(updated);
+    // Update partner B in appUsers if linked
+    if (existing.partnerBUid) {
+      const pBUpdates: Record<string, any> = { updatedAt: new Date() };
+      if (partnerBName !== undefined) pBUpdates.name = partnerBName;
+      if (partnerBAge !== undefined) pBUpdates.age = partnerBAge === null ? null : Number(partnerBAge);
+      if (partnerBGender !== undefined) pBUpdates.gender = partnerBGender;
+      
+      if (Object.keys(pBUpdates).length > 1) {
+        await db.update(appUsers).set(pBUpdates).where(eq(appUsers.uid, existing.partnerBUid));
+      }
+    }
+
+    // Fetch and format the response record
+    const partnerA = alias(appUsers, "partner_a");
+    const partnerB = alias(appUsers, "partner_b");
+    const [finalRecord] = await db
+      .select({
+        couple: couple,
+        partnerA: partnerA,
+        partnerB: partnerB,
+      })
+      .from(couple)
+      .where(eq(couple.id, existing.id))
+      .leftJoin(partnerA, eq(couple.partnerAUid, partnerA.uid))
+      .leftJoin(partnerB, eq(couple.partnerBUid, partnerB.uid));
+
+    res.json({
+      ...finalRecord.couple,
+      partnerAName: finalRecord.partnerA?.name || null,
+      partnerBName: finalRecord.partnerB?.name || null,
+      partnerAAvatar: finalRecord.partnerA?.avatar || null,
+      partnerBAvatar: finalRecord.partnerB?.avatar || null,
+      partnerAAge: finalRecord.partnerA?.age || null,
+      partnerBAge: finalRecord.partnerB?.age || null,
+      partnerAGender: finalRecord.partnerA?.gender || null,
+      partnerBGender: finalRecord.partnerB?.gender || null,
+      whatALikes: finalRecord.partnerA?.whatLikes || null,
+      whatBLikes: finalRecord.partnerB?.whatLikes || null,
+      partnerAUser: finalRecord.partnerA,
+      partnerBUser: finalRecord.partnerB,
+    });
   } catch (err) {
     console.error("[PATCH /api/couple/:uid]", err);
     res.status(500).json({ error: "Failed to update couple profile" });
@@ -1249,7 +1411,10 @@ app.delete("/api/couple/uid/:uid", authenticateToken, async (req: Request, res: 
     // Delete couple
     await db.delete(couple).where(eq(couple.id, existing.id));
 
-    broadcastAdminEvent({ type: "USER_DELETED", message: `A user deleted their account: ${existing.partnerAName}` });
+    // Get partner A's name for event message
+    const [userA] = await db.select().from(appUsers).where(eq(appUsers.uid, existing.partnerAUid));
+    const name = userA?.name || existing.partnerAUid;
+    broadcastAdminEvent({ type: "USER_DELETED", message: `A user deleted their account: ${name}` });
     
     res.json({ success: true, deleted: true });
   } catch (err) {
@@ -1278,7 +1443,10 @@ app.delete("/api/couple/id/:id", authenticateToken, async (req: Request, res: Re
     // Delete couple
     await db.delete(couple).where(eq(couple.id, id));
 
-    broadcastAdminEvent({ type: "USER_DELETED", message: `Admin deleted an account: ${existing.partnerAName}` });
+    // Get partner A's name for event message
+    const [userA] = await db.select().from(appUsers).where(eq(appUsers.uid, existing.partnerAUid));
+    const name = userA?.name || existing.partnerAUid;
+    broadcastAdminEvent({ type: "USER_DELETED", message: `Admin deleted an account: ${name}` });
     
     res.json({ success: true, deleted: true });
   } catch (err) {
@@ -1445,10 +1613,17 @@ app.put("/api/cycle/:identifier", authenticateToken, async (req: Request, res: R
     if (coupleId && !femaleUid) {
       const [coupleRow] = await db.select().from(couple).where(eq(couple.id, coupleId));
       if (coupleRow) {
-        const isBFemale = coupleRow.partnerBGender?.toLowerCase() === 'female';
-        const isAFemale = coupleRow.partnerAGender?.toLowerCase() === 'female';
-        if (isBFemale && coupleRow.partnerBUid) femaleUid = coupleRow.partnerBUid;
-        else if (isAFemale && coupleRow.partnerAUid) femaleUid = coupleRow.partnerAUid;
+        const [userA] = await db.select({ gender: appUsers.gender }).from(appUsers).where(eq(appUsers.uid, coupleRow.partnerAUid));
+        const isAFemale = userA?.gender?.toLowerCase() === 'female';
+        if (isAFemale) {
+          femaleUid = coupleRow.partnerAUid;
+        } else if (coupleRow.partnerBUid) {
+          const [userB] = await db.select({ gender: appUsers.gender }).from(appUsers).where(eq(appUsers.uid, coupleRow.partnerBUid));
+          const isBFemale = userB?.gender?.toLowerCase() === 'female';
+          if (isBFemale) {
+            femaleUid = coupleRow.partnerBUid;
+          }
+        }
       }
     }
 

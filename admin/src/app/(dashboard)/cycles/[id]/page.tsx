@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { Activity, ArrowLeft, Calendar, Clock, Loader2, AlertCircle, TrendingUp, History } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -39,6 +40,8 @@ interface CycleHistoryRecord {
 export default function IndividualCycleDashboard() {
   const { id } = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
+  const token = session?.user ? (session.user as any).backendToken : "";
   
   const [tracking, setTracking] = useState<{ 
     couple: Couple | null; 
@@ -51,19 +54,20 @@ export default function IndividualCycleDashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (id) fetchData();
-  }, [id]);
+    if (id && token) fetchData();
+  }, [id, token]);
 
   const fetchData = async () => {
+    if (!token) return;
     setLoading(true);
     setError("");
     try {
       const [trackingRes, historyRes] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cycles`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+          headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cycles/${id}/history`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+          headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
 

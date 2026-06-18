@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Users, Search, UserCheck, UserX, Mail, Calendar, Heart, Loader2, RefreshCw } from "lucide-react";
 
 interface AppUser {
   uid: string;
   email: string | null;
-  displayName: string | null;
   name: string | null;
   age: number | null;
   gender: string | null;
@@ -24,17 +24,21 @@ interface UserRow {
 }
 
 export default function AppUsersPage() {
+  const { data: session } = useSession();
+  const token = session?.user ? (session.user as any).backendToken : "";
+
   const [data, setData] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
   const fetchData = async () => {
+    if (!token) return;
     setLoading(true);
     setError("");
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/app-users`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch users");
       const json = await res.json();
@@ -46,7 +50,7 @@ export default function AppUsersPage() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { if (token) fetchData(); }, [token]);
 
   const filtered = data.filter((row) => {
     const q = search.toLowerCase();
@@ -54,7 +58,6 @@ export default function AppUsersPage() {
     return (
       u.name?.toLowerCase().includes(q) ||
       u.email?.toLowerCase().includes(q) ||
-      u.displayName?.toLowerCase().includes(q) ||
       u.gender?.toLowerCase().includes(q)
     );
   });
@@ -129,7 +132,7 @@ export default function AppUsersPage() {
               <tbody className="divide-y divide-slate-50">
                 {filtered.map((row) => {
                   const u = row.user;
-                  const displayName = u.name || u.displayName || "Anonymous";
+                  const displayName = u.name || "Anonymous";
                   const joinedDate = new Date(u.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
                   return (
                     <tr key={u.uid} className="hover:bg-slate-50/50 transition-colors">

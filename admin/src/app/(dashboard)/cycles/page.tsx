@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Activity, Calendar, History, Loader2, Heart, AlertCircle, RefreshCw, BarChart2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import Link from "next/link";
@@ -34,6 +35,9 @@ interface CycleData {
 }
 
 export default function CycleAnalyticsPage() {
+  const { data: session } = useSession();
+  const token = session?.user ? (session.user as any).backendToken : "";
+
   const [data, setData] = useState<CycleData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -44,12 +48,13 @@ export default function CycleAnalyticsPage() {
   const [selectedCoupleName, setSelectedCoupleName] = useState("");
 
   const fetchData = async () => {
+    if (!token) return;
     setLoading(true);
     setError("");
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cycles`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (!res.ok) throw new Error("Failed to fetch cycle analytics data");
@@ -68,8 +73,8 @@ export default function CycleAnalyticsPage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) fetchData();
+  }, [token]);
 
   const openHistory = (coupleId: number | string, name: string) => {
     setSelectedCoupleId(coupleId);

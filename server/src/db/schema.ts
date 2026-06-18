@@ -60,8 +60,6 @@ export const appUsers = pgTable("app_users", {
   id: serial("id").primaryKey(),
   uid: text("uid").notNull().unique(),           // Firebase UID
   email: text("email"),                          // Firebase email
-  displayName: text("display_name"),             // Firebase display name
-  photoUrl: text("photo_url"),                   // Firebase photo URL
   // App profile (filled during onboarding)
   name: text("name"),                            // Chosen name in app
   age: integer("age"),
@@ -81,17 +79,6 @@ export const couple = pgTable("couple", {
   partnerBUid: text("partner_b_uid"),             // → appUsers.uid (null until Partner B joins)
   inviteCode: text("invite_code").unique(),        // 6-char code shared with partner
   status: text("status").notNull().default("pending"), // 'pending' | 'active'
-  // Backward-compat denormalized fields (populated from appUsers going forward):
-  partnerAName: text("partner_a_name"),
-  partnerBName: text("partner_b_name"),
-  partnerAAvatar: text("partner_a_avatar"),
-  partnerBAvatar: text("partner_b_avatar"),
-  partnerAAge: integer("partner_a_age"),
-  partnerBAge: integer("partner_b_age"),
-  partnerAGender: text("partner_a_gender"),
-  partnerBGender: text("partner_b_gender"),
-  whatALikes: text("what_a_likes"),
-  whatBLikes: text("what_b_likes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

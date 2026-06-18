@@ -161,8 +161,6 @@ export default function RootLayout() {
               body: JSON.stringify({
                 uid: user.uid,
                 email: user.email,
-                displayName: user.displayName,
-                photoUrl: user.photoURL,
               }),
             }).catch(() => {});
           } catch (e) {
