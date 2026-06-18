@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Trash2, Pencil, ChevronUp, ChevronDown } from "lucide-react";
-import ConfirmModal from "./ConfirmModal";
+import { useConfirm } from "./ConfirmProvider";
 
 interface Column<T> {
   key: keyof T | string;
@@ -21,7 +21,7 @@ interface Props<T extends { id: string | number }> {
 export default function DataTable<T extends { id: string | number }>({
   data, columns, onDelete, onEdit, emptyMessage = "No records found."
 }: Props<T>) {
-  const [deleteId, setDeleteId] = useState<string | number | null>(null);
+  const confirm = useConfirm();
 
   // Sorting stater
   const [sortCol, setSortCol] = useState<string | null>(null);
@@ -100,7 +100,15 @@ export default function DataTable<T extends { id: string | number }>({
                             <Pencil className="w-4 h-4" />
                           </button>
                         )}
-                        <button onClick={() => setDeleteId(row.id)}
+                        <button onClick={async () => {
+                            const ok = await confirm({
+                              title: "Confirm Deletion",
+                              message: "Are you sure you want to delete this item? This action cannot be undone.",
+                              confirmText: "Delete",
+                              cancelText: "Cancel"
+                            });
+                            if (ok) onDelete(row.id);
+                          }}
                           className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -114,16 +122,6 @@ export default function DataTable<T extends { id: string | number }>({
         </div>
       </div>
 
-      <ConfirmModal
-        isOpen={deleteId !== null}
-        onCancel={() => setDeleteId(null)}
-        onConfirm={() => {
-          if (deleteId !== null) {
-            onDelete(deleteId);
-            setDeleteId(null);
-          }
-        }}
-      />
     </>
   );
 }

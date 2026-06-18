@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bell, Search, LogOut, User as UserIcon, Settings, Heart, Users, FileText, ImageIcon, RotateCcw } from "lucide-react";
+import { Bell, Search, LogOut, User as UserIcon, Settings, Heart, Users, FileText, ImageIcon, RotateCcw, Calendar } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -49,19 +49,19 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const searchResults = NAVIGATION_LINKS.filter(link => 
+  const searchResults = NAVIGATION_LINKS.filter(link =>
     link.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <header className="h-20 flex items-center justify-between px-10 shrink-0 border-b border-slate-100 bg-white relative z-50">
       <div className="flex items-center gap-2 text-slate-800 font-bold text-sm select-none">
-        <span className="text-indigo-600 text-lg">📅</span>
+        <span className="text-indigo-600 text-lg"><Calendar /></span>
         {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
       </div>
 
       <div className="flex items-center gap-6">
-        
+
         {/* Universal Search */}
         <div className="relative" ref={searchRef}>
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -104,13 +104,13 @@ export default function Header() {
 
         {/* Notifications Dropdown */}
         <div className="relative" ref={notifRef}>
-          <button 
+          <button
             onClick={() => setShowNotifications(!showNotifications)}
             className={`p-2 rounded-full transition ${showNotifications ? "bg-indigo-50 text-indigo-600" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"}`}
           >
             <Bell className="w-5 h-5" />
           </button>
-          
+
           {showNotifications && (
             <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-100 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
@@ -126,7 +126,7 @@ export default function Header() {
 
         {/* Profile Dropdown */}
         <div className="relative" ref={profileRef}>
-          <button 
+          <button
             onClick={() => setShowProfile(!showProfile)}
             className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white text-xs font-bold shadow ring-4 ring-indigo-50 transition transform active:scale-95"
           >
@@ -142,7 +142,7 @@ export default function Header() {
               <Link href="/profile" onClick={() => setShowProfile(false)} className="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 text-sm font-medium text-slate-700 transition">
                 <UserIcon className="w-4 h-4 text-slate-400" /> My Profile
               </Link>
-              <button 
+              <button
                 onClick={() => signOut({ callbackUrl: '/auth/login' })}
                 className="w-full flex items-center gap-3 px-4 py-2 hover:bg-red-50 text-sm font-medium text-red-600 transition mt-1"
               >

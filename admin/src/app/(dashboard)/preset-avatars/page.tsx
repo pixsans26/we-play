@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Loader2, Upload, Trash2, Image as ImageIcon, Plus, Check } from "lucide-react";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 interface PresetAvatar {
   id: number;
@@ -19,6 +20,7 @@ const getAvatarUrl = (avatar: string | null) => {
 };
 
 export default function PresetAvatarsPage() {
+  const confirm = useConfirm();
   const { data: session } = useSession();
   const token = session?.user ? (session.user as any).backendToken : "";
 
@@ -106,7 +108,12 @@ export default function PresetAvatarsPage() {
 
   const handleDelete = async (id: number) => {
     if (!token) return;
-    const confirmDelete = window.confirm("Are you sure you want to delete this preset avatar? Existing users using this avatar URL will continue to show it, but new users won't be able to select it.");
+    const confirmDelete = await confirm({
+      title: "Delete Preset Avatar?",
+      message: "Are you sure you want to delete this preset avatar? Existing users using this avatar URL will continue to show it, but new users won't be able to select it.",
+      confirmText: "Delete Preset",
+      cancelText: "Cancel"
+    });
     if (!confirmDelete) return;
 
     setDeletingId(id);

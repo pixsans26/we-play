@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import DataTable from "@/components/DataTable";
 import { Settings, Loader2, AlertTriangle, Trash2 } from "lucide-react";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 interface AdminProfile {
   id: number; name: string; email: string;
@@ -14,6 +15,7 @@ interface AdminProfile {
 const API = `${env.NEXT_PUBLIC_API_URL}/api/profile`;
 
 export default function ProfilePage() {
+  const confirm = useConfirm();
   const [profiles, setProfiles] = useState<AdminProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
@@ -36,8 +38,13 @@ export default function ProfilePage() {
   useEffect(() => { if (token) load(); }, [token]);
 
   const handleClearData = async () => {
-    const confirm = window.confirm("Are you ABSOLUTELY sure you want to clear ALL users data? This will permanently delete all app users, couples, task completion histories, game progress, and cycle tracking records. This action cannot be undone.");
-    if (!confirm) return;
+    const ok = await confirm({
+      title: "Clear All User Data?",
+      message: "Are you ABSOLUTELY sure you want to clear ALL users data? This will permanently delete all app users, couples, task completion histories, game progress, and cycle tracking records. This action cannot be undone.",
+      confirmText: "Clear All Data",
+      cancelText: "Cancel"
+    });
+    if (!ok) return;
 
     const secondConfirm = window.prompt("To confirm, type CLEAR ALL in all caps:");
     if (secondConfirm !== "CLEAR ALL") {

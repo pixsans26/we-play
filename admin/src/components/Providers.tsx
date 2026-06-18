@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { env } from "@/lib/env";
+import { ConfirmProvider } from "./ConfirmProvider";
 
 export function Providers({ children, session }: { children: React.ReactNode, session?: any }) {
   useEffect(() => {
@@ -36,7 +37,9 @@ export function Providers({ children, session }: { children: React.ReactNode, se
 
   return (
     <SessionProvider session={session}>
-      {children}
+      <ConfirmProvider>
+        {children}
+      </ConfirmProvider>
       <Toaster 
         position="top-right" 
         toastOptions={{
