@@ -90,7 +90,7 @@ export default function EditProfileScreen() {
       if (likesB.trim()) formData.append("whatBLikes", likesB.trim());
 
       if (avatarA && avatarA !== coupleProfile.partnerAAvatar) {
-        if (avatarA.startsWith("file://") || avatarA.startsWith("http")) {
+        if (avatarA.startsWith("file://") || avatarA.startsWith("content://")) {
           const dotIndex = avatarA.lastIndexOf(".");
           let ext = dotIndex !== -1 && dotIndex > avatarA.lastIndexOf("/") ? avatarA.substring(dotIndex + 1).toLowerCase() : "jpeg";
           if (ext === "jpg") ext = "jpeg";
@@ -105,7 +105,7 @@ export default function EditProfileScreen() {
       }
 
       if (avatarB && avatarB !== coupleProfile.partnerBAvatar) {
-        if (avatarB.startsWith("file://") || avatarB.startsWith("http")) {
+        if (avatarB.startsWith("file://") || avatarB.startsWith("content://")) {
           const dotIndex = avatarB.lastIndexOf(".");
           let ext = dotIndex !== -1 && dotIndex > avatarB.lastIndexOf("/") ? avatarB.substring(dotIndex + 1).toLowerCase() : "jpeg";
           if (ext === "jpg") ext = "jpeg";
