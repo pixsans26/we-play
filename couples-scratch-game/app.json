@@ -9,6 +9,10 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "scheme": "couples-scratch-game",
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#ff2d6b"
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "cover",
