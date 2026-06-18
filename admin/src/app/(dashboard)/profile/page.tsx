@@ -4,7 +4,7 @@ import { env } from "@/lib/env";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import DataTable from "@/components/DataTable";
-import { Settings, Loader2 } from "lucide-react";
+import { Settings, Loader2, AlertTriangle, Trash2 } from "lucide-react";
 
 interface AdminProfile {
   id: number; name: string; email: string;
@@ -16,6 +16,7 @@ const API = `${env.NEXT_PUBLIC_API_URL}/api/profile`;
 export default function ProfilePage() {
   const [profiles, setProfiles] = useState<AdminProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clearing, setClearing] = useState(false);
   const { data: session } = useSession();
   const token = session?.user ? (session.user as any).backendToken : "";
 
@@ -34,8 +35,41 @@ export default function ProfilePage() {
 
   useEffect(() => { if (token) load(); }, [token]);
 
+  const handleClearData = async () => {
+    const confirm = window.confirm("Are you ABSOLUTELY sure you want to clear ALL users data? This will permanently delete all app users, couples, task completion histories, game progress, and cycle tracking records. This action cannot be undone.");
+    if (!confirm) return;
+
+    const secondConfirm = window.prompt("To confirm, type CLEAR ALL in all caps:");
+    if (secondConfirm !== "CLEAR ALL") {
+      alert("Clear operation cancelled. Confirmation text did not match.");
+      return;
+    }
+
+    setClearing(true);
+    try {
+      const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/admin/clear-users-data`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      if (res.ok) {
+        alert("All user data has been successfully cleared.");
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to clear user data.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An unexpected error occurred while clearing user data.");
+    } finally {
+      setClearing(false);
+    }
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-7xl mx-auto pb-12">
       {/* Header */}
       <div className="flex items-center justify-between">
          <div className="flex items-center gap-6">
@@ -85,6 +119,29 @@ export default function ProfilePage() {
           />
         </div>
       )}
+
+      {/* Danger Zone */}
+      <div className="bg-rose-50/35 border border-rose-100 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-rose-100 border border-rose-200/50 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-6 h-6 text-rose-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Danger Zone</h3>
+            <p className="text-sm text-slate-500 font-medium mt-1">
+              Delete all mobile app users, couples, task completion histories, game progress, and period cycles. Admins and game tasks are preserved.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={handleClearData}
+          disabled={clearing}
+          className="flex items-center justify-center gap-2 px-5 py-3 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400 text-white rounded-2xl font-bold transition-all shadow-sm active:scale-95 shrink-0"
+        >
+          {clearing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+          {clearing ? "Clearing Data..." : "Clear All Users Data"}
+        </button>
+      </div>
     </div>
   );
 }

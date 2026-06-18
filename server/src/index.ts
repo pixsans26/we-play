@@ -637,6 +637,26 @@ app.get("/api/admin/app-users", authenticateToken, async (_req: Request, res: Re
   }
 });
 
+// Clear all app users' data (Danger zone action)
+app.delete("/api/admin/clear-users-data", authenticateToken, async (_req: Request, res: Response) => {
+  try {
+    // Truncate/delete user-centric tables in reverse order of foreign keys/dependencies
+    await db.delete(cycleHistory);
+    await db.delete(cycleTracking);
+    await db.delete(taskHistory);
+    await db.delete(userProgress);
+    await db.delete(couple);
+    await db.delete(appUsers);
+
+    broadcastAdminEvent({ type: "SYSTEM_RESET", message: "All user data has been cleared by an administrator." });
+
+    res.json({ success: true, message: "All user data has been successfully cleared." });
+  } catch (err) {
+    console.error("[DELETE /api/admin/clear-users-data]", err);
+    res.status(500).json({ error: "Failed to clear user data" });
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CYCLE ANALYTICS (ADMIN)
 // ─────────────────────────────────────────────────────────────────────────────
