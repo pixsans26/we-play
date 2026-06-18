@@ -752,16 +752,31 @@ app.delete("/api/admin/clear-users-data", authenticateToken, async (_req: Reques
 
 app.get("/api/admin/cycles", authenticateToken, async (_req: Request, res: Response) => {
   try {
+    const partnerA = alias(appUsers, "partner_a");
+    const partnerB = alias(appUsers, "partner_b");
     const cycles = await db
       .select({
-        couple: couple,
+        couple: {
+          id: couple.id,
+          partnerAUid: couple.partnerAUid,
+          partnerBUid: couple.partnerBUid,
+          inviteCode: couple.inviteCode,
+          status: couple.status,
+          createdAt: couple.createdAt,
+          partnerAName: partnerA.name,
+          partnerBName: partnerB.name,
+          partnerAGender: partnerA.gender,
+          partnerBGender: partnerB.gender,
+        },
         cycleTracking: cycleTracking,
         femaleEmail: appUsers.email,
         femaleName: appUsers.name,
       })
       .from(cycleTracking)
       .leftJoin(couple, eq(cycleTracking.coupleId, couple.id))
-      .leftJoin(appUsers, eq(appUsers.uid, cycleTracking.femaleUid));
+      .leftJoin(appUsers, eq(appUsers.uid, cycleTracking.femaleUid))
+      .leftJoin(partnerA, eq(couple.partnerAUid, partnerA.uid))
+      .leftJoin(partnerB, eq(couple.partnerBUid, partnerB.uid));
     res.json(cycles);
   } catch (err) {
     console.error("[GET /api/admin/cycles]", err);
