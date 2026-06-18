@@ -147,7 +147,7 @@ export default function MainGameScreen() {
 
           {/* Level + Streak hero card */}
           <View style={{ marginBottom: 20 }}>
-            <View style={{ borderRadius: 32, overflow: "hidden", position: "relative", backgroundColor: isDark ? "#7c3aed" : "#f953c6" }}>
+            <View style={{ borderRadius: 32, overflow: "hidden", position: "relative", backgroundColor: isDark ? theme.accentSecondary : theme.accent }}>
               {/* Animated Background */}
               <Animated.View style={{
                 position: "absolute",
@@ -159,7 +159,7 @@ export default function MainGameScreen() {
                 ]
               }}>
                 <LinearGradient
-                  colors={isDark ? ["#4c1d95", "#7c3aed", "#e91e8c", "#4c1d95"] : ["#b91d73", "#f953c6", "#ff8a00", "#b91d73"]}
+                  colors={isDark ? ["#4c1d95", theme.accentSecondary, theme.accent, "#4c1d95"] : [theme.accentSecondary, theme.accent, "#ff8a00", theme.accentSecondary]}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                   style={{ flex: 1 }}
                 />
@@ -201,25 +201,27 @@ export default function MainGameScreen() {
           </View>
 
           {/* Whose turn */}
-          <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 20, backgroundColor: isDark ? "#1e293b" : "#fff" }}>
-            <View style={{ borderRadius: 32, overflow: "hidden", backgroundColor: "#903555" }}>
-              <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-                borderRadius: 32, overflow: "hidden",
-                paddingVertical: 12,
-                paddingHorizontal: 16,
-              }}>
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : "#e11d48", marginRight: 10, shadowColor: isDark ? "#fff" : "#e11d48" }} />
-                <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 14, fontWeight: "700" }}>
-                  {turnName}'s turn to play
-                </Text>
-                <View style={{ flex: 1 }} />
-                <Ionicons name="heart" size={16} color={isDark ? "#ffffff" : "#e11d48"} />
-              </BlurView>
-            </View>
-          </View>
+          <LinearGradient
+            colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              borderRadius: 24,
+              borderWidth: 1,
+              borderColor: theme.card.border,
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              marginBottom: 20,
+            }}
+          >
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : theme.accent, marginRight: 10, shadowColor: isDark ? "#fff" : theme.accent, shadowOpacity: 0.8, shadowRadius: 4, shadowOffset: {width: 0, height: 0} }} />
+            <Text style={{ color: isDark ? "#ffffff" : theme.accent, fontSize: 14, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>
+              {turnName}'s turn to play
+            </Text>
+            <View style={{ flex: 1 }} />
+            <Ionicons name="heart" size={16} color={isDark ? "#ffffff" : theme.accent} />
+          </LinearGradient>
 
           {/* Game mode cards - 2x2 Grid */}
           <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>

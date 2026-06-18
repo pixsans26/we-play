@@ -11,7 +11,7 @@ import { getAvatarUrl, apiFetch } from "@/lib/apiClient";
 import { env } from "@/lib/env";
 
 // Screens that should hide the tab bar
-const HIDDEN_TAB_SCREENS = ["/image-scratch", "/task-scratch", "/spin-wheel", "/lottery", "/content/", "/edit-profile", "/cycle-sync"];
+const HIDDEN_TAB_SCREENS = ["/image-scratch", "/task-scratch", "/spin-wheel", "/lottery", "/content/", "/edit-profile", "/cycle-sync", "/calendar", "/notifications"];
 
 type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -63,19 +63,6 @@ function TabItem({
   return (
     <Pressable style={styles.tabItem} onPress={handlePress}>
       <Animated.View style={[styles.tabInner, { transform: [{ scale }] }]}>
-        {/* Pill background for active tab */}
-        {isActive && (
-          <View
-            style={[
-              styles.pillBg,
-              {
-                backgroundColor: isDark
-                  ? "rgba(249,83,198,0.15)"
-                  : "rgba(233,30,140,0.08)",
-              },
-            ]}
-          />
-        )}
         {tab.imageUrl ? (
           <View style={{ width: isActive ? 34 : 30, height: isActive ? 34 : 30, borderRadius: isActive ? 17 : 15, overflow: "hidden", borderWidth: 2, borderColor: isActive ? theme.nav.active : theme.nav.inactive }}>
             <Image source={{ uri: tab.imageUrl }} style={{ width: "100%", height: "100%", borderRadius: isActive ? 17 : 15 }} resizeMode="cover" />
@@ -177,7 +164,7 @@ export default function GameLayout() {
   if (isLoading || !user || !coupleProfile || !coupleProfile.partnerAName || (!isDataLoaded && !dataError)) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#150025" }}>
-        <ActivityIndicator size="large" color="#f953c6" />
+        <ActivityIndicator size="large" color={theme.accent} />
       </View>
     );
   }
@@ -239,7 +226,7 @@ export default function GameLayout() {
           style={[
             styles.navContainer,
             {
-              backgroundColor: isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(30, 58, 138, 0.85)", // dark blue
+              backgroundColor: isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.85)", // dark blue or white glass
               overflow: "hidden",
             },
           ]}

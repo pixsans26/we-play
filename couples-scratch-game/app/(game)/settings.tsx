@@ -45,31 +45,33 @@ interface SettingRowProps {
 
 function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, danger, isDark }: SettingRowProps) {
   return (
-    <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 2 }}>
-      <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed && onPress ? 0.75 : 1 })}>
-        <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{
+    <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed && onPress ? 0.75 : 1, marginBottom: 8 })}>
+      <LinearGradient
+        colors={danger ? (isDark ? ["rgba(239,68,68,0.15)", "rgba(239,68,68,0.05)"] : ["#fef2f2", "#ffffff"]) : (isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#f8fafc", "#ffffff"])}
+        style={{
           flexDirection: "row",
           alignItems: "center",
-          borderRadius: 32, overflow: "hidden",
+          borderRadius: 24,
           padding: 18,
           gap: 14,
+          borderWidth: 1,
+          borderColor: theme.card.border,
+          shadowColor: danger ? "#ef4444" : "#94a3b8", shadowOpacity: isDark ? 0 : 0.05, shadowRadius: 8, shadowOffset: {width:0, height:4}, elevation: isDark ? 0 : 2
         }}>
           <View style={{
-            width: 42, height: 42, borderRadius: 32, overflow: "hidden",
-            backgroundColor: danger ? (isDark ? "rgba(239,68,68,0.2)" : "rgba(239,68,68,0.1)") : (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)"),
+            width: 42, height: 42, borderRadius: 21,
+            backgroundColor: danger ? (isDark ? "rgba(239,68,68,0.2)" : "#fee2e2") : (isDark ? "rgba(255,255,255,0.1)" : "#ffffff"),
             alignItems: "center", justifyContent: "center",
-
           }}>
-            <Ionicons name={icon} size={20} color={danger ? "#fca5a5" : iconColor} />
+            <Ionicons name={icon} size={20} color={danger ? "#ef4444" : iconColor} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: danger ? "#ef4444" : (isDark ? "#ffffff" : "#0f172a"), fontSize: 16, fontWeight: "500", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{label}</Text>
+            <Text style={{ color: danger ? "#ef4444" : (isDark ? "#ffffff" : "#0f172a"), fontSize: 16, fontWeight: "500", fontFamily: "DynaPuff_700Bold" }}>{label}</Text>
             {sublabel && <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(15,23,42,0.7)", fontSize: 12, marginTop: 2 }}>{sublabel}</Text>}
           </View>
           {right}
-        </BlurView>
-      </Pressable>
-    </View>
+      </LinearGradient>
+    </Pressable>
   );
 }
 
@@ -199,11 +201,6 @@ export default function SettingsScreen() {
 
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, paddingHorizontal: 22 }}>
-        <Pressable onPress={() => router.back()} style={{ borderRadius: 32, overflow: "hidden", marginRight: 14 }}>
-          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 40, height: 40, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-            <Ionicons name="arrow-back" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
-          </BlurView>
-        </Pressable>
         <View>
           <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
           <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_600SemiBold" }}>Customize your experience</Text>

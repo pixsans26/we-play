@@ -120,61 +120,100 @@ export function calculateCyclePredictions(
  * Generates marked dates object for react-native-calendars
  * Uses `markingType="period"` compatible objects.
  */
-export function generatePredictionCalendarMarks(predictions: CyclePredictions | null, averagePeriodLength: number = 5): any {
+export function generatePredictionCalendarMarks(
+  lastPeriodStartStr: string | null,
+  averageCycleLength: number = 28,
+  averagePeriodLength: number = 5
+): any {
   const marked: any = {};
-  if (!predictions) return marked;
+  if (!lastPeriodStartStr) return marked;
 
-  const dateToKey = (d: Date) => d.toISOString().split("T")[0];
+  const dateToKey = (d: Date) => {
+    const offset = d.getTimezoneOffset() * 60000;
+    const local = new Date(d.getTime() - offset);
+    return local.toISOString().split("T")[0];
+  };
 
-  // 1. Mark Next Period predicted days
-  const periodStart = predictions.nextPeriodDate;
-  const periodEnd = new Date(periodStart);
-  periodEnd.setDate(periodStart.getDate() + averagePeriodLength - 1);
+  const lastPeriodStart = new Date(lastPeriodStartStr);
+  if (isNaN(lastPeriodStart.getTime())) return marked;
 
-  let curr = new Date(periodStart);
-  while (curr <= periodEnd) {
-    const key = dateToKey(curr);
-    marked[key] = {
-      color: "#ec4899", // Pink
-      textColor: "#fff",
-      startingDay: key === dateToKey(periodStart),
-      endingDay: key === dateToKey(periodEnd),
-    };
-    curr.setDate(curr.getDate() + 1);
-  }
+  const today = normalizeDate(new Date());
 
-  // 2. Mark Fertile Window
-  const fertileStart = predictions.fertileWindowStart;
-  const fertileEnd = predictions.fertileWindowEnd;
-  const ovDateStr = dateToKey(predictions.nextOvulationDate);
+  // Loop through current cycle and next 6 cycles
+  for (let i = 0; i <= 6; i++) {
+    // 1. Mark Period days
+    const cycleStart = new Date(lastPeriodStart);
+    cycleStart.setDate(lastPeriodStart.getDate() + (i * averageCycleLength));
+    
+    // Only mark cycles that are in the future or the current one
+    // We don't want to skip the current cycle, even if it's partly past
+    
+    const periodEnd = new Date(cycleStart);
+    periodEnd.setDate(cycleStart.getDate() + averagePeriodLength - 1);
 
-  let fCurr = new Date(fertileStart);
-  while (fCurr <= fertileEnd) {
-    const key = dateToKey(fCurr);
-    const isOvulation = key === ovDateStr;
+    let curr = new Date(cycleStart);
+    let dayOfPeriod = 1;
+    while (curr <= periodEnd) {
+      const key = dateToKey(curr);
+      
+      // Heavy flow (days 1-2), Light flow (days 3+)
+      const isHeavyFlow = dayOfPeriod <= 2;
 
-    marked[key] = {
-      color: isOvulation ? "#9333ea" : "#d8b4fe", // Dark purple for ovulation, light purple for fertile
-      textColor: isOvulation ? "#fff" : "#6b21a8",
-      startingDay: key === dateToKey(fertileStart),
-      endingDay: key === dateToKey(fertileEnd),
-    };
-    fCurr.setDate(fCurr.getDate() + 1);
+      marked[key] = {
+        color: isHeavyFlow ? "#be185d" : "#fbcfe8", // Dark pink vs Light pink
+        textColor: isHeavyFlow ? "#ffffff" : "#be185d",
+        startingDay: key === dateToKey(cycleStart),
+        endingDay: key === dateToKey(periodEnd),
+        flowType: isHeavyFlow ? "heavy" : "light"
+      };
+      
+      curr.setDate(curr.getDate() + 1);
+      dayOfPeriod++;
+    }
+
+    // 2. Mark Fertile Window & Ovulation
+    const lutealPhaseLength = 14;
+    const estimatedOvulationDay = averageCycleLength - lutealPhaseLength;
+    
+    const ovulationDate = new Date(cycleStart);
+    ovulationDate.setDate(cycleStart.getDate() + estimatedOvulationDay - 1);
+    
+    const fertileStartDay = estimatedOvulationDay - 5;
+    const fertileEndDay = estimatedOvulationDay + 1;
+    
+    const fertileStart = new Date(cycleStart);
+    fertileStart.setDate(cycleStart.getDate() + fertileStartDay - 1);
+    
+    const fertileEnd = new Date(cycleStart);
+    fertileEnd.setDate(cycleStart.getDate() + fertileEndDay - 1);
+    
+    const ovDateStr = dateToKey(ovulationDate);
+
+    let fCurr = new Date(fertileStart);
+    while (fCurr <= fertileEnd) {
+      const key = dateToKey(fCurr);
+      const isOvulation = key === ovDateStr;
+
+      // Don't overwrite period marks with fertile marks (just in case of extremely short cycles)
+      if (!marked[key]) {
+        marked[key] = {
+          color: isOvulation ? "#9333ea" : "#d8b4fe", // Dark purple for ovulation, light purple for fertile
+          textColor: isOvulation ? "#fff" : "#6b21a8",
+          startingDay: key === dateToKey(fertileStart),
+          endingDay: key === dateToKey(fertileEnd),
+        };
+      }
+      fCurr.setDate(fCurr.getDate() + 1);
+    }
   }
 
   // Mark today
-  const todayKey = dateToKey(new Date());
+  const todayKey = dateToKey(today);
   if (!marked[todayKey]) {
     marked[todayKey] = {
       customStyles: {
-        container: {
-          borderWidth: 2,
-          borderColor: "#3b82f6"
-        },
-        text: {
-          color: "#3b82f6",
-          fontWeight: "bold"
-        }
+        container: { borderWidth: 2, borderColor: "#3b82f6" },
+        text: { color: "#3b82f6", fontWeight: "bold" }
       }
     };
   }

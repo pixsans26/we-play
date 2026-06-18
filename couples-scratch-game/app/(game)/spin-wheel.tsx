@@ -57,7 +57,7 @@ const FloatingHeart = ({ delay }: { delay: number }) => {
 
   return (
     <Animated.View style={{ position: 'absolute', left: xOffset, top: 0, transform: [{ translateY }, { scale }], opacity: 0.1, zIndex: 0 }}>
-      <Ionicons name="heart" size={30} color="#ec4899" />
+      <Ionicons name="heart" size={30} color="#d946ef" />
     </Animated.View>
   );
 };
@@ -225,7 +225,7 @@ export default function SpinWheelScreen() {
     outputRange: ["#5b21b6", "#7c3aed"]
   });
 
-  const bgColors = ["#ec4899", "#4c1d95"]; // Hot pink to deep purple
+  const bgColors = theme.accentGradient;
 
   return (
     <LinearGradient colors={bgColors as any} style={styles.container}>

@@ -194,9 +194,9 @@ export function ScratchCard({
             <Svg width="100%" height="100%">
               <Defs>
                 <LinearGradient id="scratchGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <Stop offset="0%" stopColor="#f43f5e" />
-                  <Stop offset="50%" stopColor="#ec4899" />
-                  <Stop offset="100%" stopColor="#a855f7" />
+                  <Stop offset="0%" stopColor="#d946ef" />
+                  <Stop offset="50%" stopColor="#a855f7" />
+                  <Stop offset="100%" stopColor="#8b5cf6" />
                 </LinearGradient>
                 <Mask id="scratchMask" x="0" y="0" width="100%" height="100%" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">
                   <Rect x="0" y="0" width="100%" height="100%" fill="white" />

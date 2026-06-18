@@ -584,6 +584,29 @@ app.get("/api/admin/cycles/:coupleId/history", authenticateToken, async (req: Re
   }
 });
 
+app.get("/api/admin/cycles/:coupleId", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const coupleId = Number(req.params.coupleId);
+    if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
+
+    const [tracking] = await db
+      .select({
+        couple: couple,
+        cycleTracking: cycleTracking,
+      })
+      .from(cycleTracking)
+      .where(eq(cycleTracking.coupleId, coupleId))
+      .leftJoin(couple, eq(cycleTracking.coupleId, couple.id));
+
+    if (!tracking) return res.status(404).json({ error: "Cycle tracking not found for this couple" });
+
+    res.json(tracking);
+  } catch (err) {
+    console.error("[GET /api/admin/cycles/:coupleId]", err);
+    res.status(500).json({ error: "Failed to fetch cycle details" });
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HISTORY
 // ─────────────────────────────────────────────────────────────────────────────

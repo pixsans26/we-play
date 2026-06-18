@@ -787,7 +787,7 @@ export default function TaskScratchScreen() {
             <View style={{ width: "100%" }}>
               <ScratchCard onScratchComplete={handleScratchComplete}>
                 <LinearGradient
-                  colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
+                  colors={theme.accentGradient as any}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                   style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden", padding: 24 }}
                 >
@@ -808,7 +808,7 @@ export default function TaskScratchScreen() {
               borderRadius: 32, overflow: "hidden", opacity: revealOpacity,
             }}>
               <LinearGradient
-                colors={isDark ? ["#7c3aed", "#e91e8c"] : ["#f953c6", "#b91d73"]}
+                colors={theme.accentGradient as any}
                 start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                 style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
               >
@@ -864,7 +864,7 @@ export default function TaskScratchScreen() {
             style={{ opacity: canComplete ? 1 : 0.3, borderRadius: 999, overflow: "hidden" }}
           >
             <LinearGradient
-              colors={["#e91e8c", "#7c3aed"] as any}
+              colors={theme.accentGradient as any}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 999, overflow: "hidden"}}

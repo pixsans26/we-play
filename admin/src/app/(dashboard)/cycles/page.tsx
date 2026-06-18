@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Calendar, History, Loader2, Heart, AlertCircle, RefreshCw } from "lucide-react";
+import { Activity, Calendar, History, Loader2, Heart, AlertCircle, RefreshCw, BarChart2 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import Link from "next/link";
 import CycleHistoryModal from "@/components/CycleHistoryModal";
 
 interface Couple {
@@ -71,6 +73,16 @@ export default function CycleAnalyticsPage() {
     ? Math.round(data.reduce((acc, curr) => acc + curr.cycleTracking.averageCycleLength, 0) / data.length) 
     : 0;
 
+  // Cycle length distribution
+  const distributionMap: Record<number, number> = {};
+  data.forEach((row) => {
+    const len = row.cycleTracking.averageCycleLength;
+    distributionMap[len] = (distributionMap[len] || 0) + 1;
+  });
+  const distributionData = Object.entries(distributionMap)
+    .map(([length, count]) => ({ length: `${length} days`, count }))
+    .sort((a, b) => parseInt(a.length) - parseInt(b.length));
+
   return (
     <div className="pt-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       
@@ -116,6 +128,32 @@ export default function CycleAnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* Global Distribution Chart */}
+      {!loading && data.length > 0 && (
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-slate-50 text-slate-500 rounded-xl">
+              <BarChart2 className="w-5 h-5" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-800">Cycle Length Distribution</h2>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={distributionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="length" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                <Tooltip 
+                  cursor={{ fill: '#f8fafc' }}
+                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Bar dataKey="count" fill="#818cf8" radius={[4, 4, 0, 0]} name="Couples" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       {/* Error State */}
       {error && (
@@ -188,13 +226,13 @@ export default function CycleAnalyticsPage() {
                         <div className="text-sm font-medium text-slate-500">{updatedDate}</div>
                       </td>
                       <td className="p-4 pr-6 text-right">
-                        <button
-                          onClick={() => openHistory(row.cycleTracking.coupleId, coupleName)}
+                        <Link
+                          href={`/cycles/${row.cycleTracking.coupleId}`}
                           className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:border-indigo-300 hover:text-indigo-600 shadow-sm transition-all active:scale-95"
                         >
                           <History className="w-4 h-4" />
-                          View History
-                        </button>
+                          View Analytics
+                        </Link>
                       </td>
                     </tr>
                   );

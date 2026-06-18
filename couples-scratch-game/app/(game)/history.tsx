@@ -21,6 +21,8 @@ import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { HistoryEntry, CoupleProfile, Task, ImageTask } from "@/types";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
+import { GradientIcon } from "@/components/GradientIcon";
+import { GradientText } from "@/components/GradientText";
 
 // ---------------------------------------------------------------------------
 // Helpers (outside component for stable references)
@@ -172,14 +174,19 @@ export default function HistoryScreen() {
 
     return (
       <Pressable onPress={() => setSelectedEntry(item)}>
-        <View
+        <LinearGradient
+          colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
           style={{
-            backgroundColor: theme.card.bg,
             borderWidth: 1,
             borderColor: theme.card.border,
-            borderRadius: 32, overflow: "hidden",
+            borderRadius: 24,
             padding: 16,
             marginBottom: 12,
+            shadowColor: isDark ? "transparent" : "#a855f7",
+            shadowOffset: {width: 0, height: 4},
+            shadowOpacity: 0.05,
+            shadowRadius: 8,
+            elevation: isDark ? 0 : 2,
           }}
         >
           {/* Title row with heart status icon */}
@@ -203,10 +210,11 @@ export default function HistoryScreen() {
             >
               {label}
             </Text>
-            <Ionicons
+            <GradientIcon
               name={item.completed ? "heart" : "heart-outline"}
               size={22}
-              color={item.completed ? "#ec4899" : theme.card.subtext}
+              colors={item.completed ? (theme.accentGradient as any) : undefined}
+              color={!item.completed ? (theme.card.subtext as string) : undefined}
             />
           </View>
 
@@ -257,18 +265,19 @@ export default function HistoryScreen() {
               paddingTop: 8,
             }}
           >
-            <Text
+            <GradientText
               style={{
-                color: item.completed ? "#ec4899" : theme.card.subtext,
                 fontSize: 12,
                 fontWeight: "600",
               }}
+              colors={item.completed ? (theme.accentGradient as any) : undefined}
+              color={!item.completed ? (theme.card.subtext as string) : undefined}
             >
               {item.completed ? "Completed" : "Skipped"}
-            </Text>
+            </GradientText>
             <Text style={{ color: theme.card.subtext, fontSize: 12 }}>{dateStr}</Text>
           </View>
-        </View>
+        </LinearGradient>
       </Pressable>
     );
   };
@@ -500,10 +509,11 @@ export default function HistoryScreen() {
                     Status
                   </Text>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Ionicons
+                    <GradientIcon
                       name={selectedEntry.completed ? "heart" : "heart-outline"}
                       size={18}
-                      color={selectedEntry.completed ? "#ec4899" : theme.card.subtext}
+                      colors={selectedEntry.completed ? (theme.accentGradient as any) : undefined}
+                      color={!selectedEntry.completed ? (theme.card.subtext as string) : undefined}
                     />
                     <Text style={{ color: theme.card.text, fontSize: 14 }}>
                       {selectedEntry.completed ? "Completed" : "Skipped"}
@@ -618,10 +628,10 @@ export default function HistoryScreen() {
       style={{ flex: 1 }}
     >
       <View
-        style={{ flex: 1, paddingHorizontal: 22, paddingTop: 56, paddingBottom: 40 }}
+        style={{ flex: 1, paddingTop: 56, paddingBottom: 40 }}
       >
         {/* Header */}
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, zIndex: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, zIndex: 10, paddingHorizontal: 22 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>Our History</Text>
             <Text style={{ color: theme.card.subtext, fontSize: 13, marginTop: 1 }}>Your past moments</Text>
@@ -647,27 +657,36 @@ export default function HistoryScreen() {
 
         {/* Filter Tabs */}
         <View style={{ marginBottom: 16 }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 4 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 22 }}>
             {(["all", "romantic", "fun", "playful", "dare", "intimate", "lottery", "spin_wheel"] as const).map(f => {
               const isActive = filter === f;
               const label = f === "all" ? "All" : f === "lottery" ? "Heart Draw" : f === "spin_wheel" ? "Fate Wheel" : f.charAt(0).toUpperCase() + f.slice(1);
               return (
-                <Pressable
-                  key={f}
-                  onPress={() => setFilter(f as any)}
-                  style={{
-                    paddingHorizontal: 18,
-                    paddingVertical: 10,
-                    borderRadius: 32, overflow: "hidden",
-                    backgroundColor: isActive ? theme.accent : theme.glass.bg,
-                    borderWidth: 1,
-                    borderColor: isActive ? theme.accent : theme.glass.border,
-                  }}
-                >
-                  <Text style={{ color: isActive ? "#fff" : theme.card.text, fontWeight: "800" }}>
-                    {label}
-                  </Text>
-                </Pressable>
+                  <Pressable
+                    key={f}
+                    onPress={() => setFilter(f as any)}
+                    style={{
+                      borderRadius: 32, overflow: "hidden",
+                      backgroundColor: theme.glass.bg,
+                      borderWidth: isActive ? 0 : 1,
+                      borderColor: isActive ? "transparent" : theme.glass.border,
+                      margin: isActive ? 1 : 0 // Prevent size jump from missing border
+                    }}
+                  >
+                    {isActive ? (
+                      <LinearGradient
+                        colors={theme.accentGradient as any}
+                        start={{x:0, y:0}} end={{x:1, y:1}}
+                        style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 32 }}
+                      >
+                        <Text style={{ color: "#fff", fontWeight: "800" }}>{label}</Text>
+                      </LinearGradient>
+                    ) : (
+                      <View style={{ paddingHorizontal: 18, paddingVertical: 10 }}>
+                        <Text style={{ color: theme.card.text, fontWeight: "800" }}>{label}</Text>
+                      </View>
+                    )}
+                  </Pressable>
               );
             })}
           </ScrollView>
@@ -682,7 +701,7 @@ export default function HistoryScreen() {
             ListEmptyComponent={renderEmptyState}
             showsVerticalScrollIndicator={false}
             style={{ flex: 1 }}
-            contentContainerStyle={filteredHistory.length === 0 ? { flex: 1 } : { paddingTop: 8, paddingBottom: 16 }}
+            contentContainerStyle={filteredHistory.length === 0 ? { flex: 1, paddingHorizontal: 22 } : { paddingTop: 8, paddingBottom: 16, paddingHorizontal: 22 }}
           />
         </FadingEdgeMask>
 

@@ -58,8 +58,8 @@ const PAGE_META: Record<string, {
     title: "About",
     subtitle: "About WePlay",
     icon: "heart-circle",
-    gradientColors: ["#ec4899", "#e91e8c", "#db2777"],
-    accentColor: "#ec4899",
+    gradientColors: ["#d946ef", "#a855f7", "#8b5cf6"],
+    accentColor: "#d946ef",
   },
 };
 

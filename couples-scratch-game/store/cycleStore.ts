@@ -25,12 +25,17 @@ export const useCycleStore = create<CycleStore>((set, get) => ({
   error: null,
 
   fetchCycleConfig: async () => {
-    const coupleId = useAuthStore.getState().coupleProfile?.id;
+    const { coupleProfile, sessionToken } = useAuthStore.getState();
+    const coupleId = coupleProfile?.id;
     if (!coupleId) return;
 
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`${env.EXPO_PUBLIC_API_URL}/api/cycle/${coupleId}`);
+      const res = await fetch(`${env.EXPO_PUBLIC_API_URL}/api/cycle/${coupleId}`, {
+        headers: {
+          "Authorization": `Bearer ${sessionToken}`
+        }
+      });
       if (!res.ok) {
         if (res.status === 404) {
           // If not found, it's totally fine, means they haven't set it up yet.
@@ -47,14 +52,18 @@ export const useCycleStore = create<CycleStore>((set, get) => ({
   },
 
   updateCycleConfig: async (updates) => {
-    const coupleId = useAuthStore.getState().coupleProfile?.id;
+    const { coupleProfile, sessionToken } = useAuthStore.getState();
+    const coupleId = coupleProfile?.id;
     if (!coupleId) return;
 
     set({ isLoading: true, error: null });
     try {
       const res = await fetch(`${env.EXPO_PUBLIC_API_URL}/api/cycle/${coupleId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${sessionToken}`
+        },
         body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error("Failed to update cycle configuration");
