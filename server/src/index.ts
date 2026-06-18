@@ -668,6 +668,13 @@ app.get("/api/admin/app-users/:uid", authenticateToken, async (req: Request, res
       }
     }
 
+    const [cycle] = await db
+      .select()
+      .from(cycleTracking)
+      .where(
+        sql`${cycleTracking.femaleUid} = ${uid} OR ${cycleTracking.coupleId} = ${coupleRow?.couple.id || -1}`
+      );
+
     res.json({
       user,
       progress: progress || null,
@@ -675,7 +682,8 @@ app.get("/api/admin/app-users/:uid", authenticateToken, async (req: Request, res
         ...coupleRow.couple,
         isPartnerA: coupleRow.isPartnerA
       } : null,
-      partner
+      partner,
+      cycle: cycle || null
     });
   } catch (err) {
     console.error("[GET /api/admin/app-users/:uid]", err);

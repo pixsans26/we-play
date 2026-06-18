@@ -22,6 +22,48 @@ const getAvatarUrl = (avatar: string | null) => {
   return `${baseUrl}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
 };
 
+function calculatePeriodStatus(lastPeriodStartStr: string | null, averageCycleLength: number = 28, averagePeriodLength: number = 5) {
+  if (!lastPeriodStartStr) return null;
+  const lastPeriodStart = new Date(lastPeriodStartStr);
+  lastPeriodStart.setHours(0, 0, 0, 0);
+  if (isNaN(lastPeriodStart.getTime())) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const diffTime = today.getTime() - lastPeriodStart.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  // Current day of cycle (1-indexed)
+  const currentCycleDay = (diffDays % averageCycleLength) + 1;
+
+  // Days until next period
+  const daysUntilNextPeriod = averageCycleLength - currentCycleDay + 1;
+  const nextPeriodDate = new Date(today);
+  nextPeriodDate.setDate(today.getDate() + daysUntilNextPeriod);
+
+  let currentPhase: "Menstrual" | "Follicular" | "Ovulation" | "Luteal" = "Menstrual";
+  const fertileStartDay = averageCycleLength - 14 - 5;
+  const fertileEndDay = averageCycleLength - 14 + 1;
+
+  if (currentCycleDay >= 1 && currentCycleDay <= averagePeriodLength) {
+    currentPhase = "Menstrual";
+  } else if (currentCycleDay > averagePeriodLength && currentCycleDay < fertileStartDay) {
+    currentPhase = "Follicular";
+  } else if (currentCycleDay >= fertileStartDay && currentCycleDay <= fertileEndDay) {
+    currentPhase = "Ovulation";
+  } else {
+    currentPhase = "Luteal";
+  }
+
+  return {
+    currentCycleDay,
+    currentPhase,
+    daysUntilNextPeriod,
+    nextPeriodDate: nextPeriodDate.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+  };
+}
+
 export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -83,7 +125,7 @@ export default function UserDetailPage() {
     );
   }
 
-  const { user, progress, couple, partner } = data;
+  const { user, progress, couple, partner, cycle } = data;
   const displayName = user.name || "Anonymous";
   const joinedDate = new Date(user.createdAt).toLocaleDateString(undefined, {
     month: "long",
@@ -274,6 +316,76 @@ export default function UserDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Period & Cycle Status (Only for female users or if cycle exists) */}
+          {(user.gender?.toLowerCase() === "female" || cycle) && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-md">
+                <Calendar className="w-4.5 h-4.5 text-pink-500" /> Period & Cycle Status
+              </h3>
+              {cycle && cycle.lastPeriodStart ? (() => {
+                const status = calculatePeriodStatus(
+                  cycle.lastPeriodStart,
+                  cycle.averageCycleLength,
+                  cycle.averagePeriodLength
+                );
+
+                if (!status) {
+                  return <p className="text-slate-400 text-sm italic">Failed to calculate period status.</p>;
+                }
+
+                const phaseColors = {
+                  Menstrual: "text-rose-700 bg-rose-50 border-rose-100",
+                  Follicular: "text-emerald-700 bg-emerald-50 border-emerald-100",
+                  Ovulation: "text-purple-700 bg-purple-50 border-purple-100",
+                  Luteal: "text-amber-700 bg-amber-50 border-amber-100"
+                };
+
+                const phaseEmojis = {
+                  Menstrual: "🩸",
+                  Follicular: "🌱",
+                  Ovulation: "🍇",
+                  Luteal: "🍂"
+                };
+
+                return (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                      <div>
+                        <p className="text-xs text-slate-400 font-bold uppercase">Current Cycle Day</p>
+                        <p className="text-2xl font-black text-slate-800 mt-1">Day {status.currentCycleDay}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">of {cycle.averageCycleLength}-day cycle</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400 font-bold uppercase">Current Phase</p>
+                        <div className="mt-2">
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold border ${phaseColors[status.currentPhase]}`}>
+                            <span className="text-sm">{phaseEmojis[status.currentPhase]}</span> {status.currentPhase} Phase
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-100 p-4 rounded-xl">
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">Next Predicted Period</p>
+                        <p className="text-xs text-slate-400 mt-0.5">Estimated date: <span className="font-semibold text-slate-700">{status.nextPeriodDate}</span></p>
+                      </div>
+                      <div className="bg-rose-50 border border-rose-100 text-rose-700 font-black px-4 py-2 rounded-xl text-center self-start sm:self-center">
+                        {status.daysUntilNextPeriod} Days Left
+                      </div>
+                    </div>
+                  </div>
+                );
+              })() : (
+                <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl">
+                  <Calendar className="w-10 h-10 text-slate-200 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-slate-600">No Period Data Set</p>
+                  <p className="text-xs text-slate-400 mt-1">The user has not logged her last period start date in the app yet.</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Progress Metrics */}
           <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
