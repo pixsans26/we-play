@@ -8,6 +8,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView as ExpoBlurView } from "expo-blur";
 import { BlurView } from "@/components/CustomBlurView";
+import MaskedView from "@react-native-masked-view/masked-view";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Asset } from "expo-asset";
@@ -199,31 +200,56 @@ export default function SettingsScreen() {
         <Ionicons name="heart" size={150} color={heartColor} />
       </Animated.View>
 
-      {/* Blurred Header */}
-      <BlurView
-        intensity={80}
-        tint={isDark ? "dark" : "light"}
+      {/* Blurred Header with Fade at Bottom */}
+      <View
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          paddingTop: 56,
-          paddingBottom: 16,
-          paddingHorizontal: 22,
-          flexDirection: "row",
-          alignItems: "center",
           zIndex: 50,
-          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
         }}
       >
-        <View>
-          <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
-          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_600SemiBold" }}>Customize your experience</Text>
+        <MaskedView
+          style={StyleSheet.absoluteFill}
+          maskElement={
+            <LinearGradient
+              colors={["black", "black", "transparent"]}
+              locations={[0, 0.6, 1]}
+              style={{ flex: 1 }}
+            />
+          }
+        >
+          <BlurView
+            intensity={80}
+            tint={isDark ? "dark" : "light"}
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+              }
+            ]}
+          />
+        </MaskedView>
+
+        <View
+          style={{
+            paddingTop: 56,
+            paddingBottom: 24,
+            paddingHorizontal: 22,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View>
+            <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
+            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_600SemiBold" }}>Customize your experience</Text>
+          </View>
         </View>
-      </BlurView>
+      </View>
 
       <FadingEdgeMask style={{ flex: 1 }}>
         <ScrollView

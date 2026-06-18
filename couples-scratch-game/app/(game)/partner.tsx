@@ -13,6 +13,7 @@ import { calculateCyclePredictions, generatePredictionCalendarMarks, CyclePredic
 import { getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
+import MaskedView from "@react-native-masked-view/masked-view";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { GradientIcon } from "@/components/GradientIcon";
 import { GradientText } from "@/components/GradientText";
@@ -190,36 +191,61 @@ export default function PartnerScreen() {
       <View style={{ flex: 1 }}>
         <AnimatedBackground currentPhase="Unconfigured" isDark={isDark} />
         
-        {/* Fixed Blurred Header */}
-        <BlurView
-          intensity={80}
-          tint={isDark ? "dark" : "light"}
+        {/* Fixed Blurred Header with Fade at Bottom */}
+        <View
           style={{
             position: "absolute",
             top: 0,
             left: 0,
             right: 0,
-            paddingTop: insets.top + 12,
-            paddingBottom: 12,
-            paddingHorizontal: 22,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
             zIndex: 50,
-            backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
-            borderBottomWidth: StyleSheet.hairlineWidth,
-            borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
           }}
         >
-          <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
-            <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name="person" size={24} color={theme.card.subtext} />
+          <MaskedView
+            style={StyleSheet.absoluteFill}
+            maskElement={
+              <LinearGradient
+                colors={["black", "black", "transparent"]}
+                locations={[0, 0.6, 1]}
+                style={{ flex: 1 }}
+              />
+            }
+          >
+            <BlurView
+              intensity={80}
+              tint={isDark ? "dark" : "light"}
+              style={StyleSheet.absoluteFill}
+            />
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+                }
+              ]}
+            />
+          </MaskedView>
+
+          <View
+            style={{
+              paddingTop: insets.top + 12,
+              paddingBottom: 20,
+              paddingHorizontal: 22,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
+              <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="person" size={24} color={theme.card.subtext} />
+              </View>
             </View>
+            <Pressable onPress={() => router.push("/notifications")} style={{ padding: 8 }}>
+              <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+            </Pressable>
           </View>
-          <Pressable onPress={() => router.push("/notifications")} style={{ padding: 8 }}>
-            <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
-          </Pressable>
-        </BlurView>
+        </View>
 
         <View style={{ flex: 1, paddingTop: insets.top + 80, paddingHorizontal: 22 }}>
           {/* Invitation Content */}
@@ -285,43 +311,68 @@ export default function PartnerScreen() {
     <View style={{ flex: 1 }}>
       <AnimatedBackground currentPhase={activePredictions.currentPhase} isDark={isDark} />
       
-      {/* Fixed Blurred Header */}
-      <BlurView
-        intensity={80}
-        tint={isDark ? "dark" : "light"}
+      {/* Fixed Blurred Header with Fade at Bottom */}
+      <View
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          paddingTop: insets.top + 12,
-          paddingBottom: 12,
-          paddingHorizontal: 22,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
           zIndex: 50,
-          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
         }}
       >
-        <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
-          {displayAvatarSource ? (
-            <Image source={displayAvatarSource} style={{ width: "100%", height: "100%", borderRadius: 24 }} />
-          ) : (
-            <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name="person" size={24} color={theme.card.subtext} />
-            </View>
-          )}
-        </View>
-        <Pressable
-          onPress={() => router.push("/notifications")}
-          style={{ padding: 8 }}
+        <MaskedView
+          style={StyleSheet.absoluteFill}
+          maskElement={
+            <LinearGradient
+              colors={["black", "black", "transparent"]}
+              locations={[0, 0.6, 1]}
+              style={{ flex: 1 }}
+            />
+          }
         >
-          <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
-        </Pressable>
-      </BlurView>
+          <BlurView
+            intensity={80}
+            tint={isDark ? "dark" : "light"}
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+              }
+            ]}
+          />
+        </MaskedView>
+
+        <View
+          style={{
+            paddingTop: insets.top + 12,
+            paddingBottom: 20,
+            paddingHorizontal: 22,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
+            {displayAvatarSource ? (
+              <Image source={displayAvatarSource} style={{ width: "100%", height: "100%", borderRadius: 24 }} />
+            ) : (
+              <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="person" size={24} color={theme.card.subtext} />
+              </View>
+            )}
+          </View>
+          <Pressable
+            onPress={() => router.push("/notifications")}
+            style={{ padding: 8 }}
+          >
+            <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+          </Pressable>
+        </View>
+      </View>
 
       <View style={{ flex: 1 }}>
         {/* Content */}

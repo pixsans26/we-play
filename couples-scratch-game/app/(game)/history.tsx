@@ -22,6 +22,7 @@ import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { HistoryEntry, CoupleProfile, Task, ImageTask } from "@/types";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
+import MaskedView from "@react-native-masked-view/masked-view";
 import { GradientIcon } from "@/components/GradientIcon";
 import { GradientText } from "@/components/GradientText";
 
@@ -628,83 +629,103 @@ export default function HistoryScreen() {
       locations={[0, 0.5, 1]}
       style={{ flex: 1 }}
     >
-      {/* Fixed Blurred Header & Filter Tabs */}
-      <BlurView
-        intensity={80}
-        tint={isDark ? "dark" : "light"}
+      {/* Fixed Blurred Header & Filter Tabs with Fade at Bottom */}
+      <View
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          paddingTop: 56,
-          paddingBottom: 16,
           zIndex: 50,
-          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
         }}
       >
-        {/* Header Content */}
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16, paddingHorizontal: 22 }}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>Our History</Text>
-            <Text style={{ color: theme.card.subtext, fontSize: 13, marginTop: 1 }}>Your past moments</Text>
-          </View>
-          <View style={{ position: "relative" }}>
-            <Pressable onPress={() => setIsMenuOpen(!isMenuOpen)} style={{ padding: 8 }}>
-              <Ionicons name="ellipsis-vertical" size={24} color={theme.card.text} />
-            </Pressable>
-            {isMenuOpen && (
-              <>
-                {/* Backdrop to close menu */}
-                <Pressable onPress={() => setIsMenuOpen(false)} style={{ position: "absolute", top: -100, right: -100, bottom: -1000, left: -1000, zIndex: 9 }} />
-                <BlurView intensity={80} tint={isDark ? "dark" : "light"} style={{ position: "absolute", top: 40, right: 0, backgroundColor: isDark ? "rgba(30,0,53,0.85)" : "rgba(255,255,255,0.85)", borderRadius: 12, padding: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5, minWidth: 150, zIndex: 10, overflow: "hidden" }}>
-                  <Pressable onPress={() => { setIsMenuOpen(false); handleReset(); }} style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 8 }}>
-                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                    <Text style={{ color: "#ef4444", fontSize: 14, fontWeight: "bold" }}>Reset History</Text>
-                  </Pressable>
-                </BlurView>
-              </>
-            )}
-          </View>
-        </View>
+        <MaskedView
+          style={StyleSheet.absoluteFill}
+          maskElement={
+            <LinearGradient
+              colors={["black", "black", "transparent"]}
+              locations={[0, 0.75, 1]}
+              style={{ flex: 1 }}
+            />
+          }
+        >
+          <BlurView
+            intensity={80}
+            tint={isDark ? "dark" : "light"}
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+              }
+            ]}
+          />
+        </MaskedView>
 
-        {/* Filter Tabs */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 22 }}>
-          {(["all", "romantic", "fun", "playful", "dare", "intimate", "lottery", "spin_wheel"] as const).map(f => {
-            const isActive = filter === f;
-            const label = f === "all" ? "All" : f === "lottery" ? "Heart Draw" : f === "spin_wheel" ? "Fate Wheel" : f.charAt(0).toUpperCase() + f.slice(1);
-            return (
-                <Pressable
-                  key={f}
-                  onPress={() => setFilter(f as any)}
-                  style={{
-                    borderRadius: 32, overflow: "hidden",
-                    backgroundColor: theme.glass.bg,
-                    borderWidth: isActive ? 0 : 1,
-                    borderColor: isActive ? "transparent" : theme.glass.border,
-                    margin: isActive ? 1 : 0 // Prevent size jump from missing border
-                  }}
-                >
-                  {isActive ? (
-                    <LinearGradient
-                      colors={theme.accentGradient as any}
-                      start={{x:0, y:0}} end={{x:1, y:1}}
-                      style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 32 }}
-                    >
-                      <Text style={{ color: "#fff", fontWeight: "800" }}>{label}</Text>
-                    </LinearGradient>
-                  ) : (
-                    <View style={{ paddingHorizontal: 18, paddingVertical: 10 }}>
-                      <Text style={{ color: theme.card.text, fontWeight: "800" }}>{label}</Text>
-                    </View>
-                  )}
-                </Pressable>
-            );
-          })}
-        </ScrollView>
-      </BlurView>
+        <View style={{ paddingTop: 56, paddingBottom: 20 }}>
+          {/* Header Content */}
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16, paddingHorizontal: 22 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>Our History</Text>
+              <Text style={{ color: theme.card.subtext, fontSize: 13, marginTop: 1 }}>Your past moments</Text>
+            </View>
+            <View style={{ position: "relative" }}>
+              <Pressable onPress={() => setIsMenuOpen(!isMenuOpen)} style={{ padding: 8 }}>
+                <Ionicons name="ellipsis-vertical" size={24} color={theme.card.text} />
+              </Pressable>
+              {isMenuOpen && (
+                <>
+                  {/* Backdrop to close menu */}
+                  <Pressable onPress={() => setIsMenuOpen(false)} style={{ position: "absolute", top: -100, right: -100, bottom: -1000, left: -1000, zIndex: 9 }} />
+                  <BlurView intensity={80} tint={isDark ? "dark" : "light"} style={{ position: "absolute", top: 40, right: 0, backgroundColor: isDark ? "rgba(30,0,53,0.85)" : "rgba(255,255,255,0.85)", borderRadius: 12, padding: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5, minWidth: 150, zIndex: 10, overflow: "hidden" }}>
+                    <Pressable onPress={() => { setIsMenuOpen(false); handleReset(); }} style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 8 }}>
+                      <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                      <Text style={{ color: "#ef4444", fontSize: 14, fontWeight: "bold" }}>Reset History</Text>
+                    </Pressable>
+                  </BlurView>
+                </>
+              )}
+            </View>
+          </View>
+
+          {/* Filter Tabs */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 22 }}>
+            {(["all", "romantic", "fun", "playful", "dare", "intimate", "lottery", "spin_wheel"] as const).map(f => {
+              const isActive = filter === f;
+              const label = f === "all" ? "All" : f === "lottery" ? "Heart Draw" : f === "spin_wheel" ? "Fate Wheel" : f.charAt(0).toUpperCase() + f.slice(1);
+              return (
+                  <Pressable
+                    key={f}
+                    onPress={() => setFilter(f as any)}
+                    style={{
+                      borderRadius: 32, overflow: "hidden",
+                      backgroundColor: theme.glass.bg,
+                      borderWidth: isActive ? 0 : 1,
+                      borderColor: isActive ? "transparent" : theme.glass.border,
+                      margin: isActive ? 1 : 0 // Prevent size jump from missing border
+                    }}
+                  >
+                    {isActive ? (
+                      <LinearGradient
+                        colors={theme.accentGradient as any}
+                        start={{x:0, y:0}} end={{x:1, y:1}}
+                        style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 32 }}
+                      >
+                        <Text style={{ color: "#fff", fontWeight: "800" }}>{label}</Text>
+                      </LinearGradient>
+                    ) : (
+                      <View style={{ paddingHorizontal: 18, paddingVertical: 10 }}>
+                        <Text style={{ color: theme.card.text, fontWeight: "800" }}>{label}</Text>
+                      </View>
+                    )}
+                  </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </View>
 
       <View style={{ flex: 1, paddingBottom: 40 }}>
         {/* Combined history list */}

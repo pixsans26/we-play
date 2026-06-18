@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
+import MaskedView from "@react-native-masked-view/masked-view";
 
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
@@ -120,45 +121,70 @@ export default function MainGameScreen() {
         <Ionicons name="heart" size={150} color={heartColor} />
       </Animated.View>
 
-      {/* Blurred Header */}
-      <BlurView
-        intensity={80}
-        tint={isDark ? "dark" : "light"}
+      {/* Blurred Header with Fade at Bottom */}
+      <View
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          paddingTop: 56,
-          paddingBottom: 16,
-          paddingHorizontal: 22,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
           zIndex: 50,
-          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
         }}
       >
-        <View>
-          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, fontWeight: "600", marginBottom: 2 }}>
-            Welcome back 💕
-          </Text>
-          <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
-            {displayName}
-          </Text>
+        <MaskedView
+          style={StyleSheet.absoluteFill}
+          maskElement={
+            <LinearGradient
+              colors={["black", "black", "transparent"]}
+              locations={[0, 0.6, 1]}
+              style={{ flex: 1 }}
+            />
+          }
+        >
+          <BlurView
+            intensity={80}
+            tint={isDark ? "dark" : "light"}
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+              }
+            ]}
+          />
+        </MaskedView>
+
+        <View
+          style={{
+            paddingTop: 56,
+            paddingBottom: 24,
+            paddingHorizontal: 22,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View>
+            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, fontWeight: "600", marginBottom: 2 }}>
+              Welcome back 💕
+            </Text>
+            <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
+              {displayName}
+            </Text>
+          </View>
+          <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden" }}>
+            <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+              {(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) ? (
+                <Image source={getAvatarSource(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar)} style={{ width: "100%", height: "100%", borderRadius: 32 }} resizeMode="cover" />
+              ) : (
+                <MaterialCommunityIcons name={myAvatarIcon} size={24} color={isDark ? "#ffffff" : "#4c0519"} style={{ marginTop: 2 }} />
+              )}
+            </BlurView>
+          </Pressable>
         </View>
-        <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden" }}>
-          <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-            {(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) ? (
-              <Image source={getAvatarSource(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar)} style={{ width: "100%", height: "100%", borderRadius: 32 }} resizeMode="cover" />
-            ) : (
-              <MaterialCommunityIcons name={myAvatarIcon} size={24} color={isDark ? "#ffffff" : "#4c0519"} style={{ marginTop: 2 }} />
-            )}
-          </BlurView>
-        </Pressable>
-      </BlurView>
+      </View>
 
       <FadingEdgeMask style={{ flex: 1 }}>
         <ScrollView
