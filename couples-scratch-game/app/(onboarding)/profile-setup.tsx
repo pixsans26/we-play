@@ -240,6 +240,40 @@ export default function ProfileSetupScreen() {
       const BASE_URL = env.EXPO_PUBLIC_API_URL;
       const token = useAuthStore.getState().sessionToken;
 
+      let resolvedAvatar = avatarA;
+
+      if (avatarA && (avatarA.startsWith("file://") || avatarA.startsWith("content://"))) {
+        try {
+          const dotIndex = avatarA.lastIndexOf(".");
+          let ext = dotIndex !== -1 && dotIndex > avatarA.lastIndexOf("/") ? avatarA.substring(dotIndex + 1).toLowerCase() : "jpeg";
+          if (ext === "jpg") ext = "jpeg";
+
+          const uploadData = new FormData();
+          uploadData.append("file", {
+            uri: Platform.OS === "ios" && avatarA.startsWith("file://") ? avatarA.replace("file://", "") : avatarA,
+            name: `avatar.${ext}`,
+            type: `image/${ext}`
+          } as any);
+
+          const uploadRes = await fetch(`${BASE_URL}/api/upload`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`
+            },
+            body: uploadData
+          });
+
+          if (uploadRes.ok) {
+            const uploadResult = await uploadRes.json();
+            resolvedAvatar = uploadResult.url;
+          } else {
+            console.warn("Failed to upload avatar image to /api/upload:", await uploadRes.text());
+          }
+        } catch (e) {
+          console.warn("Error uploading avatar image during onboarding:", e);
+        }
+      }
+
       // Step 1: Save own profile to appUsers
       await fetch(`${BASE_URL}/api/user/register`, {
         method: "POST",
@@ -250,7 +284,7 @@ export default function ProfileSetupScreen() {
           name: name.trim(),
           age,
           gender,
-          avatar: avatarA || undefined,
+          avatar: resolvedAvatar || undefined,
           whatLikes: selectedChips.join(", ") || undefined,
         }),
       });
@@ -304,19 +338,7 @@ export default function ProfileSetupScreen() {
       formData.append("partnerAAge", age.toString());
       formData.append("partnerAGender", gender);
       if (selectedChips.length) formData.append("whatALikes", selectedChips.join(", "));
-
-      if (avatarA && (avatarA.startsWith("file://") || avatarA.startsWith("http"))) {
-        const dotIndex = avatarA.lastIndexOf(".");
-        let ext = dotIndex !== -1 && dotIndex > avatarA.lastIndexOf("/") ? avatarA.substring(dotIndex + 1).toLowerCase() : "jpeg";
-        if (ext === "jpg") ext = "jpeg";
-        formData.append("partnerAAvatar", {
-          uri: Platform.OS === "ios" && avatarA.startsWith("file://") ? avatarA.replace("file://", "") : avatarA,
-          name: `avatar_A.${ext}`,
-          type: `image/${ext}`
-        } as any);
-      } else if (avatarA) {
-        formData.append("partnerAAvatar", avatarA);
-      }
+      if (resolvedAvatar) formData.append("partnerAAvatar", resolvedAvatar);
 
       const coupleRes = await apiFetch(`${BASE_URL}/api/couple`, {
         method: "POST",
