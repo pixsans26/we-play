@@ -14,6 +14,7 @@ import { textTasks, imageTasks, spinWheelItems, lotteryItems, adminUsers, couple
   cycleHistory,
   appConfig,
   appUsers,
+  presetAvatars,
 } from "./db/schema";
 import { sql } from "drizzle-orm";
 
@@ -1924,6 +1925,83 @@ app.post("/api/upload", authenticateToken, upload.single("file"), async (req: Re
   res.json({ url: fileUrl });
 });
 
+// ─── Preset Avatars Management ───────────────────────────────────────────────────
+app.get("/api/preset-avatars", async (req: Request, res: Response) => {
+  try {
+    const list = await db.select().from(presetAvatars).orderBy(presetAvatars.id);
+    res.json(list);
+  } catch (err) {
+    console.error("[GET /api/preset-avatars]", err);
+    res.status(500).json({ error: "Failed to fetch preset avatars" });
+  }
+});
+
+app.post("/api/preset-avatars", authenticateToken, upload.single("avatar"), async (req: Request, res: Response) => {
+  try {
+    const userPayload = (req as any).user;
+    if (userPayload.role !== "superadmin" && userPayload.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    const { name } = req.body;
+    if (!name || !req.file) {
+      return res.status(400).json({ error: "Name and image file are required" });
+    }
+    const url = `/uploads/${req.file.filename}`;
+    const [inserted] = await db.insert(presetAvatars).values({ name, url }).returning();
+    res.status(201).json(inserted);
+  } catch (err) {
+    console.error("[POST /api/preset-avatars]", err);
+    res.status(500).json({ error: "Failed to upload preset avatar" });
+  }
+});
+
+app.delete("/api/preset-avatars/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userPayload = (req as any).user;
+    if (userPayload.role !== "superadmin" && userPayload.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    const id = Number(req.params.id);
+    const [existing] = await db.select().from(presetAvatars).where(eq(presetAvatars.id, id));
+    if (!existing) {
+      return res.status(404).json({ error: "Preset avatar not found" });
+    }
+    await db.delete(presetAvatars).where(eq(presetAvatars.id, id));
+    
+    if (existing.url.startsWith("/uploads/") && !existing.url.startsWith("/uploads/presets/")) {
+      const filePath = path.join(__dirname, "../public", existing.url);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error("[DELETE /api/preset-avatars/:id]", err);
+    res.status(500).json({ error: "Failed to delete preset avatar" });
+  }
+});
+
+async function seedDefaultAvatars() {
+  try {
+    const existing = await db.select().from(presetAvatars);
+    if (existing.length === 0) {
+      const defaults = [
+        { name: "Boy", url: "/uploads/presets/avatar_boy.png" },
+        { name: "Girl", url: "/uploads/presets/avatar_girl.png" },
+        { name: "Cat", url: "/uploads/presets/avatar_cat.png" },
+        { name: "Dog", url: "/uploads/presets/avatar_dog.png" },
+      ];
+      for (const item of defaults) {
+        await db.insert(presetAvatars).values(item);
+      }
+      console.log("[Seeder] Populated default preset avatars");
+    }
+  } catch (err) {
+    console.error("[Seeder] Failed to populate default avatars:", err);
+  }
+}
+
 // ─── Start Server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 app.listen(PORT, "0.0.0.0", () => {
@@ -1931,4 +2009,6 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`   Health check: http://0.0.0.0:${PORT}/health`);
   console.log(`   Text tasks:   http://0.0.0.0:${PORT}/api/tasks/text`);
   console.log(`   Image tasks:  http://0.0.0.0:${PORT}/api/tasks/image\n`);
+  seedDefaultAvatars();
 });
+

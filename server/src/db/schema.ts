@@ -53,6 +53,14 @@ export const appConfig = pgTable("app_config", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const presetAvatars = pgTable("preset_avatars", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+
 // ─── CORE USER TABLE ───────────────────────────────────────────────────────────
 // Single source of truth for every person using the app.
 // Upserted on every Firebase auth state change.

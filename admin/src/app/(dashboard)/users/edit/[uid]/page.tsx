@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Loader2, Save, ArrowLeft, User, Upload, Sparkles, Check } from "lucide-react";
 import Link from "next/link";
 
-const PRESET_AVATARS = [
+const DEFAULT_PRESETS = [
   { name: "Boy", url: "/uploads/presets/avatar_boy.png" },
   { name: "Girl", url: "/uploads/presets/avatar_girl.png" },
   { name: "Cat", url: "/uploads/presets/avatar_cat.png" },
@@ -41,9 +41,23 @@ export default function EditUserPage() {
   const [whatLikes, setWhatLikes] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   
+  const [presetAvatars, setPresetAvatars] = useState<{ name: string; url: string }[]>(DEFAULT_PRESETS);
+  
   // File upload state
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
+
+  const loadPresetAvatars = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/preset-avatars`);
+      if (res.ok) {
+        const data = await res.json();
+        setPresetAvatars(data);
+      }
+    } catch (e) {
+      console.error("Failed to load preset avatars", e);
+    }
+  };
 
   const loadUser = async () => {
     if (!token) return;
@@ -78,6 +92,7 @@ export default function EditUserPage() {
   };
 
   useEffect(() => {
+    loadPresetAvatars();
     if (token) loadUser();
   }, [token, uid]);
 
@@ -183,7 +198,7 @@ export default function EditUserPage() {
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Choose Preset Avatar</p>
                 <div className="flex flex-wrap gap-3">
-                  {PRESET_AVATARS.map((preset) => {
+                  {presetAvatars.map((preset) => {
                     const isSelected = avatar === preset.url;
                     return (
                       <button

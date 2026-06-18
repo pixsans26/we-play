@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View, Text, Pressable, Alert,
   TextInput, ScrollView, KeyboardAvoidingView, Platform, Image, Modal
@@ -39,8 +39,26 @@ export default function EditProfileScreen() {
   const [avatarA, setAvatarA] = useState(coupleProfile?.partnerAAvatar ?? null);
   const [avatarB, setAvatarB] = useState(coupleProfile?.partnerBAvatar ?? null);
   const isPartnerBPending = !coupleProfile?.partnerBUid || coupleProfile.partnerBUid.startsWith("partner_b_pending_");
+  const [presetAvatars, setPresetAvatars] = useState<{ url: string; name?: string }[]>(PRESET_AVATARS_LOCAL);
   const [partnerBEmail, setPartnerBEmail] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
+
+  useEffect(() => {
+    const fetchPresets = async () => {
+      try {
+        const res = await apiFetch(`${BASE_URL}/api/preset-avatars`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setPresetAvatars(data);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch preset avatars:", err);
+      }
+    };
+    fetchPresets();
+  }, []);
 
   // Avatar picker modal state
   const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
@@ -357,9 +375,9 @@ export default function EditProfileScreen() {
             <Text style={{ color: isDark ? "#fff" : "#0f172a", fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
 
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
-              {PRESET_AVATARS_LOCAL.map((preset, i) => (
+              {presetAvatars.map((preset, i) => (
                 <Pressable key={i} onPress={() => selectPreset(preset.url)} style={{ width: 70, height: 70, borderRadius: 50, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
-                  <Image source={preset.source} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
+                  <Image source={getAvatarSource(preset.url)} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
                 </Pressable>
               ))}
             </View>

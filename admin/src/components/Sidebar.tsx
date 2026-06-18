@@ -32,6 +32,7 @@ const menuGroups = [
       { href: "/notifications", label: "Push Notifications", icon: Bell },
       { href: "/history", label: "Task History", icon: History },
       { href: "/content", label: "App Content", icon: FileEdit },
+      { href: "/preset-avatars", label: "Preset Avatars", icon: Image },
     ]
   },
   {
