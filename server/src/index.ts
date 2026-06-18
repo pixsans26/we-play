@@ -576,8 +576,88 @@ app.get("/api/admin/cycles/:coupleId/history", authenticateToken, async (req: Re
     const coupleId = Number(req.params.coupleId);
     if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
 
-    const history = await db.select().from(cycleHistory).where(eq(cycleHistory.coupleId, coupleId)).orderBy(sql`${cycleHistory.createdAt} DESC`);
-    res.json(history);
+    const manualHistory = await db.select().from(cycleHistory).where(eq(cycleHistory.coupleId, coupleId)).orderBy(sql`${cycleHistory.createdAt} ASC`);
+    const [tracking] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+
+    if (!tracking || !tracking.lastPeriodStart) {
+      return res.json(manualHistory);
+    }
+
+    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+    const avgCycle = tracking.averageCycleLength || 28;
+    const avgPeriod = tracking.averagePeriodLength || 5;
+
+    // 1. Gather all explicit manual logs
+    const manualMarkers: any[] = manualHistory.map(h => ({
+      ...h,
+      isPredicted: false
+    }));
+    
+    // Add the current config as an explicit log if it's not already in there
+    if (!manualMarkers.some(m => m.periodStart === tracking.lastPeriodStart)) {
+      manualMarkers.push({
+        id: "current",
+        coupleId,
+        periodStart: tracking.lastPeriodStart,
+        periodEnd: tracking.lastPeriodEnd,
+        cycleLength: avgCycle,
+        createdAt: tracking.updatedAt || new Date().toISOString(),
+        isPredicted: false
+      });
+    }
+
+    // Sort ascending by period start date
+    manualMarkers.sort((a, b) => new Date(a.periodStart).getTime() - new Date(b.periodStart).getTime());
+
+    const unified: any[] = [];
+    
+    // 2. Fill gaps and extrapolate
+    for (let i = 0; i < manualMarkers.length; i++) {
+      const currentMarker = manualMarkers[i];
+      unified.push(currentMarker);
+      
+      const isLastMarker = i === manualMarkers.length - 1;
+      let iterDate = new Date(currentMarker.periodStart);
+      
+      let endBoundary: Date;
+      if (!isLastMarker) {
+        endBoundary = new Date(manualMarkers[i + 1].periodStart);
+      } else {
+        endBoundary = new Date();
+        endBoundary.setMonth(endBoundary.getMonth() + 6);
+      }
+
+      let predCounter = 1;
+      while (true) {
+        iterDate = new Date(iterDate.getTime() + avgCycle * MS_PER_DAY);
+        
+        if (isLastMarker) {
+          if (iterDate > endBoundary) break; // Finished extrapolating 6 months
+        } else {
+          // If the next predicted date is within 14 days of the actual next marker, we skip it
+          const daysDiff = (endBoundary.getTime() - iterDate.getTime()) / MS_PER_DAY;
+          if (daysDiff < 14) {
+            break;
+          }
+        }
+        
+        const pEnd = new Date(iterDate.getTime() + avgPeriod * MS_PER_DAY);
+        
+        unified.push({
+          id: `pred_${currentMarker.id}_${predCounter++}`,
+          coupleId,
+          periodStart: iterDate.toISOString(),
+          periodEnd: pEnd.toISOString(),
+          cycleLength: avgCycle,
+          createdAt: currentMarker.createdAt,
+          isPredicted: true,
+        });
+      }
+    }
+
+    // 3. Return sorted DESC so the newest logs are first
+    unified.sort((a, b) => new Date(b.periodStart).getTime() - new Date(a.periodStart).getTime());
+    res.json(unified);
   } catch (err) {
     console.error("[GET /api/admin/cycles/:coupleId/history]", err);
     res.status(500).json({ error: "Failed to fetch cycle history" });

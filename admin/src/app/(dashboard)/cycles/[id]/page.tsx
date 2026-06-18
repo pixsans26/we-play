@@ -29,6 +29,7 @@ interface CycleHistoryRecord {
   periodEnd: string | null;
   cycleLength: number;
   createdAt: string;
+  isPredicted?: boolean;
 }
 
 export default function IndividualCycleDashboard() {
@@ -109,13 +110,14 @@ export default function IndividualCycleDashboard() {
 
   // Prepare chart data from history
   // history is ordered DESC, so reverse for chart
-  const chartData = [...history].reverse().map((h, i) => {
-    const dateObj = new Date(h.createdAt);
+  const chartData = [...history].reverse().map((h) => {
+    const dateObj = new Date(h.periodStart);
     return {
-      name: `Log ${i + 1}`,
-      date: dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+      name: dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
       cycleLength: h.cycleLength,
-      periodStart: h.periodStart
+      periodStart: h.periodStart,
+      isPredicted: !!h.isPredicted,
+      label: h.isPredicted ? "Predicted" : "Logged"
     };
   });
 
@@ -169,10 +171,10 @@ export default function IndividualCycleDashboard() {
             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
               <History className="w-5 h-5" />
             </div>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Total Logs</p>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Actual Logs</p>
           </div>
           <div>
-            <p className="text-4xl font-black text-slate-800">{history.length}</p>
+            <p className="text-4xl font-black text-slate-800">{history.filter(h => !h.isPredicted).length}</p>
           </div>
         </div>
       </div>
@@ -199,6 +201,12 @@ export default function IndividualCycleDashboard() {
                   cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
                   contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   labelStyle={{ fontWeight: 'bold', color: '#334155' }}
+                  formatter={(value: any, name: any, props: any) => {
+                    return [
+                      `${value} days (${props.payload.isPredicted ? 'Predicted' : 'Logged'})`,
+                      'Cycle Length'
+                    ];
+                  }}
                 />
                 <Line 
                   type="monotone" 
@@ -206,8 +214,21 @@ export default function IndividualCycleDashboard() {
                   name="Cycle Length (Days)" 
                   stroke="#6366f1" 
                   strokeWidth={3}
-                  dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
                   activeDot={{ r: 6, fill: '#4f46e5', strokeWidth: 0 }}
+                  dot={(props: any) => {
+                    const { cx, cy, payload } = props;
+                    return (
+                      <circle 
+                        key={`dot-${payload.name}`}
+                        cx={cx} 
+                        cy={cy} 
+                        r={payload.isPredicted ? 3 : 4} 
+                        fill={payload.isPredicted ? '#cbd5e1' : '#6366f1'} 
+                        stroke="#fff" 
+                        strokeWidth={2} 
+                      />
+                    );
+                  }}
                 />
               </LineChart>
             </ResponsiveContainer>
