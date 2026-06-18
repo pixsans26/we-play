@@ -9,7 +9,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Asset } from "expo-asset";
 import { Ionicons } from "@expo/vector-icons";
 import { env } from "@/lib/env";
-import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
+import { apiFetch, getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 
@@ -169,7 +169,7 @@ export default function EditProfileScreen() {
                 style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
               >
                 {avatarA ? (
-                  <Image source={{ uri: getAvatarUrl(avatarA) as string }} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
+                  <Image source={getAvatarSource(avatarA)} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
                 ) : (
                   <Ionicons name="camera-outline" size={32} color={isDark ? "rgba(255,255,255,0.5)" : "#9333ea"} />
                 )}
@@ -257,7 +257,7 @@ export default function EditProfileScreen() {
                 style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
               >
                 {avatarB ? (
-                  <Image source={{ uri: getAvatarUrl(avatarB) as string }} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
+                  <Image source={getAvatarSource(avatarB)} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
                 ) : (
                   <Ionicons name="camera-outline" size={32} color={isDark ? "rgba(255,255,255,0.5)" : "#9333ea"} />
                 )}

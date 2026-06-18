@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
+import { apiFetch, getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Animated, Easing, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -142,8 +142,8 @@ export default function ProfileScreen() {
               {/* Avatars */}
               <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 14 }}>
                 <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                  {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
-                    <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%", borderRadius: 30 }} resizeMode="cover" />
+                  {coupleProfile?.partnerAAvatar ? (
+                    <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: "100%", height: "100%", borderRadius: 30 }} resizeMode="cover" />
                   ) : (
                     <MaterialCommunityIcons name={coupleProfile?.partnerAGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerAGender?.toLowerCase() === "male" ? "face-man" : "account"} size={36} color="rgba(255,255,255,0.7)" style={{ marginTop: 2 }} />
                   )}
@@ -152,8 +152,8 @@ export default function ProfileScreen() {
                   <GradientIcon name="heart" size={18} />
                 </View>
                 <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "rgba(0,0,0,0.25)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                  {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
-                    <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%", borderRadius: 30 }} resizeMode="cover" />
+                  {coupleProfile?.partnerBAvatar ? (
+                    <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: "100%", height: "100%", borderRadius: 30 }} resizeMode="cover" />
                   ) : (
                     <MaterialCommunityIcons name={coupleProfile?.partnerBGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerBGender?.toLowerCase() === "male" ? "face-man" : "account"} size={36} color="rgba(255,255,255,0.7)" style={{ marginTop: 2 }} />
                   )}
@@ -207,8 +207,8 @@ export default function ProfileScreen() {
           <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "#fce7f3", alignItems: "center", justifyContent: "center" }}>
-                {getAvatarUrl(coupleProfile?.partnerAAvatar) ? (
-                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerAAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                {coupleProfile?.partnerAAvatar ? (
+                  <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: "100%", height: "100%" }} />
                 ) : (
                   <MaterialCommunityIcons name={coupleProfile?.partnerAGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerAGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#fbcfe8" : "#db2777"} />
                 )}
@@ -235,8 +235,8 @@ export default function ProfileScreen() {
           <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "#f3e8ff", alignItems: "center", justifyContent: "center" }}>
-                {getAvatarUrl(coupleProfile?.partnerBAvatar) ? (
-                  <Image source={{ uri: getAvatarUrl(coupleProfile?.partnerBAvatar) as string }} style={{ width: "100%", height: "100%" }} />
+                {coupleProfile?.partnerBAvatar ? (
+                  <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: "100%", height: "100%" }} />
                 ) : (
                   <MaterialCommunityIcons name={coupleProfile?.partnerBGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerBGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#e9d5ff" : "#9333ea"} />
                 )}

@@ -10,7 +10,7 @@ import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { useCycleStore } from "@/store/cycleStore";
 import { calculateCyclePredictions, generatePredictionCalendarMarks, CyclePredictions } from "@/lib/cycleCalculations";
-import { getAvatarUrl } from "@/lib/apiClient";
+import { getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
@@ -164,7 +164,8 @@ export default function PartnerScreen() {
   const isMeFemale = myGender?.toLowerCase() === "female";
   const isSingleMale = coupleProfile?.status === "pending" && !isMeFemale;
 
-  const displayAvatar = isMeFemale ? (myAvatar ? getAvatarUrl(myAvatar) : null) : (myPartnerAvatar ? getAvatarUrl(myPartnerAvatar) : null);
+  const displayAvatarPath = isMeFemale ? myAvatar : myPartnerAvatar;
+  const displayAvatarSource = getAvatarSource(displayAvatarPath);
   const displayName = myPartnerName || "Partner";
   const displayAge = myPartnerAge ? `${myPartnerAge} yrs` : "";
 
@@ -268,8 +269,8 @@ export default function PartnerScreen() {
         {/* Top Header Icons */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 32, paddingHorizontal: 22 }}>
           <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
-            {displayAvatar ? (
-              <Image source={{ uri: displayAvatar }} style={{ width: "100%", height: "100%", borderRadius: 24 }} />
+            {displayAvatarSource ? (
+              <Image source={displayAvatarSource} style={{ width: "100%", height: "100%", borderRadius: 24 }} />
             ) : (
               <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="person" size={24} color={theme.card.subtext} />

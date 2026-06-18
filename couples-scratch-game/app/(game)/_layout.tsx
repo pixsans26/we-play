@@ -7,7 +7,7 @@ import { BlurView } from "@/components/CustomBlurView";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
-import { getAvatarUrl, apiFetch } from "@/lib/apiClient";
+import { getAvatarUrl, apiFetch, getAvatarSource } from "@/lib/apiClient";
 import { env } from "@/lib/env";
 
 // Screens that should hide the tab bar
@@ -19,7 +19,7 @@ interface TabConfig {
   route: string;
   icon: string;
   label: string;
-  imageUrl?: string | null;
+  imageSource?: any;
 }
 
 function getProfileIcon(gender: string | null | undefined): string {
@@ -63,9 +63,9 @@ function TabItem({
   return (
     <Pressable style={styles.tabItem} onPress={handlePress}>
       <Animated.View style={[styles.tabInner, { transform: [{ scale }] }]}>
-        {tab.imageUrl ? (
+        {tab.imageSource ? (
           <View style={{ width: isActive ? 34 : 30, height: isActive ? 34 : 30, borderRadius: isActive ? 17 : 15, overflow: "hidden", borderWidth: 2, borderColor: isActive ? theme.nav.active : theme.nav.inactive }}>
-            <Image source={{ uri: tab.imageUrl }} style={{ width: "100%", height: "100%", borderRadius: isActive ? 17 : 15 }} resizeMode="cover" />
+            <Image source={tab.imageSource} style={{ width: "100%", height: "100%", borderRadius: isActive ? 17 : 15 }} resizeMode="cover" />
           </View>
         ) : tab.icon.startsWith("face-") || tab.icon === "account" ? (
           <MaterialCommunityIcons
@@ -209,7 +209,7 @@ export default function GameLayout() {
       route: "/(game)/profile",
       label: myFirstName,
       icon: getProfileIcon(myGender) as IoniconName,
-      imageUrl: getAvatarUrl(myAvatarUrl),
+      imageSource: getAvatarSource(myAvatarUrl),
     },
   ];
 

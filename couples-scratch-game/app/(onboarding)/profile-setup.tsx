@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
+import { apiFetch, getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import { useState, useRef, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView,
@@ -505,7 +505,7 @@ export default function ProfileSetupScreen() {
               <View style={{ alignItems: "center", marginVertical: 40 }}>
                 <TouchableOpacity onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.8} style={{ width: 160, height: 160, borderRadius: 80, backgroundColor: theme.input.bg, borderWidth: 3, borderColor: theme.input.border, alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {avatarA ? (
-                    <Image source={PRESET_AVATARS_LOCAL.find(p => p.url === avatarA)?.source || { uri: getAvatarUrl(avatarA) || undefined }} style={{ width: "100%", height: "100%", borderRadius: 80 }} resizeMode="cover" />
+                    <Image source={getAvatarSource(avatarA)} style={{ width: "100%", height: "100%", borderRadius: 80 }} resizeMode="cover" />
                   ) : (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                       <Ionicons name="camera-outline" size={48} color={theme.input.placeholder} />

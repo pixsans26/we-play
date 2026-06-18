@@ -1,7 +1,8 @@
 node_modules/
 dist/
 .env
-public/uploads/
+public/uploads/*
+!public/uploads/presets/
 *.log
 .kiro
 .vscode
