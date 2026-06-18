@@ -23,6 +23,13 @@ interface UserRow {
   isPartnerA: boolean | null;
 }
 
+const getAvatarUrl = (avatar: string | null) => {
+  if (!avatar) return null;
+  if (avatar.startsWith("http") || avatar.startsWith("data:")) return avatar;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  return `${baseUrl}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
+};
+
 export default function AppUsersPage() {
   const { data: session } = useSession();
   const token = session?.user ? (session.user as any).backendToken : "";
@@ -85,7 +92,7 @@ export default function AppUsersPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Total Users", value: data.length, color: "text-indigo-600 bg-indigo-50" },
-          { label: "Coupled", value: data.filter(r => r.coupleId).length, color: "text-rose-600 bg-rose-50" },
+          { label: "Couples", value: new Set(data.filter(r => r.coupleId && r.coupleStatus === "active").map(r => r.coupleId)).size, color: "text-rose-600 bg-rose-50" },
           { label: "Female", value: data.filter(r => r.user.gender?.toLowerCase() === "female").length, color: "text-pink-600 bg-pink-50" },
           { label: "Solo / Pending", value: data.filter(r => !r.coupleId || r.coupleStatus === "pending").length, color: "text-amber-600 bg-amber-50" },
         ].map(({ label, value, color }) => (
@@ -138,8 +145,26 @@ export default function AppUsersPage() {
                     <tr key={u.uid} className="hover:bg-slate-50/50 transition-colors">
                       <td className="p-4 pl-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-pink-400 flex items-center justify-center text-white font-black text-sm shrink-0">
-                            {displayName[0]?.toUpperCase() || "?"}
+                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-black text-sm shrink-0 overflow-hidden border border-slate-200">
+                            {u.avatar ? (
+                              <img
+                                src={getAvatarUrl(u.avatar) || ""}
+                                alt={displayName}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as any).style.display = 'none';
+                                  const parent = (e.target as any).parentElement;
+                                  if (parent) {
+                                    parent.innerText = displayName[0]?.toUpperCase() || "?";
+                                    parent.className += " bg-gradient-to-br from-indigo-400 to-pink-400 text-white";
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <span className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-400 to-pink-400 text-white">
+                                {displayName[0]?.toUpperCase() || "?"}
+                              </span>
+                            )}
                           </div>
                           <div>
                             <div className="font-bold text-slate-800">{displayName}</div>
