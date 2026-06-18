@@ -810,7 +810,7 @@ app.get("/api/admin/cycles/:coupleId/history", authenticateToken, async (req: Re
       manualHistory = await db.select().from(cycleHistory).where(eq(cycleHistory.femaleUid, femaleUid)).orderBy(sql`${cycleHistory.createdAt} ASC`);
     }
 
-    let tracking = null;
+    let tracking: any = null;
     if (coupleId) {
       const [row] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
       tracking = row;
@@ -924,7 +924,7 @@ app.get("/api/admin/cycles/:coupleId", authenticateToken, async (req: Request, r
       }
     }
 
-    let tracking = null;
+    let tracking: any = null;
     if (coupleId) {
       const [row] = await db
         .select({
