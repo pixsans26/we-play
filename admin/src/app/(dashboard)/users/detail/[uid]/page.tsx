@@ -317,8 +317,8 @@ export default function UserDetailPage() {
             )}
           </div>
 
-          {/* Period & Cycle Status (Only for female users or if cycle exists) */}
-          {(user.gender?.toLowerCase() === "female" || cycle) && (
+          {/* Period & Cycle Status (Only for non-male users when they are female or have cycle data) */}
+          {user.gender?.toLowerCase() !== "male" && (user.gender?.toLowerCase() === "female" || cycle) && (
             <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-md">
                 <Calendar className="w-4.5 h-4.5 text-pink-500" /> Period & Cycle Status
