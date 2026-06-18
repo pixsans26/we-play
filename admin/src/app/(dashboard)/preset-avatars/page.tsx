@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Loader2, Upload, Trash2, Image as ImageIcon, Plus, Check } from "lucide-react";
 import { useConfirm } from "@/components/ConfirmProvider";
+import toast from "react-hot-toast";
 
 interface PresetAvatar {
   id: number;
@@ -64,11 +65,11 @@ export default function PresetAvatarsPage() {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      alert("You must be logged in as an admin to perform this action.");
+      toast.error("You must be logged in as an admin to perform this action.");
       return;
     }
     if (!name.trim() || !avatarFile) {
-      alert("Please provide both a name and an image file.");
+      toast.error("Please provide both a name and an image file.");
       return;
     }
 
@@ -89,6 +90,7 @@ export default function PresetAvatarsPage() {
       if (res.ok) {
         const newPreset = await res.json();
         setPresets((prev) => [...prev, newPreset]);
+        toast.success("Preset avatar uploaded successfully!");
         // Reset form
         setName("");
         setAvatarFile(null);
@@ -96,11 +98,11 @@ export default function PresetAvatarsPage() {
         if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to upload preset avatar");
+        toast.error(err.error || "Failed to upload preset avatar");
       }
     } catch (err) {
       console.error(err);
-      alert("An unexpected error occurred during upload.");
+      toast.error("An unexpected error occurred during upload.");
     } finally {
       setUploading(false);
     }
@@ -127,13 +129,14 @@ export default function PresetAvatarsPage() {
 
       if (res.ok) {
         setPresets((prev) => prev.filter((p) => p.id !== id));
+        toast.success("Preset avatar deleted successfully!");
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to delete preset avatar");
+        toast.error(err.error || "Failed to delete preset avatar");
       }
     } catch (err) {
       console.error(err);
-      alert("An unexpected error occurred during deletion.");
+      toast.error("An unexpected error occurred during deletion.");
     } finally {
       setDeletingId(null);
     }

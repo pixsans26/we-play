@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2, Save, ArrowLeft, User, Upload, Sparkles, Check } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const DEFAULT_PRESETS = [
   { name: "Boy", url: "/uploads/presets/avatar_boy.png" },
@@ -79,12 +80,12 @@ export default function EditUserPage() {
           setAvatarPreviewUrl(getAvatarUrl(u.avatar));
         }
       } else {
-        alert("Failed to load user details");
+        toast.error("Failed to load user details");
         router.push("/users");
       }
     } catch (e) {
       console.error(e);
-      alert("Error loading user");
+      toast.error("Error loading user");
       router.push("/users");
     } finally {
       setLoading(false);
@@ -141,16 +142,16 @@ export default function EditUserPage() {
       });
 
       if (res.ok) {
-        alert("User profile updated successfully!");
+        toast.success("User profile updated successfully!");
         router.push(`/users/detail/${uid}`);
         router.refresh();
       } else {
         const errJson = await res.json();
-        alert(errJson.error || "Failed to update profile.");
+        toast.error(errJson.error || "Failed to update profile.");
       }
     } catch (e) {
       console.error(e);
-      alert("Failed to update profile.");
+      toast.error("Failed to update profile.");
     } finally {
       setSaving(false);
     }

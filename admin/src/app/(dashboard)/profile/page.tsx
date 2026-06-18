@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import DataTable from "@/components/DataTable";
 import { Settings, Loader2, AlertTriangle, Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ConfirmProvider";
+import toast from "react-hot-toast";
 
 interface AdminProfile {
   id: number; name: string; email: string;
@@ -48,7 +49,7 @@ export default function ProfilePage() {
 
     const secondConfirm = window.prompt("To confirm, type CLEAR ALL in all caps:");
     if (secondConfirm !== "CLEAR ALL") {
-      alert("Clear operation cancelled. Confirmation text did not match.");
+      toast.error("Clear operation cancelled. Confirmation text did not match.");
       return;
     }
 
@@ -62,14 +63,14 @@ export default function ProfilePage() {
         }
       });
       if (res.ok) {
-        alert("All user data has been successfully cleared.");
+        toast.success("All user data has been successfully cleared.");
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to clear user data.");
+        toast.error(err.error || "Failed to clear user data.");
       }
     } catch (err) {
       console.error(err);
-      alert("An unexpected error occurred while clearing user data.");
+      toast.error("An unexpected error occurred while clearing user data.");
     } finally {
       setClearing(false);
     }
@@ -101,8 +102,8 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <DataTable
             data={profiles}
-            onDelete={async () => { alert("Cannot delete admins from dashboard yet."); }}
-            onEdit={(user) => { alert("Viewing admin: " + user.name); }}
+            onDelete={async () => { toast.error("Cannot delete admins from dashboard yet."); }}
+            onEdit={(user) => { toast.success("Viewing admin: " + user.name); }}
             emptyMessage="No admin profiles found."
             columns={[
               { key: "name", label: "Admin Name", render: (t) => (
