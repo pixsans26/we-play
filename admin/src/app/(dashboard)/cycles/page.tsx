@@ -49,9 +49,14 @@ export default function CycleAnalyticsPage() {
       });
       if (!res.ok) throw new Error("Failed to fetch cycle analytics data");
       const json = await res.json();
-      setData(json);
+      if (Array.isArray(json)) {
+        setData(json);
+      } else {
+        throw new Error(json.error || "Invalid data format received from server");
+      }
     } catch (err: any) {
       setError(err.message);
+      setData([]);
     } finally {
       setLoading(false);
     }

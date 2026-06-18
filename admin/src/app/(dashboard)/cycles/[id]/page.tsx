@@ -49,7 +49,7 @@ export default function IndividualCycleDashboard() {
     setError("");
     try {
       const [trackingRes, historyRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cycles/${id}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cycles`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
         }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/cycles/${id}/history`, {
@@ -60,11 +60,19 @@ export default function IndividualCycleDashboard() {
       if (!trackingRes.ok) throw new Error("Failed to fetch tracking details");
       if (!historyRes.ok) throw new Error("Failed to fetch history");
 
-      const trackingData = await trackingRes.json();
+      const allTrackingData = await trackingRes.json();
       const historyData = await historyRes.json();
 
-      setTracking(trackingData);
-      setHistory(historyData);
+      const specificTracking = Array.isArray(allTrackingData) 
+        ? allTrackingData.find((item: any) => item.cycleTracking.coupleId === Number(id))
+        : null;
+
+      if (!specificTracking) {
+         throw new Error("Cycle tracking not found for this couple");
+      }
+
+      setTracking(specificTracking);
+      setHistory(Array.isArray(historyData) ? historyData : []);
     } catch (err: any) {
       setError(err.message);
     } finally {
