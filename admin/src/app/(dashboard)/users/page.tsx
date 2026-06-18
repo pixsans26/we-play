@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Users, Search, UserCheck, UserX, Mail, Calendar, Heart, Loader2, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { Users, Search, UserCheck, UserX, Mail, Calendar, Heart, Loader2, RefreshCw, Eye, Edit } from "lucide-react";
 
 interface AppUser {
   uid: string;
@@ -131,7 +132,7 @@ export default function AppUsersPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50">
-                  {["User", "Email", "Gender / Age", "Couple Status", "Joined"].map(h => (
+                  {["User", "Email", "Gender / Age", "Couple Status", "Joined", "Actions"].map(h => (
                     <th key={h} className="p-4 pl-6 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 first:pl-6">{h}</th>
                   ))}
                 </tr>
@@ -205,6 +206,16 @@ export default function AppUsersPage() {
                       <td className="p-4">
                         <div className="flex items-center gap-1.5 text-sm text-slate-500 font-medium">
                           <Calendar className="w-3.5 h-3.5 text-slate-300" />{joinedDate}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Link href={`/users/detail/${u.uid}`} title="View Details" className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors">
+                            <Eye className="w-4.5 h-4.5" />
+                          </Link>
+                          <Link href={`/users/edit/${u.uid}`} title="Edit User" className="p-1.5 text-slate-500 hover:text-[#5e51d9] hover:bg-slate-100 rounded-lg transition-colors">
+                            <Edit className="w-4.5 h-4.5" />
+                          </Link>
                         </div>
                       </td>
                     </tr>

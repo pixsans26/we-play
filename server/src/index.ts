@@ -640,6 +640,84 @@ app.get("/api/admin/app-users", authenticateToken, async (_req: Request, res: Re
   }
 });
 
+app.get("/api/admin/app-users/:uid", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const uid = String(req.params.uid);
+    const [user] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const [progress] = await db.select().from(userProgress).where(eq(userProgress.userUid, uid));
+
+    const [coupleRow] = await db
+      .select({
+        couple: couple,
+        isPartnerA: sql<boolean>`${couple.partnerAUid} = ${uid}`,
+      })
+      .from(couple)
+      .where(sql`${couple.partnerAUid} = ${uid} OR ${couple.partnerBUid} = ${uid}`);
+
+    let partner = null;
+    if (coupleRow) {
+      const partnerUid = coupleRow.isPartnerA ? coupleRow.couple.partnerBUid : coupleRow.couple.partnerAUid;
+      if (partnerUid) {
+        const [partnerUser] = await db.select().from(appUsers).where(eq(appUsers.uid, partnerUid as string));
+        partner = partnerUser || null;
+      }
+    }
+
+    res.json({
+      user,
+      progress: progress || null,
+      couple: coupleRow ? {
+        ...coupleRow.couple,
+        isPartnerA: coupleRow.isPartnerA
+      } : null,
+      partner
+    });
+  } catch (err) {
+    console.error("[GET /api/admin/app-users/:uid]", err);
+    res.status(500).json({ error: "Failed to fetch user details" });
+  }
+});
+
+app.put("/api/admin/app-users/:uid", authenticateToken, upload.single("avatar"), async (req: Request, res: Response) => {
+  try {
+    const uid = String(req.params.uid);
+    const { name, email, age, gender, whatLikes } = req.body;
+    let avatar = req.body.avatar;
+
+    if (req.file) {
+      avatar = `/uploads/${req.file.filename}`;
+    }
+
+    const [existing] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
+    if (!existing) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const updates: Record<string, any> = {
+      updatedAt: new Date(),
+    };
+
+    if (name !== undefined) updates.name = name;
+    if (email !== undefined) updates.email = email;
+    if (age !== undefined) updates.age = age ? Number(age) : null;
+    if (gender !== undefined) updates.gender = gender;
+    if (avatar !== undefined) updates.avatar = avatar;
+    if (whatLikes !== undefined) updates.whatLikes = whatLikes;
+
+    const [updated] = await db.update(appUsers).set(updates).where(eq(appUsers.uid, uid)).returning();
+    res.json(updated);
+  } catch (err) {
+    console.error("[PUT /api/admin/app-users/:uid]", err);
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
 // Clear all app users' data (Danger zone action)
 app.delete("/api/admin/clear-users-data", authenticateToken, async (_req: Request, res: Response) => {
   try {
