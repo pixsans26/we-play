@@ -3,7 +3,7 @@ import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
 import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, Pressable, Alert, Switch,
-  Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform, Animated, Easing
+  Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform, Animated, Easing, StyleSheet
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView as ExpoBlurView } from "expo-blur";
@@ -187,7 +187,7 @@ export default function SettingsScreen() {
   const heartColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.25)";
 
   return (
-    <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1, paddingTop: 56 }}>
+    <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
       {/* Decorative Background Hearts */}
       <Animated.View style={{ position: "absolute", top: 80, left: -20, transform: [{ rotate: "-15deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -20] }) }] }}>
         <Ionicons name="heart" size={120} color={heartColor} />
@@ -199,18 +199,36 @@ export default function SettingsScreen() {
         <Ionicons name="heart" size={150} color={heartColor} />
       </Animated.View>
 
-      {/* Header */}
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, paddingHorizontal: 22 }}>
+      {/* Blurred Header */}
+      <BlurView
+        intensity={80}
+        tint={isDark ? "dark" : "light"}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          paddingTop: 56,
+          paddingBottom: 16,
+          paddingHorizontal: 22,
+          flexDirection: "row",
+          alignItems: "center",
+          zIndex: 50,
+          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+        }}
+      >
         <View>
           <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
           <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_600SemiBold" }}>Customize your experience</Text>
         </View>
-      </View>
+      </BlurView>
 
       <FadingEdgeMask style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 16, paddingBottom: 120 }}
+          contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 140, paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
 

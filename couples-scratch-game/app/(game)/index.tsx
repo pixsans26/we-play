@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { apiFetch, getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { View, Text, Pressable, ScrollView, Image, Animated, Easing, Share } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, Animated, Easing, Share, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -95,6 +95,9 @@ export default function MainGameScreen() {
   const badge = LEVEL_BADGES[currentLevel] ?? LEVEL_BADGES[5];
   const partnerAName = coupleProfile?.partnerAName ?? "You";
   const partnerBName = coupleProfile?.partnerBName ?? "Partner";
+  const displayName = isPartnerA 
+    ? `${partnerAName} & ${partnerBName}` 
+    : `${partnerBName} & ${partnerAName}`;
   const turnName = currentTurn === "A" ? partnerAName : partnerBName;
   const myGender = isPartnerA ? coupleProfile?.partnerAGender : coupleProfile?.partnerBGender;
   const myAvatarIcon = myGender?.toLowerCase() === "female" ? "face-woman" : myGender?.toLowerCase() === "male" ? "face-man" : "account";
@@ -104,7 +107,7 @@ export default function MainGameScreen() {
   const heartColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.25)";
 
   return (
-    <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1, paddingTop: 56 }}>
+    <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
 
       {/* Decorative Background Hearts */}
       <Animated.View style={{ position: "absolute", top: 80, left: -20, transform: [{ rotate: "-15deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -20] }) }] }}>
@@ -117,14 +120,33 @@ export default function MainGameScreen() {
         <Ionicons name="heart" size={150} color={heartColor} />
       </Animated.View>
 
-      {/* Header */}
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20, paddingHorizontal: 22 }}>
+      {/* Blurred Header */}
+      <BlurView
+        intensity={80}
+        tint={isDark ? "dark" : "light"}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          paddingTop: 56,
+          paddingBottom: 16,
+          paddingHorizontal: 22,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          zIndex: 50,
+          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+        }}
+      >
         <View>
           <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, fontWeight: "600", marginBottom: 2 }}>
             Welcome back 💕
           </Text>
           <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
-            {partnerAName} & {partnerBName}
+            {displayName}
           </Text>
         </View>
         <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden" }}>
@@ -136,12 +158,12 @@ export default function MainGameScreen() {
             )}
           </BlurView>
         </Pressable>
-      </View>
+      </BlurView>
 
       <FadingEdgeMask style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 8, paddingBottom: 110 }}
+          contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 140, paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
         >
 

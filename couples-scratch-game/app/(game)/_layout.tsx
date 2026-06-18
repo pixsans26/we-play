@@ -65,7 +65,7 @@ function TabItem({
       <Animated.View style={[styles.tabInner, { transform: [{ scale }] }]}>
         {tab.imageSource ? (
           <View style={{ width: isActive ? 34 : 30, height: isActive ? 34 : 30, borderRadius: isActive ? 17 : 15, overflow: "hidden", borderWidth: 2, borderColor: isActive ? theme.nav.active : theme.nav.inactive }}>
-            <Image source={tab.imageSource} style={{ width: "100%", height: "100%", borderRadius: isActive ? 17 : 15 }} resizeMode="cover" />
+            <Image source={tab.imageSource} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
           </View>
         ) : tab.icon.startsWith("face-") || tab.icon === "account" ? (
           <MaterialCommunityIcons
@@ -194,14 +194,16 @@ export default function GameLayout() {
   const myName = isPartnerA ? coupleProfile?.partnerAName : coupleProfile?.partnerBName;
   const myFirstName = (myName ?? "Profile").split(" ")[0].slice(0, 10);
 
-  const showCycleOnly = coupleProfile?.status === "pending" && myGender?.toLowerCase() === "female";
+  const isFemale = myGender?.toLowerCase() === "female";
+  const partnerLabel = isFemale ? "Periods" : "Partner";
+  const partnerIcon = isFemale ? "flower" : "heart";
 
   const TABS: TabConfig[] = [
     { route: "/(game)/history", label: "History", icon: "time" },
     {
       route: "/(game)/partner",
-      label: showCycleOnly ? "My Cycle" : "Partner",
-      icon: showCycleOnly ? "calendar" : "heart",
+      label: partnerLabel,
+      icon: partnerIcon as IoniconName,
     },
     { route: "/(game)", label: "Home", icon: "home" },
     { route: "/(game)/settings", label: "Settings", icon: "settings-outline" },
@@ -220,50 +222,68 @@ export default function GameLayout() {
     <View style={{ flex: 1 }}>
       <Slot />
       {!shouldHideTabs && (
-        <BlurView
-          intensity={80}
-          tint={isDark ? "dark" : "light"}
+        <View
           style={[
-            styles.navContainer,
+            styles.navContainerShadow,
             {
-              backgroundColor: isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.85)", // dark blue or white glass
-              overflow: "hidden",
-            },
+              shadowColor: isDark ? "#000000" : "#94a3b8",
+            }
           ]}
         >
-          {TABS.map((tab) => {
-            const isActive =
-              tab.route === "/(game)"
-                ? pathname === "/" || pathname === "/(game)" || pathname === ""
-                : pathname.includes(tab.route.replace("/(game)", ""));
+          <BlurView
+            intensity={80}
+            tint={isDark ? "dark" : "light"}
+            style={[
+              styles.navContainer,
+              {
+                backgroundColor: isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.85)", // dark blue or white glass
+              },
+            ]}
+          >
+            {TABS.map((tab) => {
+              const isActive =
+                tab.route === "/(game)"
+                  ? pathname === "/" || pathname === "/(game)" || pathname === ""
+                  : pathname.includes(tab.route.replace("/(game)", ""));
 
-            return (
-              <TabItem
-                key={tab.route}
-                tab={tab}
-                isActive={isActive}
-                isDark={isDark}
-                onPress={() => router.push(tab.route as any)}
-              />
-            );
-          })}
-        </BlurView>
+              return (
+                <TabItem
+                  key={tab.route}
+                  tab={tab}
+                  isActive={isActive}
+                  isDark={isDark}
+                  onPress={() => router.push(tab.route as any)}
+                />
+              );
+            })}
+          </BlurView>
+        </View>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  navContainer: {
-    flexDirection: "row",
+  navContainerShadow: {
     position: "absolute",
     bottom: 30,
     left: 24,
     right: 24,
     borderRadius: 30,
+    backgroundColor: "transparent",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  navContainer: {
+    flexDirection: "row",
+    borderRadius: 30,
     paddingBottom: 12,
     paddingTop: 12,
     paddingHorizontal: 8,
+    overflow: "hidden",
+    width: "100%",
   },
   tabItem: {
     flex: 1,

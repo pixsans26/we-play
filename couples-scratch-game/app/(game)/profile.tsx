@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { apiFetch, getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Pressable, ScrollView, Animated, Easing, Image, TouchableOpacity } from "react-native";
+import { View, Text, Pressable, ScrollView, Animated, Easing, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -100,11 +100,14 @@ export default function ProfileScreen() {
   const badge = LEVEL_BADGES[currentLevel] ?? LEVEL_BADGES[5];
   const partnerAName = coupleProfile?.partnerAName ?? "Partner A";
   const partnerBName = coupleProfile?.partnerBName ?? "Partner B";
+  const displayName = isPartnerA 
+    ? `${partnerAName} & ${partnerBName}` 
+    : `${partnerBName} & ${partnerAName}`;
 
   const heartColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.25)";
 
   return (
-    <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1, paddingTop: 56 }}>
+    <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
 
       {/* Decorative Background Hearts */}
       <Animated.View style={{ position: "absolute", top: 80, left: -20, transform: [{ rotate: "-15deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -20] }) }] }}>
@@ -117,18 +120,36 @@ export default function ProfileScreen() {
         <Ionicons name="heart" size={150} color={heartColor} />
       </Animated.View>
 
-      {/* Header */}
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, paddingHorizontal: 22 }}>
+      {/* Blurred Header */}
+      <BlurView
+        intensity={80}
+        tint={isDark ? "dark" : "light"}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          paddingTop: 56,
+          paddingBottom: 16,
+          paddingHorizontal: 22,
+          flexDirection: "row",
+          alignItems: "center",
+          zIndex: 50,
+          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+        }}
+      >
         <View>
           <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Our Profile</Text>
           <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1 }}>Your couple stats</Text>
         </View>
-      </View>
+      </BlurView>
 
       <FadingEdgeMask style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 8, paddingBottom: 110 }}
+          contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 140, paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
         >
 
@@ -160,7 +181,7 @@ export default function ProfileScreen() {
                 </View>
               </View>
               <Text style={{ color: "#ffffff", fontSize: 22, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 4, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
-                {partnerAName} & {partnerBName}
+                {displayName}
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(0,0,0,0.2)", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 32, overflow: "hidden" }}>
                 <Text style={{ fontSize: 18 }}>{badge.emoji}</Text>
@@ -203,61 +224,110 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* Partner A card */}
-          <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-              <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "#fce7f3", alignItems: "center", justifyContent: "center" }}>
-                {coupleProfile?.partnerAAvatar ? (
-                  <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: "100%", height: "100%" }} />
-                ) : (
-                  <MaterialCommunityIcons name={coupleProfile?.partnerAGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerAGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#fbcfe8" : "#db2777"} />
-                )}
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
+          {/* Partner Cards (YOU shown first) */}
+          {isPartnerA ? (
+            <>
+              {/* Partner A card (YOU) */}
+              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                  <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "#fce7f3", alignItems: "center", justifyContent: "center" }}>
+                    {coupleProfile?.partnerAAvatar ? (
+                      <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: "100%", height: "100%" }} />
+                    ) : (
+                      <MaterialCommunityIcons name={coupleProfile?.partnerAGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerAGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#fbcfe8" : "#db2777"} />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
+                    </View>
+                    <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
+                      {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
+                      {coupleProfile?.partnerAAge && coupleProfile?.partnerAGender ? " · " : ""}
+                      {coupleProfile?.partnerAGender ?? ""}
+                    </Text>
+                  </View>
+                  <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
+                    <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
+                  </View>
                 </View>
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
-                  {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
-                  {coupleProfile?.partnerAAge && coupleProfile?.partnerAGender ? " · " : ""}
-                  {coupleProfile?.partnerAGender ?? ""}
-                </Text>
-              </View>
-              {isPartnerA && (
-                <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
-                  <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
-                </View>
-              )}
-            </View>
-          </LinearGradient>
+              </LinearGradient>
 
-          {/* Partner B card */}
-          <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-              <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "#f3e8ff", alignItems: "center", justifyContent: "center" }}>
-                {coupleProfile?.partnerBAvatar ? (
-                  <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: "100%", height: "100%" }} />
-                ) : (
-                  <MaterialCommunityIcons name={coupleProfile?.partnerBGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerBGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#e9d5ff" : "#9333ea"} />
-                )}
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
+              {/* Partner B card */}
+              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                  <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "#f3e8ff", alignItems: "center", justifyContent: "center" }}>
+                    {coupleProfile?.partnerBAvatar ? (
+                      <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: "100%", height: "100%" }} />
+                    ) : (
+                      <MaterialCommunityIcons name={coupleProfile?.partnerBGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerBGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#e9d5ff" : "#9333ea"} />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
+                    </View>
+                    <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
+                      {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
+                      {coupleProfile?.partnerBAge && coupleProfile?.partnerBGender ? " · " : ""}
+                      {coupleProfile?.partnerBGender ?? ""}
+                    </Text>
+                  </View>
                 </View>
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
-                  {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
-                  {coupleProfile?.partnerBAge && coupleProfile?.partnerBGender ? " · " : ""}
-                  {coupleProfile?.partnerBGender ?? ""}
-                </Text>
-              </View>
-              {!isPartnerA && (
-                <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
-                  <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
+              </LinearGradient>
+            </>
+          ) : (
+            <>
+              {/* Partner B card (YOU) */}
+              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                  <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "#f3e8ff", alignItems: "center", justifyContent: "center" }}>
+                    {coupleProfile?.partnerBAvatar ? (
+                      <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: "100%", height: "100%" }} />
+                    ) : (
+                      <MaterialCommunityIcons name={coupleProfile?.partnerBGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerBGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#e9d5ff" : "#9333ea"} />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
+                    </View>
+                    <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
+                      {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
+                      {coupleProfile?.partnerBAge && coupleProfile?.partnerBGender ? " · " : ""}
+                      {coupleProfile?.partnerBGender ?? ""}
+                    </Text>
+                  </View>
+                  <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
+                    <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
+                  </View>
                 </View>
-              )}
-            </View>
-          </LinearGradient>
+              </LinearGradient>
+
+              {/* Partner A card */}
+              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                  <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "#fce7f3", alignItems: "center", justifyContent: "center" }}>
+                    {coupleProfile?.partnerAAvatar ? (
+                      <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: "100%", height: "100%" }} />
+                    ) : (
+                      <MaterialCommunityIcons name={coupleProfile?.partnerAGender?.toLowerCase() === "female" ? "face-woman" : coupleProfile?.partnerAGender?.toLowerCase() === "male" ? "face-man" : "account"} size={28} color={isDark ? "#fbcfe8" : "#db2777"} />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
+                    </View>
+                    <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
+                      {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
+                      {coupleProfile?.partnerAAge && coupleProfile?.partnerAGender ? " · " : ""}
+                      {coupleProfile?.partnerAGender ?? ""}
+                    </Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </>
+          )}
 
           {/* Account */}
           <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 20 }}>

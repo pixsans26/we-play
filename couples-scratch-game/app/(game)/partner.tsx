@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Modal, Alert, Image, Share } from "react-native";
+import { View, Text, Pressable, ScrollView, Modal, Alert, Image, Share, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -189,19 +189,39 @@ export default function PartnerScreen() {
     return (
       <View style={{ flex: 1 }}>
         <AnimatedBackground currentPhase="Unconfigured" isDark={isDark} />
-        <View style={{ flex: 1, paddingTop: insets.top + 20, paddingHorizontal: 22 }}>
-          {/* Top Header Icons */}
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-            <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
-              <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name="person" size={24} color={theme.card.subtext} />
-              </View>
+        
+        {/* Fixed Blurred Header */}
+        <BlurView
+          intensity={80}
+          tint={isDark ? "dark" : "light"}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            paddingTop: insets.top + 12,
+            paddingBottom: 12,
+            paddingHorizontal: 22,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            zIndex: 50,
+            backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+          }}
+        >
+          <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
+            <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
+              <Ionicons name="person" size={24} color={theme.card.subtext} />
             </View>
-            <Pressable onPress={() => router.push("/notifications")} style={{ padding: 8 }}>
-              <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
-            </Pressable>
           </View>
+          <Pressable onPress={() => router.push("/notifications")} style={{ padding: 8 }}>
+            <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+          </Pressable>
+        </BlurView>
 
+        <View style={{ flex: 1, paddingTop: insets.top + 80, paddingHorizontal: 22 }}>
           {/* Invitation Content */}
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 24, paddingBottom: 60 }}>
             <View style={{
@@ -264,30 +284,49 @@ export default function PartnerScreen() {
   return (
     <View style={{ flex: 1 }}>
       <AnimatedBackground currentPhase={activePredictions.currentPhase} isDark={isDark} />
-      <View style={{ flex: 1, paddingTop: insets.top + 20 }}>
-
-        {/* Top Header Icons */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 32, paddingHorizontal: 22 }}>
-          <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
-            {displayAvatarSource ? (
-              <Image source={displayAvatarSource} style={{ width: "100%", height: "100%", borderRadius: 24 }} />
-            ) : (
-              <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name="person" size={24} color={theme.card.subtext} />
-              </View>
-            )}
-          </View>
-          <Pressable
-            onPress={() => router.push("/notifications")}
-            style={{ padding: 8 }}
-          >
-            <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
-          </Pressable>
+      
+      {/* Fixed Blurred Header */}
+      <BlurView
+        intensity={80}
+        tint={isDark ? "dark" : "light"}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          paddingTop: insets.top + 12,
+          paddingBottom: 12,
+          paddingHorizontal: 22,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          zIndex: 50,
+          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+        }}
+      >
+        <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
+          {displayAvatarSource ? (
+            <Image source={displayAvatarSource} style={{ width: "100%", height: "100%", borderRadius: 24 }} />
+          ) : (
+            <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
+              <Ionicons name="person" size={24} color={theme.card.subtext} />
+            </View>
+          )}
         </View>
+        <Pressable
+          onPress={() => router.push("/notifications")}
+          style={{ padding: 8 }}
+        >
+          <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+        </Pressable>
+      </BlurView>
 
+      <View style={{ flex: 1 }}>
         {/* Content */}
         <FadingEdgeMask style={{ flex: 1 }}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 22 }}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: insets.top + 80, paddingBottom: 120, paddingHorizontal: 22 }}>
 
             {/* Top Period Hero Section */}
             <View style={{ alignItems: "center", marginBottom: 40 }}>

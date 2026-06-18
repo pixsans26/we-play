@@ -9,6 +9,7 @@ import {
   Modal,
   Image,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -627,11 +628,25 @@ export default function HistoryScreen() {
       locations={[0, 0.5, 1]}
       style={{ flex: 1 }}
     >
-      <View
-        style={{ flex: 1, paddingTop: 56, paddingBottom: 40 }}
+      {/* Fixed Blurred Header & Filter Tabs */}
+      <BlurView
+        intensity={80}
+        tint={isDark ? "dark" : "light"}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          paddingTop: 56,
+          paddingBottom: 16,
+          zIndex: 50,
+          backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+        }}
       >
-        {/* Header */}
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, zIndex: 10, paddingHorizontal: 22 }}>
+        {/* Header Content */}
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16, paddingHorizontal: 22 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>Our History</Text>
             <Text style={{ color: theme.card.subtext, fontSize: 13, marginTop: 1 }}>Your past moments</Text>
@@ -656,42 +671,42 @@ export default function HistoryScreen() {
         </View>
 
         {/* Filter Tabs */}
-        <View style={{ marginBottom: 16 }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 22 }}>
-            {(["all", "romantic", "fun", "playful", "dare", "intimate", "lottery", "spin_wheel"] as const).map(f => {
-              const isActive = filter === f;
-              const label = f === "all" ? "All" : f === "lottery" ? "Heart Draw" : f === "spin_wheel" ? "Fate Wheel" : f.charAt(0).toUpperCase() + f.slice(1);
-              return (
-                  <Pressable
-                    key={f}
-                    onPress={() => setFilter(f as any)}
-                    style={{
-                      borderRadius: 32, overflow: "hidden",
-                      backgroundColor: theme.glass.bg,
-                      borderWidth: isActive ? 0 : 1,
-                      borderColor: isActive ? "transparent" : theme.glass.border,
-                      margin: isActive ? 1 : 0 // Prevent size jump from missing border
-                    }}
-                  >
-                    {isActive ? (
-                      <LinearGradient
-                        colors={theme.accentGradient as any}
-                        start={{x:0, y:0}} end={{x:1, y:1}}
-                        style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 32 }}
-                      >
-                        <Text style={{ color: "#fff", fontWeight: "800" }}>{label}</Text>
-                      </LinearGradient>
-                    ) : (
-                      <View style={{ paddingHorizontal: 18, paddingVertical: 10 }}>
-                        <Text style={{ color: theme.card.text, fontWeight: "800" }}>{label}</Text>
-                      </View>
-                    )}
-                  </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 22 }}>
+          {(["all", "romantic", "fun", "playful", "dare", "intimate", "lottery", "spin_wheel"] as const).map(f => {
+            const isActive = filter === f;
+            const label = f === "all" ? "All" : f === "lottery" ? "Heart Draw" : f === "spin_wheel" ? "Fate Wheel" : f.charAt(0).toUpperCase() + f.slice(1);
+            return (
+                <Pressable
+                  key={f}
+                  onPress={() => setFilter(f as any)}
+                  style={{
+                    borderRadius: 32, overflow: "hidden",
+                    backgroundColor: theme.glass.bg,
+                    borderWidth: isActive ? 0 : 1,
+                    borderColor: isActive ? "transparent" : theme.glass.border,
+                    margin: isActive ? 1 : 0 // Prevent size jump from missing border
+                  }}
+                >
+                  {isActive ? (
+                    <LinearGradient
+                      colors={theme.accentGradient as any}
+                      start={{x:0, y:0}} end={{x:1, y:1}}
+                      style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 32 }}
+                    >
+                      <Text style={{ color: "#fff", fontWeight: "800" }}>{label}</Text>
+                    </LinearGradient>
+                  ) : (
+                    <View style={{ paddingHorizontal: 18, paddingVertical: 10 }}>
+                      <Text style={{ color: theme.card.text, fontWeight: "800" }}>{label}</Text>
+                    </View>
+                  )}
+                </Pressable>
+            );
+          })}
+        </ScrollView>
+      </BlurView>
 
+      <View style={{ flex: 1, paddingBottom: 40 }}>
         {/* Combined history list */}
         <FadingEdgeMask style={{ flex: 1, marginBottom: 16 }}>
           <FlatList
@@ -701,10 +716,13 @@ export default function HistoryScreen() {
             ListEmptyComponent={renderEmptyState}
             showsVerticalScrollIndicator={false}
             style={{ flex: 1 }}
-            contentContainerStyle={filteredHistory.length === 0 ? { flex: 1, paddingHorizontal: 22 } : { paddingTop: 8, paddingBottom: 16, paddingHorizontal: 22 }}
+            contentContainerStyle={
+              filteredHistory.length === 0
+                ? { flex: 1, paddingHorizontal: 22, paddingTop: 190 }
+                : { paddingTop: 190, paddingBottom: 110, paddingHorizontal: 22 }
+            }
           />
         </FadingEdgeMask>
-
       </View>
 
       {/* Detail Modal */}
