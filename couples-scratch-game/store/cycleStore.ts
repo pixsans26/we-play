@@ -3,7 +3,8 @@ import { env } from "@/lib/env";
 import { useAuthStore } from "./authStore";
 
 interface CycleTracking {
-  coupleId: number;
+  coupleId: number | null;
+  femaleUid: string | null;
   averageCycleLength: number;
   averagePeriodLength: number;
   lastPeriodStart: string | null;
@@ -25,13 +26,13 @@ export const useCycleStore = create<CycleStore>((set, get) => ({
   error: null,
 
   fetchCycleConfig: async () => {
-    const { coupleProfile, sessionToken } = useAuthStore.getState();
-    const coupleId = coupleProfile?.id;
-    if (!coupleId) return;
+    const { coupleProfile, user, sessionToken } = useAuthStore.getState();
+    const identifier = coupleProfile?.id || user?.uid;
+    if (!identifier) return;
 
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`${env.EXPO_PUBLIC_API_URL}/api/cycle/${coupleId}`, {
+      const res = await fetch(`${env.EXPO_PUBLIC_API_URL}/api/cycle/${identifier}`, {
         headers: {
           "Authorization": `Bearer ${sessionToken}`
         }
@@ -52,13 +53,13 @@ export const useCycleStore = create<CycleStore>((set, get) => ({
   },
 
   updateCycleConfig: async (updates) => {
-    const { coupleProfile, sessionToken } = useAuthStore.getState();
-    const coupleId = coupleProfile?.id;
-    if (!coupleId) return;
+    const { coupleProfile, user, sessionToken } = useAuthStore.getState();
+    const identifier = coupleProfile?.id || user?.uid;
+    if (!identifier) return;
 
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`${env.EXPO_PUBLIC_API_URL}/api/cycle/${coupleId}`, {
+      const res = await fetch(`${env.EXPO_PUBLIC_API_URL}/api/cycle/${identifier}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",

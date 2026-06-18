@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Modal, Alert, Image } from "react-native";
+import { View, Text, Pressable, ScrollView, Modal, Alert, Image, Share } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -161,7 +161,8 @@ export default function PartnerScreen() {
 
   const myGender = isPartnerA ? coupleProfile?.partnerAGender : coupleProfile?.partnerBGender;
   const myAvatar = isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar;
-  const isMeFemale = myGender === "female";
+  const isMeFemale = myGender?.toLowerCase() === "female";
+  const isSingleMale = coupleProfile?.status === "pending" && !isMeFemale;
 
   const displayAvatar = isMeFemale ? (myAvatar ? getAvatarUrl(myAvatar) : null) : (myPartnerAvatar ? getAvatarUrl(myPartnerAvatar) : null);
   const displayName = myPartnerName || "Partner";
@@ -182,6 +183,82 @@ export default function PartnerScreen() {
   };
 
   const activePredictions = predictions || defaultPredictions;
+
+  if (isSingleMale) {
+    return (
+      <View style={{ flex: 1 }}>
+        <AnimatedBackground currentPhase="Unconfigured" isDark={isDark} />
+        <View style={{ flex: 1, paddingTop: insets.top + 20, paddingHorizontal: 22 }}>
+          {/* Top Header Icons */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+            <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
+              <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="person" size={24} color={theme.card.subtext} />
+              </View>
+            </View>
+            <Pressable onPress={() => router.push("/notifications")} style={{ padding: 8 }}>
+              <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+            </Pressable>
+          </View>
+
+          {/* Invitation Content */}
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 24, paddingBottom: 60 }}>
+            <View style={{
+              width: 100, height: 100, borderRadius: 50,
+              backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+              alignItems: "center", justifyContent: "center",
+              borderWidth: 2, borderColor: theme.accent,
+            }}>
+              <Ionicons name="heart-outline" size={50} color={theme.accent} />
+            </View>
+
+            <View style={{ gap: 8, alignItems: "center" }}>
+              <Text style={{ fontFamily: "DynaPuff_700Bold", fontSize: 26, color: theme.card.text, textAlign: "center" }}>
+                Invite Your Partner 💑
+              </Text>
+              <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 15, color: theme.card.subtext, textAlign: "center", lineHeight: 22 }}>
+                Connect with your partner to start tracking her period cycle together and unlock sharing moods and desires.
+              </Text>
+            </View>
+
+            {coupleProfile?.inviteCode ? (
+              <View style={{
+                backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                borderRadius: 24, borderWidth: 2, borderColor: theme.accent,
+                paddingHorizontal: 40, paddingVertical: 24, alignItems: "center", width: "100%"
+              }}>
+                <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_600SemiBold", marginBottom: 8, letterSpacing: 2 }}>INVITE CODE</Text>
+                <Text style={{ color: theme.accent, fontSize: 40, fontFamily: "DynaPuff_700Bold", letterSpacing: 6 }}>{coupleProfile.inviteCode}</Text>
+              </View>
+            ) : (
+              <Text style={{ color: theme.card.subtext, fontSize: 14 }}>Generating your invite code...</Text>
+            )}
+
+            <Pressable
+              onPress={async () => {
+                if (!coupleProfile?.inviteCode) return;
+                try {
+                  const shareMessage = `Join me on WePlay using this invite code: ${coupleProfile.inviteCode}`;
+                  await Share.share({ message: shareMessage });
+                } catch (err) {
+                  console.warn(err);
+                }
+              }}
+              style={{ borderRadius: 32, overflow: "hidden", width: "100%", marginTop: 8 }}
+            >
+              <LinearGradient
+                colors={["#ff2d6b", "#a82dff"]}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={{ paddingVertical: 18, alignItems: "center" }}
+              >
+                <Text style={{ color: "#ffffff", fontSize: 18, fontFamily: "DynaPuff_700Bold" }}>Share Invite Code 📲</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1 }}>

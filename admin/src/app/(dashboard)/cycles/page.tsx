@@ -16,7 +16,8 @@ interface Couple {
 
 interface CycleTracking {
   id: number;
-  coupleId: number;
+  coupleId: number | null;
+  femaleUid: string | null;
   averageCycleLength: number;
   averagePeriodLength: number;
   lastPeriodStart: string | null;
@@ -39,7 +40,7 @@ export default function CycleAnalyticsPage() {
   
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedCoupleId, setSelectedCoupleId] = useState<number | null>(null);
+  const [selectedCoupleId, setSelectedCoupleId] = useState<number | string | null>(null);
   const [selectedCoupleName, setSelectedCoupleName] = useState("");
 
   const fetchData = async () => {
@@ -70,7 +71,7 @@ export default function CycleAnalyticsPage() {
     fetchData();
   }, []);
 
-  const openHistory = (coupleId: number, name: string) => {
+  const openHistory = (coupleId: number | string, name: string) => {
     setSelectedCoupleId(coupleId);
     setSelectedCoupleName(name);
     setModalOpen(true);
@@ -204,7 +205,7 @@ export default function CycleAnalyticsPage() {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {data.map((row) => {
-                  let coupleName = `Couple #${row.cycleTracking.coupleId}`;
+                  let coupleName = "";
                   if (row.couple) {
                     let first = row.couple.partnerAName;
                     let second = row.couple.partnerBName || 'Partner';
@@ -218,6 +219,14 @@ export default function CycleAnalyticsPage() {
                     }
 
                     coupleName = `${first} & ${second}`;
+                  } else if (row.femaleName) {
+                    coupleName = `${row.femaleName} (Single)`;
+                  } else if (row.femaleEmail) {
+                    coupleName = `${row.femaleEmail} (Single)`;
+                  } else if (row.cycleTracking.femaleUid) {
+                    coupleName = `Single User (${row.cycleTracking.femaleUid.substring(0, 6)})`;
+                  } else {
+                    coupleName = `User #${row.cycleTracking.id}`;
                   }
                     
                   const updatedDate = new Date(row.cycleTracking.updatedAt).toLocaleDateString(undefined, {
@@ -228,7 +237,9 @@ export default function CycleAnalyticsPage() {
                     <tr key={row.cycleTracking.id} className="hover:bg-slate-50/50 transition-colors group">
                       <td className="p-4 pl-6">
                         <div className="font-bold text-slate-800">{coupleName}</div>
-                        <div className="text-xs font-semibold text-slate-400 mt-0.5">ID: {row.cycleTracking.coupleId}</div>
+                        <div className="text-xs font-semibold text-slate-400 mt-0.5">
+                          ID: {row.cycleTracking.coupleId || `User: ${row.cycleTracking.femaleUid}`}
+                        </div>
                       </td>
                       <td className="p-4">
                         {row.femaleEmail ? (
@@ -259,7 +270,7 @@ export default function CycleAnalyticsPage() {
                       </td>
                       <td className="p-4 pr-6 text-right">
                         <Link
-                          href={`/cycles/${row.cycleTracking.coupleId}`}
+                          href={`/cycles/${row.cycleTracking.coupleId || row.cycleTracking.femaleUid}`}
                           className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:border-indigo-300 hover:text-indigo-600 shadow-sm transition-all active:scale-95"
                         >
                           <History className="w-4 h-4" />

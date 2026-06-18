@@ -161,6 +161,9 @@ export default function ProfileSetupScreen() {
   const [age, setAge] = useState<number>(18);
   const [avatarA, setAvatarA] = useState<string | null>(null);
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
+  const [inviteCodeInput, setInviteCodeInput] = useState("");
+  const [isLinkedOnSignup, setIsLinkedOnSignup] = useState(false);
+  const [partnerName, setPartnerName] = useState("");
 
   // Avatar picker modal state
   const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
@@ -251,6 +254,48 @@ export default function ProfileSetupScreen() {
           whatLikes: selectedChips.join(", ") || undefined,
         }),
       });
+
+      if (inviteCodeInput.trim()) {
+        const trimmed = inviteCodeInput.trim().toUpperCase();
+        const joinRes = await fetch(`${BASE_URL}/api/couple/invite/join`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ uid: user.uid, inviteCode: trimmed }),
+        });
+
+        if (!joinRes.ok) {
+          const data = await joinRes.json();
+          throw new Error(data.error || "Failed to join couple with that code");
+        }
+
+        const coupleRecord = await joinRes.json();
+        setCoupleProfile({
+          id: coupleRecord.id,
+          partnerAUid: coupleRecord.partnerAUid,
+          partnerBUid: coupleRecord.partnerBUid ?? null,
+          partnerAName: coupleRecord.partnerAName,
+          partnerBName: coupleRecord.partnerBName ?? null,
+          partnerAAge: coupleRecord.partnerAAge ?? null,
+          partnerBAge: coupleRecord.partnerBAge ?? null,
+          partnerAAvatar: coupleRecord.partnerAAvatar ?? null,
+          partnerBAvatar: coupleRecord.partnerBAvatar ?? null,
+          partnerAGender: coupleRecord.partnerAGender ?? null,
+          partnerBGender: coupleRecord.partnerBGender ?? null,
+          whatALikes: coupleRecord.whatALikes ?? null,
+          whatBLikes: coupleRecord.whatBLikes ?? null,
+          status: coupleRecord.status ?? null,
+          inviteCode: coupleRecord.inviteCode ?? null,
+        });
+
+        useAuthStore.getState().setIsPartnerA(false); // They are Partner B!
+        setIsLinkedOnSignup(true);
+        setPartnerName(coupleRecord.partnerAName || "your partner");
+        setStep(5); // Show success screen (Step 5 dynamic check)
+        return;
+      }
 
       // Step 2: Create couple record
       const formData = new FormData();
@@ -354,14 +399,14 @@ export default function ProfileSetupScreen() {
               {step === 2 && "How old are you?"}
               {step === 3 && "Pick an Avatar"}
               {step === 4 && "Your Interests"}
-              {step === 5 && "Invite Your Partner 💌"}
+              {step === 5 && (isLinkedOnSignup ? "Profile Ready! 💖" : "Invite Your Partner 💌")}
             </Text>
             <Text style={{ color: theme.card.subtext, fontSize: 16 }}>
               {step === 1 && "Let's get to know you first."}
               {step === 2 && "You must be 18 or older to play."}
               {step === 3 && "Show off your personality."}
               {step === 4 && "What do you enjoy doing?"}
-              {step === 5 && "Share this code with your partner!"}
+              {step === 5 && (isLinkedOnSignup ? "Everything is set up." : "Share this code with your partner!")}
             </Text>
           </View>
 
@@ -389,6 +434,18 @@ export default function ProfileSetupScreen() {
                 <View>
                   <Text style={labelStyle}>Your Gender</Text>
                   <GenderSelector value={gender} onChange={setGender} theme={theme} />
+                </View>
+                <View>
+                  <Text style={labelStyle}>Partner's Invite Code (Optional)</Text>
+                  <TextInput
+                    style={[inputStyle(false), { fontSize: 18 }]}
+                    placeholder="e.g. XXXXXX"
+                    placeholderTextColor={theme.input.placeholder}
+                    value={inviteCodeInput}
+                    onChangeText={(t) => setInviteCodeInput(t.toUpperCase())}
+                    autoCapitalize="characters"
+                    maxLength={10}
+                  />
                 </View>
               </View>
             )}
@@ -443,7 +500,24 @@ export default function ProfileSetupScreen() {
 
             {step === 5 && (
               <View style={{ alignItems: "center", paddingVertical: 32, gap: 20 }}>
-                {inviteCode ? (
+                {isLinkedOnSignup ? (
+                  <>
+                    <View style={{
+                      width: 100, height: 100, borderRadius: 50,
+                      backgroundColor: "rgba(34,197,94,0.15)",
+                      alignItems: "center", justifyContent: "center",
+                      marginBottom: 16
+                    }}>
+                      <Ionicons name="checkmark-circle" size={64} color="#22c55e" />
+                    </View>
+                    <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "bold", fontFamily: "DynaPuff_700Bold", textAlign: "center" }}>
+                      Successfully Linked! 🎉
+                    </Text>
+                    <Text style={{ color: theme.card.subtext, fontSize: 16, textAlign: "center", fontFamily: "Nunito_600SemiBold", paddingHorizontal: 12 }}>
+                      You are now linked with <Text style={{ color: theme.accent, fontWeight: "bold" }}>{partnerName}</Text>. Let's start playing!
+                    </Text>
+                  </>
+                ) : inviteCode ? (
                   <>
                     <Text style={{ color: theme.card.subtext, fontSize: 15, textAlign: "center", fontFamily: "Nunito_600SemiBold" }}>
                       Share this code with your partner so they can join you in the app.

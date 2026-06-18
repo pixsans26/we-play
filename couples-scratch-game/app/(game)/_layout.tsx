@@ -189,25 +189,25 @@ export default function GameLayout() {
   }
 
   // Build profile tab label — first name, max 10 chars
-  const partnerFirstName = (coupleProfile.partnerAName ?? "Profile")
-    .split(" ")[0]
-    .slice(0, 10);
+  const myGender = isPartnerA ? coupleProfile?.partnerAGender : coupleProfile?.partnerBGender;
+  const myAvatarUrl = isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar;
+  const myName = isPartnerA ? coupleProfile?.partnerAName : coupleProfile?.partnerBName;
+  const myFirstName = (myName ?? "Profile").split(" ")[0].slice(0, 10);
 
-  const myGender = isPartnerA ? coupleProfile.partnerAGender : coupleProfile.partnerBGender;
-  const myAvatarUrl = isPartnerA ? coupleProfile.partnerAAvatar : coupleProfile.partnerBAvatar;
+  const showCycleOnly = coupleProfile?.status === "pending" && myGender?.toLowerCase() === "female";
 
   const TABS: TabConfig[] = [
     { route: "/(game)/history", label: "History", icon: "time" },
     {
       route: "/(game)/partner",
-      label: "Partner",
-      icon: "heart",
+      label: showCycleOnly ? "My Cycle" : "Partner",
+      icon: showCycleOnly ? "calendar" : "heart",
     },
     { route: "/(game)", label: "Home", icon: "home" },
     { route: "/(game)/settings", label: "Settings", icon: "settings-outline" },
     {
       route: "/(game)/profile",
-      label: partnerFirstName,
+      label: myFirstName,
       icon: getProfileIcon(myGender) as IoniconName,
       imageUrl: getAvatarUrl(myAvatarUrl),
     },

@@ -682,11 +682,38 @@ app.get("/api/admin/cycles", authenticateToken, async (_req: Request, res: Respo
 
 app.get("/api/admin/cycles/:coupleId/history", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const coupleId = Number(req.params.coupleId);
-    if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
+    const identifier = String(req.params.coupleId);
+    let coupleId: number | null = null;
+    let femaleUid: string | null = null;
 
-    const manualHistory = await db.select().from(cycleHistory).where(eq(cycleHistory.coupleId, coupleId)).orderBy(sql`${cycleHistory.createdAt} ASC`);
-    const [tracking] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+    if (/^\d+$/.test(identifier)) {
+      coupleId = Number(identifier);
+    } else {
+      femaleUid = identifier;
+      const [coupleRow] = await db.select().from(couple).where(
+        sql`${couple.partnerAUid} = ${femaleUid} OR ${couple.partnerBUid} = ${femaleUid}`
+      );
+      if (coupleRow) {
+        coupleId = coupleRow.id;
+      }
+    }
+
+    let manualHistory: any[] = [];
+    if (coupleId) {
+      manualHistory = await db.select().from(cycleHistory).where(eq(cycleHistory.coupleId, coupleId)).orderBy(sql`${cycleHistory.createdAt} ASC`);
+    } else if (femaleUid) {
+      manualHistory = await db.select().from(cycleHistory).where(eq(cycleHistory.femaleUid, femaleUid)).orderBy(sql`${cycleHistory.createdAt} ASC`);
+    }
+
+    let tracking = null;
+    if (coupleId) {
+      const [row] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+      tracking = row;
+    }
+    if (!tracking && femaleUid) {
+      const [row] = await db.select().from(cycleTracking).where(eq(cycleTracking.femaleUid, femaleUid));
+      tracking = row;
+    }
 
     if (!tracking || !tracking.lastPeriodStart) {
       return res.json(manualHistory);
@@ -706,7 +733,8 @@ app.get("/api/admin/cycles/:coupleId/history", authenticateToken, async (req: Re
     if (!manualMarkers.some(m => m.periodStart === tracking.lastPeriodStart)) {
       manualMarkers.push({
         id: "current",
-        coupleId,
+        coupleId: coupleId || null,
+        femaleUid: femaleUid || null,
         periodStart: tracking.lastPeriodStart,
         periodEnd: tracking.lastPeriodEnd,
         cycleLength: avgCycle,
@@ -775,19 +803,54 @@ app.get("/api/admin/cycles/:coupleId/history", authenticateToken, async (req: Re
 
 app.get("/api/admin/cycles/:coupleId", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const coupleId = Number(req.params.coupleId);
-    if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
+    const identifier = String(req.params.coupleId);
+    let coupleId: number | null = null;
+    let femaleUid: string | null = null;
 
-    const [tracking] = await db
-      .select({
-        couple: couple,
-        cycleTracking: cycleTracking,
-      })
-      .from(cycleTracking)
-      .where(eq(cycleTracking.coupleId, coupleId))
-      .leftJoin(couple, eq(cycleTracking.coupleId, couple.id));
+    if (/^\d+$/.test(identifier)) {
+      coupleId = Number(identifier);
+    } else {
+      femaleUid = identifier;
+      const [coupleRow] = await db.select().from(couple).where(
+        sql`${couple.partnerAUid} = ${femaleUid} OR ${couple.partnerBUid} = ${femaleUid}`
+      );
+      if (coupleRow) {
+        coupleId = coupleRow.id;
+      }
+    }
 
-    if (!tracking) return res.status(404).json({ error: "Cycle tracking not found for this couple" });
+    let tracking = null;
+    if (coupleId) {
+      const [row] = await db
+        .select({
+          couple: couple,
+          cycleTracking: cycleTracking,
+        })
+        .from(cycleTracking)
+        .where(eq(cycleTracking.coupleId, coupleId))
+        .leftJoin(couple, eq(cycleTracking.coupleId, couple.id));
+      tracking = row;
+    }
+    
+    if (!tracking && femaleUid) {
+      const [row] = await db
+        .select({
+          cycleTracking: cycleTracking,
+        })
+        .from(cycleTracking)
+        .where(eq(cycleTracking.femaleUid, femaleUid));
+      if (row) {
+        const [userRow] = await db.select().from(appUsers).where(eq(appUsers.uid, femaleUid));
+        tracking = {
+          couple: null,
+          cycleTracking: row,
+          femaleEmail: userRow?.email || null,
+          femaleName: userRow?.displayName || null,
+        };
+      }
+    }
+
+    if (!tracking) return res.status(404).json({ error: "Cycle tracking not found" });
 
     res.json(tracking);
   } catch (err) {
@@ -1094,14 +1157,24 @@ app.post("/api/couple/invite/join", authenticateToken, async (req: Request, res:
       return res.status(400).json({ error: "You cannot join your own couple" });
     }
 
+    // Fetch partner B's appUser details
+    const [userRecord] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
+
     // Link partner B and mark as active
     const [updated] = await db.update(couple)
-      .set({ partnerBUid: uid, status: 'active' })
+      .set({ 
+        partnerBUid: uid, 
+        status: 'active',
+        partnerBName: userRecord?.name || null,
+        partnerBAge: userRecord?.age || null,
+        partnerBGender: userRecord?.gender || null,
+        partnerBAvatar: userRecord?.avatar || null,
+        whatBLikes: userRecord?.whatLikes || null,
+      })
       .where(eq(couple.id, targetCouple.id))
       .returning();
 
     // Update cycle tracking femaleUid if partner B is female
-    const [userRecord] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
     if (userRecord?.gender?.toLowerCase() === 'female') {
       await db.update(cycleTracking)
         .set({ femaleUid: uid })
@@ -1287,16 +1360,42 @@ app.post("/api/progress", authenticateToken, async (req: Request, res: Response)
 // ─────────────────────────────────────────────────────────────────────────────
 // CYCLE TRACKING
 // ─────────────────────────────────────────────────────────────────────────────
-app.get("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Response) => {
+app.get("/api/cycle/:identifier", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const coupleId = Number(req.params.coupleId);
-    if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
+    const identifier = String(req.params.identifier);
+    let coupleId: number | null = null;
+    let femaleUid: string | null = null;
 
-    const [existing] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+    if (/^\d+$/.test(identifier)) {
+      coupleId = Number(identifier);
+    } else {
+      femaleUid = identifier;
+      // Also try to find if a couple exists for this userUid
+      const [coupleRow] = await db.select().from(couple).where(
+        sql`${couple.partnerAUid} = ${femaleUid} OR ${couple.partnerBUid} = ${femaleUid}`
+      );
+      if (coupleRow) {
+        coupleId = coupleRow.id;
+      }
+    }
+
+    let existing = null;
+    if (coupleId) {
+      const [row] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+      existing = row;
+    }
+    
+    // If not found by coupleId, try by femaleUid
+    if (!existing && femaleUid) {
+      const [row] = await db.select().from(cycleTracking).where(eq(cycleTracking.femaleUid, femaleUid));
+      existing = row;
+    }
+
     if (!existing) {
       // Return default values
       return res.json({
         coupleId,
+        femaleUid,
         averageCycleLength: 28,
         averagePeriodLength: 5,
         lastPeriodStart: null,
@@ -1311,30 +1410,53 @@ app.get("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Res
   }
 });
 
-app.put("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Response) => {
+app.put("/api/cycle/:identifier", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const coupleId = Number(req.params.coupleId);
-    if (isNaN(coupleId)) return res.status(400).json({ error: "Invalid couple ID" });
+    const identifier = String(req.params.identifier);
+    let coupleId: number | null = null;
+    let femaleUid: string | null = null;
+
+    if (/^\d+$/.test(identifier)) {
+      coupleId = Number(identifier);
+    } else {
+      femaleUid = identifier;
+      const [coupleRow] = await db.select().from(couple).where(
+        sql`${couple.partnerAUid} = ${femaleUid} OR ${couple.partnerBUid} = ${femaleUid}`
+      );
+      if (coupleRow) {
+        coupleId = coupleRow.id;
+      }
+    }
 
     const { averageCycleLength, averagePeriodLength, lastPeriodStart, lastPeriodEnd, isLocked } = req.body;
 
-    const [existing] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+    // Try to find if a cycleTracking row exists
+    let existing = null;
+    if (coupleId) {
+      const [row] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
+      existing = row;
+    }
+    if (!existing && femaleUid) {
+      const [row] = await db.select().from(cycleTracking).where(eq(cycleTracking.femaleUid, femaleUid));
+      existing = row;
+    }
 
-    // Auto-determine femaleUid from the couple record
-    const [coupleRow] = await db.select().from(couple).where(eq(couple.id, coupleId));
-    let femaleUid: string | null = null;
-    if (coupleRow) {
-      // Check partner A gender first, then partner B
-      const isBFemale = coupleRow.partnerBGender?.toLowerCase() === 'female';
-      const isAFemale = coupleRow.partnerAGender?.toLowerCase() === 'female';
-      if (isBFemale && coupleRow.partnerBUid) femaleUid = coupleRow.partnerBUid;
-      else if (isAFemale && coupleRow.partnerAUid) femaleUid = coupleRow.partnerAUid;
+    // Auto-determine femaleUid if not already set (if we have a coupleId)
+    if (coupleId && !femaleUid) {
+      const [coupleRow] = await db.select().from(couple).where(eq(couple.id, coupleId));
+      if (coupleRow) {
+        const isBFemale = coupleRow.partnerBGender?.toLowerCase() === 'female';
+        const isAFemale = coupleRow.partnerAGender?.toLowerCase() === 'female';
+        if (isBFemale && coupleRow.partnerBUid) femaleUid = coupleRow.partnerBUid;
+        else if (isAFemale && coupleRow.partnerAUid) femaleUid = coupleRow.partnerAUid;
+      }
     }
 
     if (existing) {
       if (existing.lastPeriodStart && lastPeriodStart && existing.lastPeriodStart !== lastPeriodStart) {
         await db.insert(cycleHistory).values({
           coupleId,
+          femaleUid,
           periodStart: existing.lastPeriodStart,
           periodEnd: existing.lastPeriodEnd,
           cycleLength: existing.averageCycleLength,
@@ -1343,15 +1465,16 @@ app.put("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Res
 
       const [updated] = await db.update(cycleTracking)
         .set({
+          coupleId: coupleId || existing.coupleId,
+          femaleUid: femaleUid || existing.femaleUid,
           averageCycleLength: averageCycleLength ?? existing.averageCycleLength,
           averagePeriodLength: averagePeriodLength ?? existing.averagePeriodLength,
           lastPeriodStart: lastPeriodStart !== undefined ? lastPeriodStart : existing.lastPeriodStart,
           lastPeriodEnd: lastPeriodEnd !== undefined ? lastPeriodEnd : existing.lastPeriodEnd,
           isLocked: isLocked !== undefined ? isLocked : existing.isLocked,
-          ...(femaleUid && { femaleUid }),
           updatedAt: new Date(),
         })
-        .where(eq(cycleTracking.coupleId, coupleId))
+        .where(eq(cycleTracking.id, existing.id))
         .returning();
       res.json(updated);
     } else {

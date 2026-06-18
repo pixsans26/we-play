@@ -15,7 +15,8 @@ interface Couple {
 
 interface CycleTracking {
   id: number;
-  coupleId: number;
+  coupleId: number | null;
+  femaleUid: string | null;
   averageCycleLength: number;
   averagePeriodLength: number;
   lastPeriodStart: string | null;
@@ -26,7 +27,8 @@ interface CycleTracking {
 
 interface CycleHistoryRecord {
   id: number;
-  coupleId: number;
+  coupleId: number | null;
+  femaleUid: string | null;
   periodStart: string;
   periodEnd: string | null;
   cycleLength: number;
@@ -38,7 +40,12 @@ export default function IndividualCycleDashboard() {
   const { id } = useParams();
   const router = useRouter();
   
-  const [tracking, setTracking] = useState<{ couple: Couple | null; cycleTracking: CycleTracking } | null>(null);
+  const [tracking, setTracking] = useState<{ 
+    couple: Couple | null; 
+    cycleTracking: CycleTracking;
+    femaleEmail?: string | null;
+    femaleName?: string | null;
+  } | null>(null);
   const [history, setHistory] = useState<CycleHistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -66,12 +73,19 @@ export default function IndividualCycleDashboard() {
       const allTrackingData = await trackingRes.json();
       const historyData = await historyRes.json();
 
+      const isNumeric = /^\d+$/.test(String(id));
       const specificTracking = Array.isArray(allTrackingData) 
-        ? allTrackingData.find((item: any) => item.cycleTracking.coupleId === Number(id))
+        ? allTrackingData.find((item: any) => {
+            if (isNumeric) {
+              return item.cycleTracking.coupleId === Number(id);
+            } else {
+              return item.cycleTracking.femaleUid === String(id);
+            }
+          })
         : null;
 
       if (!specificTracking) {
-         throw new Error("Cycle tracking not found for this couple");
+         throw new Error("Cycle tracking not found");
       }
 
       setTracking(specificTracking);
@@ -106,7 +120,7 @@ export default function IndividualCycleDashboard() {
     );
   }
 
-  let coupleName = `Couple #${id}`;
+  let coupleName = `User ${id}`;
   if (tracking.couple) {
     let first = tracking.couple.partnerAName;
     let second = tracking.couple.partnerBName || 'Partner';
@@ -120,6 +134,10 @@ export default function IndividualCycleDashboard() {
     }
 
     coupleName = `${first} & ${second}`;
+  } else if (tracking.femaleName) {
+    coupleName = `${tracking.femaleName} (Single)`;
+  } else if (tracking.femaleEmail) {
+    coupleName = `${tracking.femaleEmail} (Single)`;
   }
 
   // Prepare chart data from history

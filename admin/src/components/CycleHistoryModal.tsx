@@ -5,7 +5,8 @@ import { X, Calendar as CalendarIcon, Clock, Activity, Loader2 } from "lucide-re
 
 interface CycleHistoryRecord {
   id: number;
-  coupleId: number;
+  coupleId: number | null;
+  femaleUid: string | null;
   periodStart: string;
   periodEnd: string | null;
   cycleLength: number;
@@ -13,7 +14,7 @@ interface CycleHistoryRecord {
 }
 
 interface Props {
-  coupleId: number;
+  coupleId: number | string;
   coupleName: string;
   isOpen: boolean;
   onClose: () => void;

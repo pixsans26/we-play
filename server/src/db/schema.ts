@@ -124,8 +124,8 @@ export const taskHistory = pgTable("task_history", {
 // ─── CYCLE TRACKING ───────────────────────────────────────────────────────────
 export const cycleTracking = pgTable("cycle_tracking", {
   id: serial("id").primaryKey(),
-  coupleId: integer("couple_id").notNull().unique(),
-  femaleUid: text("female_uid"),                 // → appUsers.uid of the female partner
+  coupleId: integer("couple_id").unique(),       // Nullable for single users
+  femaleUid: text("female_uid").unique(),        // Nullable, unique link to female user
   averageCycleLength: integer("average_cycle_length").default(28).notNull(),
   averagePeriodLength: integer("average_period_length").default(5).notNull(),
   lastPeriodStart: text("last_period_start"),
@@ -136,7 +136,8 @@ export const cycleTracking = pgTable("cycle_tracking", {
 
 export const cycleHistory = pgTable("cycle_history", {
   id: serial("id").primaryKey(),
-  coupleId: integer("couple_id").notNull(),
+  coupleId: integer("couple_id"),                // Nullable for single users
+  femaleUid: text("female_uid"),                 // Nullable link to female user
   periodStart: text("period_start").notNull(),
   periodEnd: text("period_end"),
   cycleLength: integer("cycle_length").notNull(),
