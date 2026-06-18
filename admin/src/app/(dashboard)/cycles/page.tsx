@@ -10,6 +10,8 @@ interface Couple {
   id: number;
   partnerAName: string;
   partnerBName: string;
+  partnerAGender?: string;
+  partnerBGender?: string;
 }
 
 interface CycleTracking {
@@ -26,6 +28,8 @@ interface CycleTracking {
 interface CycleData {
   couple: Couple | null;
   cycleTracking: CycleTracking;
+  femaleEmail?: string | null;
+  femaleName?: string | null;
 }
 
 export default function CycleAnalyticsPage() {
@@ -191,6 +195,7 @@ export default function CycleAnalyticsPage() {
               <thead>
                 <tr className="bg-slate-50/50">
                   <th className="p-4 pl-6 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">Couple</th>
+                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">Female Partner Email</th>
                   <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">Average Cycle</th>
                   <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">Last Period Start</th>
                   <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">Last Updated</th>
@@ -199,9 +204,21 @@ export default function CycleAnalyticsPage() {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {data.map((row) => {
-                  const coupleName = row.couple 
-                    ? `${row.couple.partnerAName} & ${row.couple.partnerBName || 'Partner'}` 
-                    : `Couple #${row.cycleTracking.coupleId}`;
+                  let coupleName = `Couple #${row.cycleTracking.coupleId}`;
+                  if (row.couple) {
+                    let first = row.couple.partnerAName;
+                    let second = row.couple.partnerBName || 'Partner';
+                    
+                    const isBFemale = row.couple.partnerBGender?.toLowerCase() === 'female';
+                    const isAFemale = row.couple.partnerAGender?.toLowerCase() === 'female';
+
+                    if (isBFemale && !isAFemale) {
+                      first = row.couple.partnerBName || 'Partner';
+                      second = row.couple.partnerAName;
+                    }
+
+                    coupleName = `${first} & ${second}`;
+                  }
                     
                   const updatedDate = new Date(row.cycleTracking.updatedAt).toLocaleDateString(undefined, {
                     month: 'short', day: 'numeric', year: 'numeric'
@@ -212,6 +229,16 @@ export default function CycleAnalyticsPage() {
                       <td className="p-4 pl-6">
                         <div className="font-bold text-slate-800">{coupleName}</div>
                         <div className="text-xs font-semibold text-slate-400 mt-0.5">ID: {row.cycleTracking.coupleId}</div>
+                      </td>
+                      <td className="p-4">
+                        {row.femaleEmail ? (
+                          <div>
+                            <div className="text-sm font-semibold text-slate-700">{row.femaleEmail}</div>
+                            {row.femaleName && <div className="text-xs text-slate-400 mt-0.5">{row.femaleName}</div>}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-xs italic">Not registered</span>
+                        )}
                       </td>
                       <td className="p-4">
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-sm border border-indigo-100/50">

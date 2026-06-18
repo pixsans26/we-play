@@ -115,3 +115,13 @@ export const cycleHistory = pgTable("cycle_history", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Stores Firebase app users (uid + email) registered from the mobile app
+export const appUsers = pgTable("app_users", {
+  id: serial("id").primaryKey(),
+  uid: text("uid").notNull().unique(),          // Firebase UID
+  email: text("email"),                         // Firebase email (nullable if anonymous)
+  displayName: text("display_name"),
+  photoUrl: text("photo_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

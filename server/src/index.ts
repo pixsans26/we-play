@@ -8,10 +8,11 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db/client";
-import { textTasks, imageTasks, spinWheelItems, lotteryItems, adminUsers, couple, userProgress,  taskHistory,
+import { textTasks, imageTasks, spinWheelItems, lotteryItems, adminUsers, couple, userProgress, taskHistory,
   cycleTracking,
   cycleHistory,
   appConfig,
+  appUsers,
 } from "./db/schema";
 import { sql } from "drizzle-orm";
 
@@ -552,18 +553,60 @@ app.delete("/api/tasks/lottery/:id", authenticateToken, async (req: Request, res
 // Removed api/profile because it was just returning all admin profiles which isn't used
 
 // ─────────────────────────────────────────────────────────────────────────────
+// APP USERS (email registry from mobile app)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Mobile app calls this on login/signup to register the Firebase user's email
+app.post("/api/user/register", async (req: Request, res: Response) => {
+  try {
+    const { uid, email, displayName, photoUrl } = req.body;
+    if (!uid) return res.status(400).json({ error: "uid is required" });
+
+    const [existing] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
+    if (existing) {
+      const [updated] = await db.update(appUsers)
+        .set({ email: email ?? existing.email, displayName: displayName ?? existing.displayName, photoUrl: photoUrl ?? existing.photoUrl, updatedAt: new Date() })
+        .where(eq(appUsers.uid, uid))
+        .returning();
+      return res.json(updated);
+    }
+
+    const [inserted] = await db.insert(appUsers).values({ uid, email, displayName, photoUrl }).returning();
+    res.status(201).json(inserted);
+  } catch (err) {
+    console.error("[POST /api/user/register]", err);
+    res.status(500).json({ error: "Failed to register user" });
+  }
+});
+
+app.get("/api/admin/app-users", authenticateToken, async (_req: Request, res: Response) => {
+  try {
+    const users = await db.select().from(appUsers);
+    res.json(users);
+  } catch (err) {
+    console.error("[GET /api/admin/app-users]", err);
+    res.status(500).json({ error: "Failed to fetch app users" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // CYCLE ANALYTICS (ADMIN)
 // ─────────────────────────────────────────────────────────────────────────────
 
 app.get("/api/admin/cycles", authenticateToken, async (_req: Request, res: Response) => {
   try {
+    // Alias for second join
+    const partnerBUsers = appUsers;
     const cycles = await db
       .select({
         couple: couple,
         cycleTracking: cycleTracking,
+        femaleEmail: appUsers.email,
+        femaleName: appUsers.displayName,
       })
       .from(cycleTracking)
-      .leftJoin(couple, eq(cycleTracking.coupleId, couple.id));
+      .leftJoin(couple, eq(cycleTracking.coupleId, couple.id))
+      .leftJoin(appUsers, eq(appUsers.uid, couple.partnerBUid));
     res.json(cycles);
   } catch (err) {
     console.error("[GET /api/admin/cycles]", err);

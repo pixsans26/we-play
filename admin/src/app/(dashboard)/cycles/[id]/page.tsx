@@ -9,6 +9,8 @@ interface Couple {
   id: number;
   partnerAName: string;
   partnerBName: string;
+  partnerAGender?: string;
+  partnerBGender?: string;
 }
 
 interface CycleTracking {
@@ -104,9 +106,21 @@ export default function IndividualCycleDashboard() {
     );
   }
 
-  const coupleName = tracking.couple 
-    ? `${tracking.couple.partnerAName} & ${tracking.couple.partnerBName || 'Partner'}` 
-    : `Couple #${id}`;
+  let coupleName = `Couple #${id}`;
+  if (tracking.couple) {
+    let first = tracking.couple.partnerAName;
+    let second = tracking.couple.partnerBName || 'Partner';
+    
+    const isBFemale = tracking.couple.partnerBGender?.toLowerCase() === 'female';
+    const isAFemale = tracking.couple.partnerAGender?.toLowerCase() === 'female';
+
+    if (isBFemale && !isAFemale) {
+      first = tracking.couple.partnerBName || 'Partner';
+      second = tracking.couple.partnerAName;
+    }
+
+    coupleName = `${first} & ${second}`;
+  }
 
   // Prepare chart data from history
   // history is ordered DESC, so reverse for chart

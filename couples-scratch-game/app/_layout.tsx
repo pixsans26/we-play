@@ -153,6 +153,18 @@ export default function RootLayout() {
             } else {
               setSessionToken(null);
             }
+
+            // Register user email so admin can see it
+            fetch(`${API_URL}/api/user/register`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                photoUrl: user.photoURL,
+              }),
+            }).catch(() => {});
           } catch (e) {
             console.error("[auth] Token fetch failed", e);
             setSessionToken(null);
