@@ -264,12 +264,6 @@ export default function UserDetailPage() {
                       </p>
                     </div>
                   </div>
-                  <Link
-                    href={`/users/${couple.id}`}
-                    className="text-xs font-bold text-indigo-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm self-start sm:self-center"
-                  >
-                    Edit Couple Profile
-                  </Link>
                 </div>
 
                 {partner ? (
