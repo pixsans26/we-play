@@ -351,7 +351,7 @@ export default function TaskScratchScreen() {
       : 0;
 
     const scratcherUid = currentTurn === "A"
-      ? (coupleProfile?.partnerAUid ?? user.email!)
+      ? (coupleProfile?.partnerAUid ?? user.uid)
       : (coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`);
     const performerUid = currentTurn === "A"
       ? coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`
@@ -395,7 +395,7 @@ export default function TaskScratchScreen() {
     }
 
     const scratcherUid = currentTurn === "A"
-      ? (coupleProfile?.partnerAUid ?? user.email!)
+      ? (coupleProfile?.partnerAUid ?? user.uid)
       : (coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`);
     const performerUid = currentTurn === "A"
       ? coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`

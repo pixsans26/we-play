@@ -127,10 +127,10 @@ export default function GameLayout() {
 
   // Background real-time sync for couple profile
   useEffect(() => {
-    if (!user || !user.email) return;
+    if (!user || !user.uid) return;
 
     const fetchProfile = () => {
-      apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/couple/${user.email}`)
+      apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/couple/${user.uid}`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data) setCoupleProfile(data);

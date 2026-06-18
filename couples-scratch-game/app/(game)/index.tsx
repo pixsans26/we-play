@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { apiFetch, getAvatarUrl } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { View, Text, Pressable, ScrollView, Image, Animated, Easing } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, Animated, Easing, Share } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -144,6 +144,52 @@ export default function MainGameScreen() {
           contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 8, paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
         >
+
+          {/* Invite Partner Banner (if status is pending) */}
+          {coupleProfile?.status === "pending" && isPartnerA && (
+            <View style={{
+              borderRadius: 32, overflow: "hidden", marginBottom: 20,
+              borderWidth: 1.5, borderColor: theme.accent,
+            }}>
+              <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ padding: 20, alignItems: "center" }}>
+                <Ionicons name="mail-open-outline" size={32} color={theme.accent} style={{ marginBottom: 8 }} />
+                <Text style={{ color: theme.card.text, fontSize: 18, fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 4 }}>
+                  Invite Your Partner 💌
+                </Text>
+                <Text style={{ color: theme.card.subtext, fontSize: 13, textAlign: "center", fontFamily: "Nunito_600SemiBold", marginBottom: 12 }}>
+                  Your partner needs to enter this code to connect:
+                </Text>
+                <View style={{
+                  backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                  borderRadius: 16, paddingHorizontal: 24, paddingVertical: 10,
+                  borderWidth: 1, borderColor: "rgba(255,255,255,0.1)",
+                  marginBottom: 16,
+                }}>
+                  <Text style={{ color: theme.accent, fontSize: 24, fontFamily: "DynaPuff_700Bold", letterSpacing: 4 }}>
+                    {coupleProfile.inviteCode || "PENDING"}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={async () => {
+                    try {
+                      const shareMessage = `Join me on WePlay using this invite code: ${coupleProfile.inviteCode || ""}`;
+                      await Share.share({ message: shareMessage });
+                    } catch (err) {
+                      console.warn(err);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: theme.accent,
+                    borderRadius: 20, paddingHorizontal: 20, paddingVertical: 10,
+                    flexDirection: "row", alignItems: "center", gap: 8,
+                  }}
+                >
+                  <Ionicons name="share-social-outline" size={16} color="#ffffff" />
+                  <Text style={{ color: "#ffffff", fontSize: 14, fontFamily: "Nunito_700Bold" }}>Share Invite Code</Text>
+                </Pressable>
+              </BlurView>
+            </View>
+          )}
 
           {/* Level + Streak hero card */}
           <View style={{ marginBottom: 20 }}>

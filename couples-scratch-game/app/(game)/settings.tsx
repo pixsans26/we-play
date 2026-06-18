@@ -148,8 +148,8 @@ export default function SettingsScreen() {
   }
 
   function handleDeleteAccount() {
-    if (!user?.email) return;
-    const userEmailStr = user.email;
+    if (!user?.uid) return;
+    const userUidStr = user.uid;
     Alert.alert(
       "Delete Account",
       "Are you sure you want to delete your account? This will permanently delete your couple profile and all your progress. This action cannot be undone.",
@@ -160,12 +160,12 @@ export default function SettingsScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              const res = await apiFetch(`${BASE_URL}/api/couple/uid/${userEmailStr}`, {
+              const res = await apiFetch(`${BASE_URL}/api/couple/uid/${userUidStr}`, {
                 method: "DELETE"
               });
               if (res.ok) {
                 // Wipe local state
-                await resetHistory(userEmailStr);
+                await resetHistory(userUidStr);
                 if (coupleProfile?.partnerBUid) await resetHistory(coupleProfile.partnerBUid);
                 setHistoryAll([]);
                 setCoupleProfile(null);

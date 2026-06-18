@@ -147,6 +147,8 @@ export default function ProfileSetupScreen() {
 
   const [step, setStep] = useState<number>(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [coupleId, setCoupleId] = useState<number | null>(null);
 
   const isDark = useThemeStore((s) => s.isDark);
   const theme = getTheme(isDark);
@@ -159,9 +161,6 @@ export default function ProfileSetupScreen() {
   const [age, setAge] = useState<number>(18);
   const [avatarA, setAvatarA] = useState<string | null>(null);
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
-  const [partnerName, setPartnerName] = useState("");
-  const [partnerGender, setPartnerGender] = useState<string>("Female");
-  const [partnerAge, setPartnerAge] = useState<number>(18);
 
   // Avatar picker modal state
   const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
@@ -222,73 +221,70 @@ export default function ProfileSetupScreen() {
     } else if (step === 3) {
       setStep(4);
     } else if (step === 4) {
-      setStep(5);
+      handleSubmit();
     }
   };
 
   const handleSubmit = async () => {
     setErrorMsg("");
-    if (!partnerName.trim()) return setErrorMsg("Please enter your partner's name");
-    if (partnerAge < 18) return setErrorMsg("Partner must be at least 18");
-
-    if (!user || !user.email) {
+    if (!user || !user.uid) {
       return setErrorMsg("You must be logged in to complete setup");
     }
-
     setIsLoading(true);
-
     try {
       const BASE_URL = env.EXPO_PUBLIC_API_URL;
+      const token = useAuthStore.getState().sessionToken;
+
+      // Step 1: Save own profile to appUsers
+      await fetch(`${BASE_URL}/api/user/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoUrl: user.photoURL,
+          name: name.trim(),
+          age,
+          gender,
+          avatar: avatarA || undefined,
+          whatLikes: selectedChips.join(", ") || undefined,
+        }),
+      });
+
+      // Step 2: Create couple record
       const formData = new FormData();
-
-      formData.append("partnerAUid", user.email);
-      // partnerBUid is null since we removed email from setup
-
+      formData.append("partnerAUid", user.uid);
       formData.append("partnerAName", name.trim());
       formData.append("partnerAAge", age.toString());
       formData.append("partnerAGender", gender);
+      if (selectedChips.length) formData.append("whatALikes", selectedChips.join(", "));
 
-      formData.append("partnerBName", partnerName.trim());
-      formData.append("partnerBAge", partnerAge.toString());
-      formData.append("partnerBGender", partnerGender);
-
-      const prefsStr = selectedChips.join(", ");
-      if (prefsStr) formData.append("whatALikes", prefsStr);
-
-      if (avatarA) {
-        if (avatarA.startsWith("file://") || avatarA.startsWith("http")) {
-          const dotIndex = avatarA.lastIndexOf(".");
-          let ext = dotIndex !== -1 && dotIndex > avatarA.lastIndexOf("/") ? avatarA.substring(dotIndex + 1).toLowerCase() : "jpeg";
-          if (ext === "jpg") ext = "jpeg";
-          formData.append("partnerAAvatar", {
-            uri: Platform.OS === "ios" && avatarA.startsWith("file://") ? avatarA.replace("file://", "") : avatarA,
-            name: `avatar_A.${ext}`,
-            type: `image/${ext}`
-          } as any);
-        } else {
-          formData.append("partnerAAvatar", avatarA);
-        }
+      if (avatarA && (avatarA.startsWith("file://") || avatarA.startsWith("http"))) {
+        const dotIndex = avatarA.lastIndexOf(".");
+        let ext = dotIndex !== -1 && dotIndex > avatarA.lastIndexOf("/") ? avatarA.substring(dotIndex + 1).toLowerCase() : "jpeg";
+        if (ext === "jpg") ext = "jpeg";
+        formData.append("partnerAAvatar", {
+          uri: Platform.OS === "ios" && avatarA.startsWith("file://") ? avatarA.replace("file://", "") : avatarA,
+          name: `avatar_A.${ext}`,
+          type: `image/${ext}`
+        } as any);
+      } else if (avatarA) {
+        formData.append("partnerAAvatar", avatarA);
       }
 
-      // Create couple profile
       const coupleRes = await apiFetch(`${BASE_URL}/api/couple`, {
         method: "POST",
         body: formData,
       });
-
       if (!coupleRes.ok) throw new Error("Failed to create couple profile");
       const coupleRecord = await coupleRes.json();
 
-      // Create progress for Partner A
+      // Step 3: Create progress for self
       await apiFetch(`${BASE_URL}/api/progress`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userUid: user.email,
-          scratchCount: 0,
-          completedCount: 0,
-          currentLevel: 1
-        })
+        body: JSON.stringify({ userUid: user.uid, scratchCount: 0, completedCount: 0, currentLevel: 1 })
       });
 
       setCoupleProfile({
@@ -305,9 +301,13 @@ export default function ProfileSetupScreen() {
         partnerBGender: coupleRecord.partnerBGender ?? null,
         whatALikes: coupleRecord.whatALikes ?? null,
         whatBLikes: coupleRecord.whatBLikes ?? null,
+        status: coupleRecord.status ?? null,
+        inviteCode: coupleRecord.inviteCode ?? null,
       });
 
-      router.replace("/(game)");
+      setInviteCode(coupleRecord.inviteCode || null);
+      setCoupleId(coupleRecord.id);
+      setStep(5); // Show invite code screen
     } catch (error) {
       console.warn("[ProfileSetupScreen] save failed:", error);
       setErrorMsg("Failed to save profile. Please try again.");
@@ -342,7 +342,7 @@ export default function ProfileSetupScreen() {
             </View>
 
             <View style={{ flexDirection: "row", gap: 8, marginBottom: 24 }}>
-              {[1, 2, 3, 4, 5].map((idx) => (
+              {[1, 2, 3, 4].map((idx) => (
                 <View key={idx} style={{
                   flex: 1, height: 6, borderRadius: 3,
                   backgroundColor: step >= idx ? theme.accent : (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)")
@@ -354,14 +354,14 @@ export default function ProfileSetupScreen() {
               {step === 2 && "How old are you?"}
               {step === 3 && "Pick an Avatar"}
               {step === 4 && "Your Interests"}
-              {step === 5 && "Your Partner"}
+              {step === 5 && "Invite Your Partner 💌"}
             </Text>
             <Text style={{ color: theme.card.subtext, fontSize: 16 }}>
               {step === 1 && "Let's get to know you first."}
               {step === 2 && "You must be 18 or older to play."}
               {step === 3 && "Show off your personality."}
               {step === 4 && "What do you enjoy doing?"}
-              {step === 5 && "Who will you be playing with?"}
+              {step === 5 && "Share this code with your partner!"}
             </Text>
           </View>
 
@@ -442,33 +442,34 @@ export default function ProfileSetupScreen() {
             )}
 
             {step === 5 && (
-              <View style={{ gap: 24 }}>
-                <View>
-                  <Text style={labelStyle}>Partner's Name</Text>
-                  <TextInput
-                    style={[inputStyle(false), { fontSize: 20 }]}
-                    placeholder="Partner's Name"
-                    placeholderTextColor={theme.input.placeholder}
-                    value={partnerName}
-                    onChangeText={setPartnerName}
-                    autoCapitalize="words"
-                  />
-                </View>
-                <View>
-                  <Text style={labelStyle}>Partner's Gender</Text>
-                  <GenderSelector value={partnerGender} onChange={setPartnerGender} theme={theme} />
-                </View>
-                <View>
-                  <Text style={labelStyle}>Partner's Age</Text>
-                  <AgeWheelPicker selectedAge={partnerAge} setAgeValue={setPartnerAge} theme={theme} isDark={isDark} />
-                </View>
+              <View style={{ alignItems: "center", paddingVertical: 32, gap: 20 }}>
+                {inviteCode ? (
+                  <>
+                    <Text style={{ color: theme.card.subtext, fontSize: 15, textAlign: "center", fontFamily: "Nunito_600SemiBold" }}>
+                      Share this code with your partner so they can join you in the app.
+                    </Text>
+                    <View style={{
+                      backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                      borderRadius: 24, borderWidth: 2, borderColor: theme.accent,
+                      paddingHorizontal: 40, paddingVertical: 24, alignItems: "center"
+                    }}>
+                      <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_600SemiBold", marginBottom: 8, letterSpacing: 2 }}>INVITE CODE</Text>
+                      <Text style={{ color: theme.accent, fontSize: 40, fontFamily: "DynaPuff_700Bold", letterSpacing: 6 }}>{inviteCode}</Text>
+                    </View>
+                    <Text style={{ color: theme.card.subtext, fontSize: 13, textAlign: "center", fontFamily: "Nunito_400Regular" }}>
+                      Your partner can enter this code after signing up to link your accounts.
+                    </Text>
+                  </>
+                ) : (
+                  <Text style={{ color: theme.card.subtext, fontSize: 14, textAlign: "center" }}>Generating your invite code...</Text>
+                )}
               </View>
             )}
           </View>
 
           {/* Navigation Buttons */}
           <View style={{ marginTop: "auto", paddingTop: 20, gap: 16 }}>
-            {step < 5 ? (
+            {step < 4 ? (
               <>
                 <TouchableOpacity onPress={handleNext} activeOpacity={0.8}>
                   <LinearGradient colors={["#ff2d6b", "#a82dff"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 32, paddingVertical: 18, alignItems: "center" }}>
@@ -481,10 +482,17 @@ export default function ProfileSetupScreen() {
                   </TouchableOpacity>
                 )}
               </>
-            ) : (
-              <TouchableOpacity onPress={handleSubmit} disabled={isLoading} activeOpacity={0.8}>
+            ) : step === 4 ? (
+              <TouchableOpacity onPress={handleNext} disabled={isLoading} activeOpacity={0.8}>
                 <LinearGradient colors={["#ff2d6b", "#a82dff"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 32, paddingVertical: 18, alignItems: "center" }}>
-                  {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold" }}>Start Playing</Text>}
+                  {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold" }}>Create My Profile</Text>}
+                </LinearGradient>
+              </TouchableOpacity>
+            ) : (
+              // Step 5: invite code shown — just a "Start Playing" button
+              <TouchableOpacity onPress={() => router.replace("/(game)")} activeOpacity={0.8}>
+                <LinearGradient colors={["#ff2d6b", "#a82dff"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 32, paddingVertical: 18, alignItems: "center" }}>
+                  <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold" }}>Start Playing 🎉</Text>
                 </LinearGradient>
               </TouchableOpacity>
             )}

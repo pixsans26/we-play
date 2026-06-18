@@ -28,6 +28,8 @@ export interface CoupleProfile {
   partnerBGender: string | null;
   whatALikes: string | null;
   whatBLikes: string | null;
+  status?: string | null;
+  inviteCode?: string | null;
 }
 
 export interface UserProgress {

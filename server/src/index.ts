@@ -553,25 +553,31 @@ app.delete("/api/tasks/lottery/:id", authenticateToken, async (req: Request, res
 // Removed api/profile because it was just returning all admin profiles which isn't used
 
 // ─────────────────────────────────────────────────────────────────────────────
-// APP USERS (email registry from mobile app)
+// APP USERS — profile registry for every mobile user
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Mobile app calls this on login/signup to register the Firebase user's email
+// Called on every Firebase auth state change; upserts email + full profile
 app.post("/api/user/register", async (req: Request, res: Response) => {
   try {
-    const { uid, email, displayName, photoUrl } = req.body;
+    const { uid, email, displayName, photoUrl, name, age, gender, avatar, whatLikes } = req.body;
     if (!uid) return res.status(400).json({ error: "uid is required" });
 
     const [existing] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
     if (existing) {
-      const [updated] = await db.update(appUsers)
-        .set({ email: email ?? existing.email, displayName: displayName ?? existing.displayName, photoUrl: photoUrl ?? existing.photoUrl, updatedAt: new Date() })
-        .where(eq(appUsers.uid, uid))
-        .returning();
+      const updates: Record<string, any> = { updatedAt: new Date() };
+      if (email !== undefined) updates.email = email;
+      if (displayName !== undefined) updates.displayName = displayName;
+      if (photoUrl !== undefined) updates.photoUrl = photoUrl;
+      if (name !== undefined) updates.name = name;
+      if (age !== undefined) updates.age = age;
+      if (gender !== undefined) updates.gender = gender;
+      if (avatar !== undefined) updates.avatar = avatar;
+      if (whatLikes !== undefined) updates.whatLikes = whatLikes;
+      const [updated] = await db.update(appUsers).set(updates).where(eq(appUsers.uid, uid)).returning();
       return res.json(updated);
     }
 
-    const [inserted] = await db.insert(appUsers).values({ uid, email, displayName, photoUrl }).returning();
+    const [inserted] = await db.insert(appUsers).values({ uid, email, displayName, photoUrl, name, age, gender, avatar, whatLikes }).returning();
     res.status(201).json(inserted);
   } catch (err) {
     console.error("[POST /api/user/register]", err);
@@ -579,9 +585,51 @@ app.post("/api/user/register", async (req: Request, res: Response) => {
   }
 });
 
+// Get own full profile from appUsers
+app.get("/api/user/profile/:uid", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const uid = String(req.params.uid);
+    const [user] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    console.error("[GET /api/user/profile/:uid]", err);
+    res.status(500).json({ error: "Failed to fetch user profile" });
+  }
+});
+
+// Update own profile
+app.put("/api/user/profile", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { uid, name, age, gender, avatar, whatLikes } = req.body;
+    if (!uid) return res.status(400).json({ error: "uid is required" });
+    const updates: Record<string, any> = { updatedAt: new Date() };
+    if (name !== undefined) updates.name = name;
+    if (age !== undefined) updates.age = age;
+    if (gender !== undefined) updates.gender = gender;
+    if (avatar !== undefined) updates.avatar = avatar;
+    if (whatLikes !== undefined) updates.whatLikes = whatLikes;
+    const [updated] = await db.update(appUsers).set(updates).where(eq(appUsers.uid, uid)).returning();
+    if (!updated) return res.status(404).json({ error: "User not found" });
+    res.json(updated);
+  } catch (err) {
+    console.error("[PUT /api/user/profile]", err);
+    res.status(500).json({ error: "Failed to update user profile" });
+  }
+});
+
 app.get("/api/admin/app-users", authenticateToken, async (_req: Request, res: Response) => {
   try {
-    const users = await db.select().from(appUsers);
+    // Join with couple to show partnership status
+    const users = await db
+      .select({
+        user: appUsers,
+        coupleId: couple.id,
+        coupleStatus: couple.status,
+        isPartnerA: sql<boolean>`${couple.partnerAUid} = ${appUsers.uid}`,
+      })
+      .from(appUsers)
+      .leftJoin(couple, sql`${couple.partnerAUid} = ${appUsers.uid} OR ${couple.partnerBUid} = ${appUsers.uid}`);
     res.json(users);
   } catch (err) {
     console.error("[GET /api/admin/app-users]", err);
@@ -595,8 +643,6 @@ app.get("/api/admin/app-users", authenticateToken, async (_req: Request, res: Re
 
 app.get("/api/admin/cycles", authenticateToken, async (_req: Request, res: Response) => {
   try {
-    // Alias for second join
-    const partnerBUsers = appUsers;
     const cycles = await db
       .select({
         couple: couple,
@@ -606,7 +652,7 @@ app.get("/api/admin/cycles", authenticateToken, async (_req: Request, res: Respo
       })
       .from(cycleTracking)
       .leftJoin(couple, eq(cycleTracking.coupleId, couple.id))
-      .leftJoin(appUsers, eq(appUsers.uid, couple.partnerBUid));
+      .leftJoin(appUsers, eq(appUsers.uid, cycleTracking.femaleUid));
     res.json(cycles);
   } catch (err) {
     console.error("[GET /api/admin/cycles]", err);
@@ -854,15 +900,34 @@ app.get("/api/couples/:id", authenticateToken, async (req: Request, res: Respons
 app.get("/api/couple/:uid", authenticateToken, async (req: Request, res: Response) => {
   try {
     const uid = String(req.params.uid);
-    // Find couple profile where this user is partnerA or partnerB
-    const profiles = await db.select().from(couple).where(
-      sql`${couple.partnerAUid} = ${uid} OR ${couple.partnerBUid} = ${uid}`
-    );
+    const partnerA = db.select().from(appUsers).as("partnerA");
+    const partnerB = db.select().from(appUsers).as("partnerB");
+    
+    const profiles = await db
+      .select({
+        couple: couple,
+        partnerAUser: { uid: appUsers.uid, name: appUsers.name, email: appUsers.email, gender: appUsers.gender, age: appUsers.age, avatar: appUsers.avatar, whatLikes: appUsers.whatLikes },
+      })
+      .from(couple)
+      .where(sql`${couple.partnerAUid} = ${uid} OR ${couple.partnerBUid} = ${uid}`)
+      .leftJoin(appUsers, eq(appUsers.uid, couple.partnerAUid));
+
     if (profiles.length === 0) {
       res.status(404).json({ error: "Couple profile not found" });
       return;
     }
-    res.json(profiles[0]);
+    
+    const row = profiles[0];
+    const coupleData = row.couple;
+    
+    // Also fetch partner B's appUser record if linked
+    let partnerBUser = null;
+    if (coupleData.partnerBUid) {
+      const [pb] = await db.select().from(appUsers).where(eq(appUsers.uid, coupleData.partnerBUid));
+      partnerBUser = pb || null;
+    }
+    
+    res.json({ ...coupleData, partnerAUser: row.partnerAUser, partnerBUser });
   } catch (err) {
     console.error("[GET /api/couple/:uid]", err);
     res.status(500).json({ error: "Failed to fetch couple profile" });
@@ -906,26 +971,137 @@ app.post("/api/couple", authenticateToken, upload.fields([{ name: "partnerAAvata
       if (existing) targetId = existing.id;
     }
 
+    let responseRecord;
     if (targetId) {
       const [updated] = await db
         .update(couple)
         .set(dataToSave)
         .where(eq(couple.id, targetId))
         .returning();
-      res.json(updated);
+      responseRecord = updated;
     } else {
+      // Generate a unique 6-char invite code
+      const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+      let inviteCode = generateCode();
+      // Retry if collision
+      let attempts = 0;
+      while (attempts < 5) {
+        const [collision] = await db.select().from(couple).where(eq(couple.inviteCode, inviteCode));
+        if (!collision) break;
+        inviteCode = generateCode();
+        attempts++;
+      }
+
       const [inserted] = await db
         .insert(couple)
-        .values(dataToSave as any)
+        .values({ ...dataToSave, inviteCode, status: partnerBUid ? 'active' : 'pending' } as any)
         .returning();
-        
+      responseRecord = inserted;
       broadcastAdminEvent({ type: "NEW_USER", message: `A new couple just registered: ${partnerAName}!` });
-      
-      res.status(201).json(inserted);
     }
+
+    // Sync partnerA profile into appUsers
+    if (partnerAUid) {
+      const [existingUser] = await db.select().from(appUsers).where(eq(appUsers.uid, partnerAUid));
+      const profileUpdate = {
+        name: partnerAName || undefined,
+        age: partnerAAge ? Number(partnerAAge) : undefined,
+        gender: partnerAGender || undefined,
+        avatar: partnerAAvatar || undefined,
+        whatLikes: whatALikes || undefined,
+        updatedAt: new Date(),
+      };
+      if (existingUser) {
+        await db.update(appUsers).set(profileUpdate).where(eq(appUsers.uid, partnerAUid));
+      } else {
+        await db.insert(appUsers).values({ uid: partnerAUid, ...profileUpdate }).catch(() => {});
+      }
+    }
+
+    // Sync partnerB profile into appUsers
+    if (partnerBUid) {
+      const [existingUser] = await db.select().from(appUsers).where(eq(appUsers.uid, partnerBUid));
+      const profileUpdate = {
+        name: partnerBName || undefined,
+        age: partnerBAge ? Number(partnerBAge) : undefined,
+        gender: partnerBGender || undefined,
+        avatar: partnerBAvatar || undefined,
+        whatLikes: whatBLikes || undefined,
+        updatedAt: new Date(),
+      };
+      if (existingUser) {
+        await db.update(appUsers).set(profileUpdate).where(eq(appUsers.uid, partnerBUid));
+      } else {
+        await db.insert(appUsers).values({ uid: partnerBUid, ...profileUpdate }).catch(() => {});
+      }
+    }
+
+    res.status(targetId ? 200 : 201).json(responseRecord);
   } catch (err) {
     console.error("[POST /api/couple]", err);
     res.status(500).json({ error: "Failed to save couple profile" });
+  }
+});
+
+// ── Invite Code: get or generate for a couple ──
+app.get("/api/couple/invite/:uid", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const uid = String(req.params.uid);
+    const [existingCouple] = await db.select().from(couple).where(
+      sql`${couple.partnerAUid} = ${uid} OR ${couple.partnerBUid} = ${uid}`
+    );
+    if (!existingCouple) return res.status(404).json({ error: "No couple found for this user" });
+    res.json({ inviteCode: existingCouple.inviteCode, status: existingCouple.status, coupleId: existingCouple.id });
+  } catch (err) {
+    console.error("[GET /api/couple/invite/:uid]", err);
+    res.status(500).json({ error: "Failed to get invite code" });
+  }
+});
+
+// ── Join couple using invite code ──
+app.post("/api/couple/invite/join", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { uid, inviteCode } = req.body;
+    if (!uid || !inviteCode) return res.status(400).json({ error: "uid and inviteCode are required" });
+    
+    const code = String(inviteCode).trim().toUpperCase();
+    const [targetCouple] = await db.select().from(couple).where(eq(couple.inviteCode, code));
+    if (!targetCouple) return res.status(404).json({ error: "Invalid invite code" });
+    if (targetCouple.partnerBUid && targetCouple.partnerBUid !== uid) {
+      return res.status(409).json({ error: "This couple is already linked to another partner" });
+    }
+    if (targetCouple.partnerAUid === uid) {
+      return res.status(400).json({ error: "You cannot join your own couple" });
+    }
+
+    // Link partner B and mark as active
+    const [updated] = await db.update(couple)
+      .set({ partnerBUid: uid, status: 'active' })
+      .where(eq(couple.id, targetCouple.id))
+      .returning();
+
+    // Update cycle tracking femaleUid if partner B is female
+    const [userRecord] = await db.select().from(appUsers).where(eq(appUsers.uid, uid));
+    if (userRecord?.gender?.toLowerCase() === 'female') {
+      await db.update(cycleTracking)
+        .set({ femaleUid: uid })
+        .where(eq(cycleTracking.coupleId, targetCouple.id))
+        .catch(() => {});
+    }
+
+    // Create progress record for partner B if none
+    const [existingProgress] = await db.select().from(userProgress).where(eq(userProgress.userUid, uid));
+    if (!existingProgress) {
+      await db.insert(userProgress).values({ userUid: uid, coupleId: updated.id, scratchCount: 0, completedCount: 0, currentLevel: 1 }).catch(() => {});
+    } else {
+      await db.update(userProgress).set({ coupleId: updated.id }).where(eq(userProgress.userUid, uid)).catch(() => {});
+    }
+
+    broadcastAdminEvent({ type: "NEW_USER", message: `A partner just joined a couple!` });
+    res.json(updated);
+  } catch (err) {
+    console.error("[POST /api/couple/invite/join]", err);
+    res.status(500).json({ error: "Failed to join couple" });
   }
 });
 
@@ -1124,8 +1300,18 @@ app.put("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Res
 
     const [existing] = await db.select().from(cycleTracking).where(eq(cycleTracking.coupleId, coupleId));
 
+    // Auto-determine femaleUid from the couple record
+    const [coupleRow] = await db.select().from(couple).where(eq(couple.id, coupleId));
+    let femaleUid: string | null = null;
+    if (coupleRow) {
+      // Check partner A gender first, then partner B
+      const isBFemale = coupleRow.partnerBGender?.toLowerCase() === 'female';
+      const isAFemale = coupleRow.partnerAGender?.toLowerCase() === 'female';
+      if (isBFemale && coupleRow.partnerBUid) femaleUid = coupleRow.partnerBUid;
+      else if (isAFemale && coupleRow.partnerAUid) femaleUid = coupleRow.partnerAUid;
+    }
+
     if (existing) {
-      // If the period start date changed, log the previous cycle for analytics
       if (existing.lastPeriodStart && lastPeriodStart && existing.lastPeriodStart !== lastPeriodStart) {
         await db.insert(cycleHistory).values({
           coupleId,
@@ -1142,6 +1328,7 @@ app.put("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Res
           lastPeriodStart: lastPeriodStart !== undefined ? lastPeriodStart : existing.lastPeriodStart,
           lastPeriodEnd: lastPeriodEnd !== undefined ? lastPeriodEnd : existing.lastPeriodEnd,
           isLocked: isLocked !== undefined ? isLocked : existing.isLocked,
+          ...(femaleUid && { femaleUid }),
           updatedAt: new Date(),
         })
         .where(eq(cycleTracking.coupleId, coupleId))
@@ -1151,6 +1338,7 @@ app.put("/api/cycle/:coupleId", authenticateToken, async (req: Request, res: Res
       const [inserted] = await db.insert(cycleTracking)
         .values({
           coupleId,
+          femaleUid,
           averageCycleLength: averageCycleLength ?? 28,
           averagePeriodLength: averagePeriodLength ?? 5,
           lastPeriodStart: lastPeriodStart ?? null,

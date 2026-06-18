@@ -54,11 +54,11 @@ export default function EntryScreen() {
         router.replace("/(game)");
         
         // Background revalidation
-        apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/couple/${encodeURIComponent(user.email || "")}`)
+        apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/couple/${encodeURIComponent(user.uid || "")}`)
           .then(res => res.ok ? res.json() : null)
           .then(record => {
             if (record && record.partnerAName) {
-              const isA = record.partnerAUid === user.email;
+              const isA = record.partnerAUid === user.uid;
               setIsPartnerA(isA);
               setCoupleProfile({
                 id: record.id,
@@ -72,18 +72,20 @@ export default function EntryScreen() {
                 partnerBGender: record.partnerBGender ?? null,
                 whatALikes: record.whatALikes ?? null,
                 whatBLikes: record.whatBLikes ?? null,
+                status: record.status ?? null,
+                inviteCode: record.inviteCode ?? null,
               });
             }
           })
           .catch(() => console.log("[Background sync] Failed to fetch latest profile"));
         return;
       }
-
+ 
       // 4. No local profile, we MUST block and fetch
       setCheckingProfile(true);
       try {
         const BASE_URL = env.EXPO_PUBLIC_API_URL;
-        const res = await apiFetch(`${BASE_URL}/api/couple/${encodeURIComponent(user.email || "")}`);
+        const res = await apiFetch(`${BASE_URL}/api/couple/${encodeURIComponent(user.uid || "")}`);
         if (!res.ok) {
           setCoupleProfile(null);
           router.replace("/(onboarding)/profile-setup");
@@ -96,8 +98,8 @@ export default function EntryScreen() {
           router.replace("/(onboarding)/profile-setup");
           return;
         }
-
-        const isA = record.partnerAUid === user.email;
+ 
+        const isA = record.partnerAUid === user.uid;
         setIsPartnerA(isA);
         setCoupleProfile({
           id: record.id,
@@ -111,6 +113,8 @@ export default function EntryScreen() {
           partnerBGender: record.partnerBGender ?? null,
           whatALikes: record.whatALikes ?? null,
           whatBLikes: record.whatBLikes ?? null,
+          status: record.status ?? null,
+          inviteCode: record.inviteCode ?? null,
         });
 
         router.replace("/(game)");
