@@ -95,7 +95,7 @@ export default function EditProfileScreen() {
           let ext = dotIndex !== -1 && dotIndex > avatarA.lastIndexOf("/") ? avatarA.substring(dotIndex + 1).toLowerCase() : "jpeg";
           if (ext === "jpg") ext = "jpeg";
           formData.append("partnerAAvatar", {
-            uri: Platform.OS === "ios" && avatarA.startsWith("file://") ? avatarA.replace("file://", "") : avatarA,
+            uri: avatarA,
             name: `avatar_A.${ext}`,
             type: `image/${ext}`
           } as any);
@@ -110,7 +110,7 @@ export default function EditProfileScreen() {
           let ext = dotIndex !== -1 && dotIndex > avatarB.lastIndexOf("/") ? avatarB.substring(dotIndex + 1).toLowerCase() : "jpeg";
           if (ext === "jpg") ext = "jpeg";
           formData.append("partnerBAvatar", {
-            uri: Platform.OS === "ios" && avatarB.startsWith("file://") ? avatarB.replace("file://", "") : avatarB,
+            uri: avatarB,
             name: `avatar_B.${ext}`,
             type: `image/${ext}`
           } as any);

@@ -250,7 +250,7 @@ export default function ProfileSetupScreen() {
 
           const uploadData = new FormData();
           uploadData.append("file", {
-            uri: Platform.OS === "ios" && avatarA.startsWith("file://") ? avatarA.replace("file://", "") : avatarA,
+            uri: avatarA,
             name: `avatar.${ext}`,
             type: `image/${ext}`
           } as any);
