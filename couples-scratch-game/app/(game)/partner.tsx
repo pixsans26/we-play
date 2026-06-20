@@ -12,6 +12,7 @@ import { useCycleStore } from "@/store/cycleStore";
 import { calculateCyclePredictions, generatePredictionCalendarMarks, CyclePredictions } from "@/lib/cycleCalculations";
 import { getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import { useNotificationStore } from "@/store/notificationStore";
+import * as Clipboard from 'expo-clipboard';
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -276,14 +277,25 @@ export default function PartnerScreen() {
             </View>
 
             {coupleProfile?.inviteCode ? (
-              <View style={{
-                backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
-                borderRadius: 24, borderWidth: 2, borderColor: theme.accent,
-                paddingHorizontal: 40, paddingVertical: 24, alignItems: "center", width: "100%"
-              }}>
+              <Pressable
+                onPress={async () => {
+                  if (coupleProfile?.inviteCode) {
+                    await Clipboard.setStringAsync(coupleProfile.inviteCode);
+                    Alert.alert("Copied!", "Invite code copied to clipboard.");
+                  }
+                }}
+                style={{
+                  backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                  borderRadius: 24, borderWidth: 2, borderColor: theme.accent,
+                  paddingHorizontal: 40, paddingVertical: 24, alignItems: "center", width: "100%"
+                }}
+              >
                 <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_700Bold", marginBottom: 8, letterSpacing: 2 }}>INVITE CODE</Text>
-                <Text style={{ color: theme.accent, fontSize: 40, fontFamily: "DynaPuff_700Bold", letterSpacing: 6 }}>{coupleProfile.inviteCode}</Text>
-              </View>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <Text style={{ color: theme.accent, fontSize: 32, fontFamily: "Nunito_700Bold", letterSpacing: 6 }}>{coupleProfile.inviteCode}</Text>
+                  <Ionicons name="copy-outline" size={24} color={theme.accent} />
+                </View>
+              </Pressable>
             ) : (
               <Text style={{ color: theme.card.subtext, fontSize: 14 }}>Generating your invite code...</Text>
             )}
