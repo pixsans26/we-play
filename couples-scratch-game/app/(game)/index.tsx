@@ -7,6 +7,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
+import * as Clipboard from 'expo-clipboard';
 
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
@@ -272,16 +273,25 @@ export default function MainGameScreen() {
                 <Text style={{ color: theme.card.subtext, fontSize: 13, textAlign: "center", fontFamily: "Nunito_700Bold", marginBottom: 12 }}>
                   Your partner needs to enter this code to connect:
                 </Text>
-                <View style={{
-                  backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
-                  borderRadius: 16, paddingHorizontal: 24, paddingVertical: 10,
-                  borderWidth: 1, borderColor: "rgba(255,255,255,0.1)",
-                  marginBottom: 16,
-                }}>
-                  <Text style={{ color: theme.accent, fontSize: 24, fontFamily: "DynaPuff_700Bold", letterSpacing: 4 }}>
+                <Pressable 
+                  onPress={async () => {
+                    if (coupleProfile?.inviteCode) {
+                      await Clipboard.setStringAsync(coupleProfile.inviteCode);
+                      Alert.alert("Copied!", "Invite code copied to clipboard.");
+                    }
+                  }}
+                  style={{
+                    backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                    borderRadius: 16, paddingHorizontal: 24, paddingVertical: 10,
+                    borderWidth: 1, borderColor: "rgba(255,255,255,0.1)",
+                    marginBottom: 16,
+                    flexDirection: "row", alignItems: "center", gap: 12,
+                  }}>
+                  <Text style={{ color: theme.accent, fontSize: 24, fontFamily: "Nunito_700Bold", letterSpacing: 4 }}>
                     {coupleProfile.inviteCode || "PENDING"}
                   </Text>
-                </View>
+                  <Ionicons name="copy-outline" size={20} color={theme.accent} />
+                </Pressable>
                 <Pressable
                   onPress={async () => {
                     try {
