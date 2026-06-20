@@ -267,9 +267,12 @@ export default function MainGameScreen() {
             }}>
               <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ padding: 20, alignItems: "center" }}>
                 <Ionicons name="mail-open-outline" size={32} color={theme.accent} style={{ marginBottom: 8 }} />
-                <Text style={{ color: theme.card.text, fontSize: 18, fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 4 }}>
-                  Invite Your Partner 💌
-                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                  <Text style={{ color: theme.card.text, fontSize: 18, fontFamily: "DynaPuff_700Bold", textAlign: "center" }}>
+                    Invite Your Partner
+                  </Text>
+                  <Ionicons name="mail-unread-outline" size={22} color={theme.accent} />
+                </View>
                 <Text style={{ color: theme.card.subtext, fontSize: 13, textAlign: "center", fontFamily: "Nunito_700Bold", marginBottom: 12 }}>
                   Your partner needs to enter this code to connect:
                 </Text>
