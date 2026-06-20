@@ -426,6 +426,7 @@ export default function ProfileSetupScreen() {
                   try {
                     await signOut(auth);
                     setCoupleProfile(null);
+                    router.replace("/(auth)/login");
                   } catch (e) {
                     console.error("Sign out failed", e);
                   }

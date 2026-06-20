@@ -144,6 +144,44 @@ export default function SettingsScreen() {
     );
   }
 
+  function handleDisconnectPartner() {
+    if (!user?.uid) return;
+    const userUidStr = user.uid;
+    Alert.alert(
+      "Disconnect Partner",
+      "Are you sure you want to disconnect? This will permanently unlink you and delete shared progress. You will need to set up a new profile or join someone else.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Disconnect",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const res = await apiFetch(`${BASE_URL}/api/couple/uid/${userUidStr}`, {
+                method: "DELETE"
+              });
+              if (res.ok) {
+                // Wipe local state
+                await resetHistory(userUidStr);
+                if (coupleProfile?.partnerBUid) await resetHistory(coupleProfile.partnerBUid);
+                setHistoryAll([]);
+                setCoupleProfile(null);
+                
+                // Go back to profile setup
+                router.replace("/(onboarding)/profile-setup");
+              } else {
+                Alert.alert("Error", "Failed to disconnect. Please try again.");
+              }
+            } catch (err) {
+              console.warn("Disconnect error:", err);
+              Alert.alert("Error", "Could not disconnect. Please try again later.");
+            }
+          }
+        }
+      ]
+    );
+  }
+
   function handleDeleteAccount() {
     if (!user?.uid) return;
     const userUidStr = user.uid;
@@ -288,6 +326,19 @@ export default function SettingsScreen() {
               onPress={handleResetHistory}
               right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
             />
+            {coupleProfile && coupleProfile.status !== "pending" && (
+              <SettingRow
+                isDark={isDark}
+                icon="cut-outline"
+                iconColor="#ef4444"
+                label="Disconnect Partner"
+                sublabel="Unlink from your current partner"
+                theme={theme}
+                danger={true}
+                onPress={handleDisconnectPartner}
+                right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
+              />
+            )}
           </View>
 
           {/* Preferences */}

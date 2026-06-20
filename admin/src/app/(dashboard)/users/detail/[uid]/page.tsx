@@ -4,8 +4,9 @@ import { env } from "@/lib/env";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
-import { Loader2, ArrowLeft, User, Heart, Calendar, Mail, UserCheck, ShieldAlert, Sparkles } from "lucide-react";
+import { Loader2, ArrowLeft, User, Heart, Calendar, Mail, UserCheck, ShieldAlert, Sparkles, Unplug } from "lucide-react";
 import Link from "next/link";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 const LEVEL_BADGES: Record<number, { emoji: string; label: string }> = {
   1: { emoji: "🌱", label: "New Couple" },
@@ -101,6 +102,32 @@ export default function UserDetailPage() {
   useEffect(() => {
     if (token) loadData();
   }, [token, uid]);
+
+  const confirm = useConfirm();
+
+  const handleDisconnectCouple = async () => {
+    if (!token) return;
+    const isConfirmed = await confirm({
+      title: "Disconnect Couple",
+      message: "Are you sure you want to disconnect this couple? This will delete their shared progress and unlink them permanently. This action cannot be undone.",
+      confirmText: "Disconnect",
+      cancelText: "Cancel",
+    });
+    if (!isConfirmed) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/couple/${uid}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to disconnect couple");
+      await loadData();
+    } catch (err: any) {
+      alert(err.message);
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -246,9 +273,19 @@ export default function UserDetailPage() {
 
           {/* Connection Status */}
           <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-md">
-              <Heart className="w-4.5 h-4.5 text-rose-500" /> Partnership Status
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2 text-md">
+                <Heart className="w-4.5 h-4.5 text-rose-500" /> Partnership Status
+              </h3>
+              {couple && (
+                <button
+                  onClick={handleDisconnectCouple}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors shadow-sm"
+                >
+                  <Unplug className="w-3.5 h-3.5" /> Disconnect
+                </button>
+              )}
+            </div>
 
             {couple ? (
               <div className="space-y-6">

@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { apiFetch, getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { View, Text, Pressable, ScrollView, Image, Animated, Easing, Share, StyleSheet } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, Animated, Easing, Share, StyleSheet, Alert, TextInput, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -33,6 +33,61 @@ export default function MainGameScreen() {
   const [progressB, setProgressB] = useState<UserProgress | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [completedCount, setCompletedCount] = useState(0);
+  const [inviteCodeInput, setInviteCodeInput] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+  const setCoupleProfile = useAuthStore((s) => s.setCoupleProfile);
+  const setIsPartnerA = useAuthStore((s) => s.setIsPartnerA);
+  const sessionToken = useAuthStore((s) => s.sessionToken);
+
+  const handleJoinPartner = async () => {
+    if (!inviteCodeInput || inviteCodeInput.trim().length < 4) {
+      Alert.alert("Invalid Code", "Please enter a valid invite code.");
+      return;
+    }
+    if (!user || !sessionToken) return;
+
+    setIsJoining(true);
+    try {
+      const trimmed = inviteCodeInput.trim().toUpperCase();
+      const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/couple/invite/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionToken}` },
+        body: JSON.stringify({ uid: user.uid, inviteCode: trimmed })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        Alert.alert("Connection Failed", errorData.error || "Invalid invite code or already linked.");
+        return;
+      }
+
+      const data = await res.json();
+      setIsPartnerA(false);
+      setCoupleProfile({
+        id: data.id,
+        partnerAUid: data.partnerAUid,
+        partnerBUid: data.partnerBUid ?? null,
+        partnerAName: data.partnerAName,
+        partnerBName: data.partnerBName ?? null,
+        partnerAAge: data.partnerAAge ?? null,
+        partnerBAge: data.partnerBAge ?? null,
+        partnerAAvatar: data.partnerAAvatar ?? null,
+        partnerBAvatar: data.partnerBAvatar ?? null,
+        partnerAGender: data.partnerAGender ?? null,
+        partnerBGender: data.partnerBGender ?? null,
+        whatALikes: data.whatALikes ?? null,
+        whatBLikes: data.whatBLikes ?? null,
+        status: data.status ?? null,
+        inviteCode: data.inviteCode ?? null,
+      });
+
+      Alert.alert("Success!", "You are now connected with your partner.");
+    } catch (err) {
+      Alert.alert("Error", "Could not connect. Please try again later.");
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   const bgAnim = useRef(new Animated.Value(0)).current;
 
@@ -239,12 +294,51 @@ export default function MainGameScreen() {
                   style={{
                     backgroundColor: theme.accent,
                     borderRadius: 20, paddingHorizontal: 20, paddingVertical: 10,
-                    flexDirection: "row", alignItems: "center", gap: 8,
+                    flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 24
                   }}
                 >
                   <Ionicons name="share-social-outline" size={16} color="#ffffff" />
                   <Text style={{ color: "#ffffff", fontSize: 14, fontFamily: "Nunito_700Bold" }}>Share Invite Code</Text>
                 </Pressable>
+
+                <View style={{ width: "100%", height: 1, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)", marginBottom: 24 }} />
+
+                <Text style={{ color: theme.card.text, fontSize: 16, fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 4 }}>
+                  Or enter partner's code
+                </Text>
+                <TextInput
+                  value={inviteCodeInput}
+                  onChangeText={setInviteCodeInput}
+                  placeholder="e.g. A1B2C3"
+                  placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
+                  autoCapitalize="characters"
+                  maxLength={10}
+                  style={{
+                    width: "100%",
+                    backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#ffffff",
+                    borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                    borderRadius: 16, padding: 14,
+                    color: theme.card.text, fontSize: 16, textAlign: "center", fontFamily: "Nunito_700Bold",
+                    marginBottom: 12
+                  }}
+                />
+                <Pressable
+                  onPress={handleJoinPartner}
+                  disabled={isJoining || inviteCodeInput.trim().length < 4}
+                  style={({ pressed }) => ({
+                    width: "100%",
+                    backgroundColor: isJoining || inviteCodeInput.trim().length < 4 ? "rgba(156, 163, 175, 0.5)" : "#10b981",
+                    borderRadius: 16, padding: 14, alignItems: "center",
+                    opacity: pressed ? 0.8 : 1
+                  })}
+                >
+                  {isJoining ? (
+                    <ActivityIndicator color="#ffffff" size="small" />
+                  ) : (
+                    <Text style={{ color: "#ffffff", fontSize: 16, fontFamily: "Nunito_700Bold", fontWeight: "800" }}>Connect Partner</Text>
+                  )}
+                </Pressable>
+
               </BlurView>
             </View>
           )}

@@ -1,16 +1,26 @@
 import { useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Image
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Image, Alert
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, Link } from "expo-router";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { auth } from "@/lib/firebase";
 import { env } from "@/lib/env";
+
+let GoogleSignin: any = null;
+try {
+  GoogleSignin = require('@react-native-google-signin/google-signin').GoogleSignin;
+  GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "",
+  });
+} catch (error) {
+  console.warn("GoogleSignin native module not found. It will be disabled in Expo Go.");
+}
 
 interface FormErrors {
   name?: string;
@@ -56,6 +66,9 @@ export default function SignupScreen() {
       // Update Firebase display name
       await updateProfile(user, { displayName: name.trim() });
 
+      // Send email verification
+      await sendEmailVerification(user);
+
       // Save user details to server immediately
       const API_URL = env.EXPO_PUBLIC_API_URL;
       await fetch(`${API_URL}/api/user/register`, {
@@ -68,7 +81,10 @@ export default function SignupScreen() {
         }),
       }).catch(console.error);
 
-      router.replace("/(onboarding)/profile-setup");
+      // Alert user to verify email and redirect to login
+      Alert.alert("Account created!", "Please check your email to verify your account.", [
+        { text: "OK", onPress: () => router.replace("/(auth)/login") }
+      ]);
     } catch (error: any) {
       if (error?.code === "auth/email-already-in-use") setErrors({ email: "Email already in use" });
       else if (error?.code === "auth/invalid-email") setErrors({ email: "Invalid email address" });
@@ -76,6 +92,41 @@ export default function SignupScreen() {
       else setErrors({ general: "Something went wrong. Please try again." });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!GoogleSignin) {
+      Alert.alert("Not Supported", "Google Sign-In requires a custom native build (npm run ios/android). It does not work in Expo Go.");
+      return;
+    }
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      const idToken = response.data?.idToken;
+      if (!idToken) throw new Error("No ID token found");
+
+      const credential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, credential);
+      const user = userCredential.user;
+
+      const API_URL = env.EXPO_PUBLIC_API_URL;
+      await fetch(`${API_URL}/api/user/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || "Google User",
+          avatar: user.photoURL || null,
+        }),
+      }).catch(console.error);
+
+      // We assume Google emails are already verified, go to setup or app
+      router.replace("/(onboarding)/profile-setup");
+    } catch (error: any) {
+      console.log(error);
+      setErrors({ general: "Google Sign-In failed. Please try again." });
     }
   };
 
@@ -182,6 +233,14 @@ export default function SignupScreen() {
                   : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Create Account</Text>
                 }
               </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Google Sign-in */}
+            <TouchableOpacity onPress={handleGoogleSignIn} disabled={isLoading} activeOpacity={0.85} style={{ marginTop: 16 }}>
+              <View style={{ backgroundColor: "#ffffff", borderRadius: 999, paddingVertical: 15, alignItems: "center", flexDirection: "row", justifyContent: "center" }}>
+                <Ionicons name="logo-google" size={20} color="#000000" style={{ marginRight: 10 }} />
+                <Text style={{ color: "#000000", fontSize: 16, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>Continue with Google</Text>
+              </View>
             </TouchableOpacity>
             </BlurView>
           </View>

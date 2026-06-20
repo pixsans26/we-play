@@ -13,11 +13,21 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, sendEmailVerification, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import { auth } from "@/lib/firebase";
+
+let GoogleSignin: any = null;
+try {
+  GoogleSignin = require('@react-native-google-signin/google-signin').GoogleSignin;
+  GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "",
+  });
+} catch (error) {
+  console.warn("GoogleSignin native module not found. It will be disabled in Expo Go.");
+}
 import { useSettingsStore } from "@/store/settingsStore";
 import { BlurView } from "@/components/CustomBlurView";
 import { useThemeStore, getTheme } from "@/store/themeStore";
@@ -42,6 +52,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [unverifiedUser, setUnverifiedUser] = useState<any>(null);
 
   const biometricEnabled = useSettingsStore((s) => s.biometricEnabled);
   const isDark = useThemeStore((s) => s.isDark);
@@ -71,7 +82,14 @@ export default function LoginScreen() {
           if (authResult.success) {
             setIsLoading(true);
             try {
-              await signInWithEmailAndPassword(auth, storedEmail, storedPassword);
+              const userCred = await signInWithEmailAndPassword(auth, storedEmail, storedPassword);
+              if (!userCred.user.emailVerified) {
+                await signOut(auth);
+                setUnverifiedUser(userCred.user);
+                setError("Please verify your email address to log in.");
+                setIsLoading(false);
+                return;
+              }
               router.replace("/");
             } catch (err: any) {
               setError(getAuthErrorMessage(err?.code || ""));
@@ -92,7 +110,15 @@ export default function LoginScreen() {
     if (!password) { setError("Please enter your password."); return; }
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      const userCred = await signInWithEmailAndPassword(auth, email.trim(), password);
+
+      if (!userCred.user.emailVerified) {
+        await signOut(auth);
+        setUnverifiedUser(userCred.user);
+        setError("Please verify your email address to log in.");
+        setIsLoading(false);
+        return;
+      }
 
       // Save credentials for future biometric logins
       await SecureStore.setItemAsync("biometric_email", email.trim());
@@ -104,6 +130,38 @@ export default function LoginScreen() {
       setError(getAuthErrorMessage(err?.code || ""));
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    if (!GoogleSignin) {
+      Alert.alert("Not Supported", "Google Sign-In requires a custom native build (npm run ios/android). It does not work in Expo Go.");
+      return;
+    }
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      const idToken = response.data?.idToken;
+      if (!idToken) throw new Error("No ID token found");
+
+      const credential = GoogleAuthProvider.credential(idToken);
+      await signInWithCredential(auth, credential);
+      
+      // Google emails are implicitly verified
+      router.replace("/");
+    } catch (err: any) {
+      console.log(err);
+      setError("Google Sign-In failed. Please try again.");
+    }
+  }
+
+  async function handleResendEmail() {
+    if (!unverifiedUser) return;
+    try {
+      await sendEmailVerification(unverifiedUser);
+      Alert.alert("Email Sent", "A new verification link has been sent to your email.");
+    } catch (err) {
+      setError("Failed to resend email. Please try again later.");
     }
   }
 
@@ -144,6 +202,11 @@ export default function LoginScreen() {
                 {error && (
                   <View style={{ backgroundColor: "rgba(239,68,68,0.15)", borderWidth: 1, borderColor: "rgba(248,113,113,0.3)", borderRadius: 32, overflow: "hidden", padding: 12, marginBottom: 20 }}>
                     <Text style={{ color: "#fca5a5", fontSize: 13, textAlign: "center" }}>{error}</Text>
+                    {unverifiedUser && (
+                      <TouchableOpacity onPress={handleResendEmail} style={{ marginTop: 8 }}>
+                        <Text style={{ color: "#ffffff", fontSize: 13, textAlign: "center", fontWeight: "bold", textDecorationLine: "underline" }}>Resend Verification Email</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 )}
 
@@ -203,6 +266,14 @@ export default function LoginScreen() {
                       : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Log In</Text>
                     }
                   </LinearGradient>
+                </TouchableOpacity>
+
+                {/* Google Sign-in */}
+                <TouchableOpacity onPress={handleGoogleSignIn} disabled={isLoading} activeOpacity={0.85} style={{ marginTop: 16 }}>
+                  <View style={{ backgroundColor: "#ffffff", borderRadius: 999, paddingVertical: 15, alignItems: "center", flexDirection: "row", justifyContent: "center" }}>
+                    <Ionicons name="logo-google" size={20} color="#000000" style={{ marginRight: 10 }} />
+                    <Text style={{ color: "#000000", fontSize: 16, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>Continue with Google</Text>
+                  </View>
                 </TouchableOpacity>
               </BlurView>
             </View>

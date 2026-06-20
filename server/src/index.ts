@@ -747,6 +747,27 @@ app.delete("/api/admin/clear-users-data", authenticateToken, async (_req: Reques
   }
 });
 
+app.delete("/api/admin/couple/:uid", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const uid = String(req.params.uid);
+    const [existing] = await db.select().from(couple).where(
+      sql`${couple.partnerAUid} = ${uid} OR ${couple.partnerBUid} = ${uid}`
+    );
+    if (!existing) return res.status(404).json({ error: "Couple not found" });
+
+    await db.delete(couple).where(eq(couple.id, existing.id));
+    await db.delete(userProgress).where(eq(userProgress.coupleId, existing.id)).catch(() => {});
+    await db.delete(cycleTracking).where(eq(cycleTracking.coupleId, existing.id)).catch(() => {});
+    
+    broadcastAdminEvent({ type: "COUPLE_DISCONNECTED", message: `A couple was disconnected by an admin.` });
+    
+    res.json({ success: true, message: "Couple disconnected successfully" });
+  } catch (err) {
+    console.error("[DELETE /api/admin/couple/:uid]", err);
+    res.status(500).json({ error: "Failed to disconnect couple" });
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CYCLE ANALYTICS (ADMIN)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1365,6 +1386,11 @@ app.post("/api/couple/invite/join", authenticateToken, async (req: Request, res:
       })
       .where(eq(couple.id, targetCouple.id))
       .returning();
+
+    // Cleanup: If the joining user had a pending orphan couple as partnerA, delete it
+    await db.delete(couple)
+      .where(sql`${couple.partnerAUid} = ${uid} AND ${couple.status} = 'pending'`)
+      .catch(() => {});
 
     // Update cycle tracking femaleUid if partner B is female
     if (userRecord?.gender?.toLowerCase() === 'female') {
