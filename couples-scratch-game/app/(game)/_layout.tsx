@@ -118,12 +118,15 @@ export default function GameLayout() {
 
   const setCoupleProfile = useAuthStore((s) => s.setCoupleProfile);
 
+  const isLinked = coupleProfile?.status !== "pending" && !!coupleProfile?.partnerBUid;
+
   useEffect(() => {
     if (isLoading || !user || !coupleProfile?.partnerAName) return;
+    if (!isLinked) return;
     if (!isDataLoaded) {
       fetchData().catch((err) => setDataError(err.message));
     }
-  }, [isLoading, user, coupleProfile, isDataLoaded, fetchData]);
+  }, [isLoading, user, coupleProfile, isLinked, isDataLoaded, fetchData]);
 
   // Background real-time sync for couple profile
   useEffect(() => {
@@ -161,7 +164,15 @@ export default function GameLayout() {
     }
   }, [isLoading, user, coupleProfile]);
 
-  if (isLoading || !user || !coupleProfile || !coupleProfile.partnerAName || (!isDataLoaded && !dataError)) {
+  if (isLoading || !user || !coupleProfile || !coupleProfile.partnerAName) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#150025" }}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
+
+  if (isLinked && !isDataLoaded && !dataError) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#150025" }}>
         <ActivityIndicator size="large" color={theme.accent} />
@@ -195,7 +206,7 @@ export default function GameLayout() {
   const myFirstName = (myName ?? "Profile").split(" ")[0].slice(0, 10);
 
   const isFemale = myGender?.toLowerCase() === "female";
-  const partnerLabel = isFemale ? "Periods" : "Partner";
+  const partnerLabel = isLinked ? (isFemale ? "Periods" : "Partner") : "Link Partner";
   const partnerIcon = isFemale ? "flower" : "heart";
 
   const TABS: TabConfig[] = [

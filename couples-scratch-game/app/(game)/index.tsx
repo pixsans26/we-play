@@ -40,6 +40,8 @@ export default function MainGameScreen() {
   const setIsPartnerA = useAuthStore((s) => s.setIsPartnerA);
   const sessionToken = useAuthStore((s) => s.sessionToken);
 
+  const isLinked = coupleProfile?.status !== "pending" && !!coupleProfile?.partnerBUid;
+
   const handleJoinPartner = async () => {
     if (!inviteCodeInput || inviteCodeInput.trim().length < 4) {
       Alert.alert("Invalid Code", "Please enter a valid invite code.");
@@ -106,10 +108,10 @@ export default function MainGameScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (user && coupleProfile) {
+      if (user && coupleProfile && isLinked) {
         fetchData().catch((err) => console.error("Failed to revalidate data:", err));
       }
-    }, [user, coupleProfile, fetchData])
+    }, [user, coupleProfile, isLinked, fetchData])
   );
 
   async function loadProgress() {
@@ -154,10 +156,19 @@ export default function MainGameScreen() {
   const badge = LEVEL_BADGES[currentLevel] ?? LEVEL_BADGES[5];
   const partnerAName = coupleProfile?.partnerAName ?? "You";
   const partnerBName = coupleProfile?.partnerBName ?? "Partner";
-  const displayName = isPartnerA 
-    ? `${partnerAName} & ${partnerBName}` 
-    : `${partnerBName} & ${partnerAName}`;
+  const displayName = isLinked 
+    ? (isPartnerA ? `${partnerAName} & ${partnerBName}` : `${partnerBName} & ${partnerAName}`)
+    : (isPartnerA ? partnerAName : partnerBName);
   const turnName = currentTurn === "A" ? partnerAName : partnerBName;
+
+  const handleGamePress = (mode: string, route: any) => {
+    if (!isLinked) {
+      Alert.alert("Partner Not Linked", "Please connect with your partner to play games together.");
+      return;
+    }
+    if (mode) setMode(mode as any);
+    router.push(route);
+  };
   const myGender = isPartnerA ? coupleProfile?.partnerAGender : coupleProfile?.partnerBGender;
   const myAvatarIcon = myGender?.toLowerCase() === "female" ? "face-woman" : myGender?.toLowerCase() === "male" ? "face-man" : "account";
 
@@ -443,68 +454,40 @@ export default function MainGameScreen() {
             {/* Hidden Moments */}
             <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
-                onPress={() => { setMode("image"); router.push("/(game)/image-scratch"); }}
+                onPress={() => handleGamePress("image", "/(game)/image-scratch")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
                 <Image source={require("../../assets/images/hidden-moments.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
-                {/* <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.9)"]}
-                  style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
-                >
-                  <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Hidden Moments</Text>
-                  <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Reveal pictures</Text>
-                </LinearGradient> */}
               </Pressable>
             </View>
 
             {/* Love Missions */}
             <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
-                onPress={() => { setMode("text"); router.push("/(game)/task-scratch"); }}
+                onPress={() => handleGamePress("text", "/(game)/task-scratch")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
                 <Image source={require("../../assets/images/love-missions.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
-                {/* <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.9)"]}
-                  style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
-                >
-                  <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Love Missions</Text>
-                  <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Fun challenges</Text>
-                </LinearGradient> */}
               </Pressable>
             </View>
 
             {/* Fate Wheel */}
             <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
-                onPress={() => router.push("/(game)/spin-wheel")}
+                onPress={() => handleGamePress("", "/(game)/spin-wheel")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
                 <Image source={require("../../assets/images/fate-wheel.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
-                {/* <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.9)"]}
-                  style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
-                >
-                  <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Fate Wheel</Text>
-                  <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Win a reward</Text>
-                </LinearGradient> */}
               </Pressable>
             </View>
 
             {/* Heart Draw */}
             <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
-                onPress={() => router.push("/(game)/lottery")}
+                onPress={() => handleGamePress("", "/(game)/lottery")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
                 <Image source={require("../../assets/images/heart-draw.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
-                {/* <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.9)"]}
-                  style={{ flex: 1, padding: 16, justifyContent: "flex-end" }}
-                >
-                  <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", marginBottom: 2, fontFamily: "DynaPuff_700Bold", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Heart Draw</Text>
-                  <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Fun generator</Text>
-                </LinearGradient> */}
               </Pressable>
             </View>
           </View>

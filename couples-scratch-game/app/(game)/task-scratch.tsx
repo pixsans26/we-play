@@ -104,7 +104,13 @@ export default function TaskScratchScreen() {
 
   const getPerformingPartnerName = useCallback(() => performingName, [performingName]);
 
-  useFocusEffect(useCallback(() => { fetchData().catch(() => { }); }, [fetchData]));
+  const isLinked = coupleProfile?.status !== "pending" && !!coupleProfile?.partnerBUid;
+  
+  useFocusEffect(useCallback(() => { 
+    if (isLinked) {
+      fetchData().catch(() => { }); 
+    }
+  }, [isLinked, fetchData]));
 
   const loadScratchCounts = useCallback(async () => {
     if (!coupleProfile) return;

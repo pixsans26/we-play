@@ -104,7 +104,13 @@ export default function ImageScratchScreen() {
 
   const getPerformingPartnerName = useCallback(() => performingName, [performingName]);
 
-  useFocusEffect(useCallback(() => { fetchData().catch(() => { }); }, [fetchData]));
+  const isLinked = coupleProfile?.status !== "pending" && !!coupleProfile?.partnerBUid;
+
+  useFocusEffect(useCallback(() => {
+    if (isLinked) {
+      fetchData().catch(() => { });
+    }
+  }, [isLinked, fetchData]));
 
   const loadScratchCounts = useCallback(async () => {
     if (!coupleProfile) return;
@@ -458,7 +464,7 @@ export default function ImageScratchScreen() {
 
                 {/* Timer/hint overlay at bottom */}
                 <View style={[S.timerOverlay, {
-                  backgroundColor: isDark ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.95)",
+                  backgroundColor: isDark ? "rgba(0,0,0,0)" : "rgba(255,255,255,0.95)",
                   borderTopColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(124,58,237,0.2)",
                 }]}>
                   {timerStarted ? (

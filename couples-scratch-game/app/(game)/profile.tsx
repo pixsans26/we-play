@@ -101,9 +101,10 @@ export default function ProfileScreen() {
   const badge = LEVEL_BADGES[currentLevel] ?? LEVEL_BADGES[5];
   const partnerAName = coupleProfile?.partnerAName ?? "Partner A";
   const partnerBName = coupleProfile?.partnerBName ?? "Partner B";
-  const displayName = isPartnerA 
-    ? `${partnerAName} & ${partnerBName}` 
-    : `${partnerBName} & ${partnerAName}`;
+  const isLinked = coupleProfile?.status !== "pending" && !!coupleProfile?.partnerBUid;
+  const displayName = isLinked 
+    ? (isPartnerA ? `${partnerAName} & ${partnerBName}` : `${partnerBName} & ${partnerAName}`)
+    : (isPartnerA ? partnerAName : partnerBName);
 
   const heartColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.25)";
 
@@ -299,13 +300,19 @@ export default function ProfileScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{!isLinked ? "Not Linked" : partnerBName}</Text>
                     </View>
-                    <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
-                      {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
-                      {coupleProfile?.partnerBAge && coupleProfile?.partnerBGender ? " · " : ""}
-                      {coupleProfile?.partnerBGender ?? ""}
-                    </Text>
+                    {!isLinked ? (
+                      <TouchableOpacity onPress={() => router.push("/(game)/partner")} style={{ marginTop: 6, alignSelf: "flex-start", backgroundColor: "#3b82f6", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 }}>
+                        <Text style={{ color: "#ffffff", fontSize: 12, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>Link Partner</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
+                        {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
+                        {coupleProfile?.partnerBAge && coupleProfile?.partnerBGender ? " · " : ""}
+                        {coupleProfile?.partnerBGender ?? ""}
+                      </Text>
+                    )}
                   </View>
                 </View>
               </LinearGradient>
@@ -350,13 +357,19 @@ export default function ProfileScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{!isLinked ? "Not Linked" : partnerAName}</Text>
                     </View>
-                    <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
-                      {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
-                      {coupleProfile?.partnerAAge && coupleProfile?.partnerAGender ? " · " : ""}
-                      {coupleProfile?.partnerAGender ?? ""}
-                    </Text>
+                    {!isLinked ? (
+                      <TouchableOpacity onPress={() => router.push("/(game)/partner")} style={{ marginTop: 6, alignSelf: "flex-start", backgroundColor: "#3b82f6", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 }}>
+                        <Text style={{ color: "#ffffff", fontSize: 12, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>Link Partner</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
+                        {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
+                        {coupleProfile?.partnerAAge && coupleProfile?.partnerAGender ? " · " : ""}
+                        {coupleProfile?.partnerAGender ?? ""}
+                      </Text>
+                    )}
                   </View>
                 </View>
               </LinearGradient>
