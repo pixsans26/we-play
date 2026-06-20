@@ -15,12 +15,7 @@ import { useThemeStore, getTheme } from "@/store/themeStore";
 
 const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
-const PRESET_AVATARS_LOCAL = [
-  { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.jpg") },
-  { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.jpg") },
-  { url: "/uploads/presets/avatar_cat.png", source: require("@/assets/images/avatars/avatar_cat.jpg") },
-  { url: "/uploads/presets/avatar_dog.png", source: require("@/assets/images/avatars/avatar_dog.jpg") },
-];
+const PRESET_AVATARS_LOCAL: { url: string; source?: any; name?: string }[] = [];
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -172,7 +167,7 @@ export default function EditProfileScreen() {
         <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
           {/* Partner A */}
           <View style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.6)", borderRadius: 24, padding: 20, marginBottom: 20 }}>
-            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "800", marginBottom: 16 }}>
+            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "800", marginBottom: 16, fontFamily: "Nunito_700Bold" }}>
               {isPartnerA ? "PARTNER A (YOU)" : "PARTNER A"}
             </Text>
 
@@ -193,13 +188,13 @@ export default function EditProfileScreen() {
                 )}
               </Pressable>
               {isPartnerA && (
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 8 }}>Tap to change</Text>
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 8, fontFamily: "Nunito_700Bold" }}>Tap to change</Text>
               )}
             </View>
 
             <View style={{ gap: 12 }}>
               <View>
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Name</Text>
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4, fontFamily: "Nunito_700Bold" }}>Name</Text>
                 <TextInput
                   value={nameA}
                   onChangeText={setNameA}
@@ -218,7 +213,7 @@ export default function EditProfileScreen() {
                 />
               </View>
               <View>
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Gender</Text>
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4, fontFamily: "Nunito_700Bold" }}>Gender</Text>
                 <TextInput
                   value={genderA}
                   onChangeText={setGenderA}
@@ -237,7 +232,7 @@ export default function EditProfileScreen() {
                 />
               </View>
               <View>
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Likes (comma separated)</Text>
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4, fontFamily: "Nunito_700Bold" }}>Likes (comma separated)</Text>
                 <TextInput
                   value={likesA}
                   onChangeText={setLikesA}
@@ -281,16 +276,16 @@ export default function EditProfileScreen() {
                 )}
               </Pressable>
               {!isPartnerA && (
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 8 }}>Tap to change</Text>
+                <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 8, fontFamily: "Nunito_700Bold" }}>Tap to change</Text>
               )}
             </View>
 
             <View style={{ gap: 12 }}>
               {isPartnerBPending && isPartnerA && (
                 <View>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4 }}>Partner Email to Link (Optional)</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)", fontSize: 12, marginBottom: 4, marginLeft: 4, fontFamily: "Nunito_700Bold" }}>Partner Email to Link (Optional)</Text>
                   <TextInput value={partnerBEmail} onChangeText={setPartnerBEmail} placeholder="partner@email.com" keyboardType="email-address" autoCapitalize="none" placeholderTextColor={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: isDark ? "#fff" : "#0f172a", paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16, fontSize: 16, fontWeight: "600" }} />
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 4, marginLeft: 4 }}>They can login using this email later to sync progress.</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", fontSize: 10, marginTop: 4, marginLeft: 4, fontFamily: "Nunito_700Bold" }}>They can login using this email later to sync progress.</Text>
                 </View>
               )}
               <View>
@@ -384,7 +379,7 @@ export default function EditProfileScreen() {
 
             <Pressable onPress={() => pickImage(activePartnerAvatar === "A" ? setAvatarA : setAvatarB)} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#f1f5f9" }}>
               <Ionicons name="image-outline" size={20} color={isDark ? "#fff" : "#3b82f6"} />
-              <Text style={{ color: isDark ? "#fff" : "#3b82f6", fontWeight: "700" }}>Upload from Gallery</Text>
+              <Text style={{ color: isDark ? "#fff" : "#3b82f6", fontWeight: "700", fontFamily: "Nunito_700Bold" }}>Upload from Gallery</Text>
             </Pressable>
           </Pressable>
         </Pressable>

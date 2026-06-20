@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, Image } from "react-native";
-import { Slot, useRouter, usePathname } from "expo-router";
+import { Stack, useRouter, usePathname } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 
@@ -64,19 +64,19 @@ function TabItem({
     <Pressable style={styles.tabItem} onPress={handlePress}>
       <Animated.View style={[styles.tabInner, { transform: [{ scale }] }]}>
         {tab.imageSource ? (
-          <View style={{ width: isActive ? 34 : 30, height: isActive ? 34 : 30, borderRadius: isActive ? 17 : 15, overflow: "hidden", borderWidth: 2, borderColor: isActive ? theme.nav.active : theme.nav.inactive }}>
+          <View style={{ width: 30, height: 30, borderRadius: 15, overflow: "hidden", borderWidth: 2, borderColor: isActive ? theme.nav.active : theme.nav.inactive }}>
             <Image source={tab.imageSource} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
           </View>
         ) : tab.icon.startsWith("face-") || tab.icon === "account" ? (
           <MaterialCommunityIcons
             name={tab.icon as any}
-            size={isActive ? 28 : 26}
+            size={26}
             color={isActive ? theme.nav.active : theme.nav.inactive}
           />
         ) : (
           <Ionicons
             name={tab.icon as any}
-            size={isActive ? 26 : 24}
+            size={24}
             color={isActive ? theme.nav.active : theme.nav.inactive}
           />
         )}
@@ -220,7 +220,7 @@ export default function GameLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Slot />
+      <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 300 }} />
       {!shouldHideTabs && (
         <View
           style={[

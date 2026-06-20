@@ -1,5 +1,5 @@
 import React, { useState, cloneElement, Children, isValidElement } from "react";
-import { StyleSheet, ViewStyle, NativeScrollEvent, NativeSyntheticEvent } from "react-native";
+import { StyleSheet, ViewStyle, NativeScrollEvent, NativeSyntheticEvent, Platform, View } from "react-native";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -35,6 +35,10 @@ export function FadingEdgeMask({ children, style, fadeSize = 0.05 }: FadingEdgeM
 
   const topColor = isScrolledTop ? "transparent" : "black";
   const bottomColor = isScrolledBottom ? "transparent" : "black";
+
+  if (Platform.OS === 'android') {
+    return <View style={[{ flex: 1 }, style]}>{clonedChild}</View>;
+  }
 
   return (
     <MaskedView

@@ -1,7 +1,10 @@
 import { env } from "@/lib/env";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch, getAvatarSource } from "@/lib/apiClient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, Animated, Easing, ActivityIndicator } from "react-native";
+import {
+  View, Text, Pressable, Animated, Image,
+  Easing, ActivityIndicator, StyleSheet, Dimensions
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,890 +17,849 @@ import { useTimer } from "@/hooks/useTimer";
 import { useSound } from "@/hooks/useSound";
 import { ScratchCard } from "@/components/ScratchCard/ScratchCard";
 import HeartConfetti from "@/components/Confetti/HeartConfetti";
-import { Task } from "@/types";
+import { ImageTask, Task } from "@/types";
 import { safeDbWrite } from "@/lib/safeDbWrite";
+import Svg, { Path, LinearGradient as SvgLinearGradient, Stop, G, Defs } from "react-native-svg";
 
-function AnimatedButton({
-  onPress,
-  disabled,
-  style,
-  children,
-}: {
-  onPress: () => void;
-  disabled?: boolean;
-  style: any;
-  children: React.ReactNode;
-}) {
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const AnimatedHeartIcon = () => {
   const scale = useRef(new Animated.Value(1)).current;
 
-  const handlePressIn = () => {
-    Animated.spring(scale, {
-      toValue: 0.95,
-      useNativeDriver: true,
-      speed: 50,
-    }).start();
-  };
-  const handlePressOut = () => {
-    Animated.spring(scale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 50,
-    }).start();
-  };
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(scale, { toValue: 1.15, duration: 800, useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 1, duration: 800, useNativeDriver: true })
+      ])
+    ).start();
+  }, [scale]);
 
   return (
-    <Pressable
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <Animated.View style={[style, { transform: [{ scale }] }]}>
-        {children}
-      </Animated.View>
-    </Pressable>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Svg width={40} height={40} viewBox="0 0 512 512">
+        <Defs>
+          <SvgLinearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="124.759" x2="392.343" y1="396.304" y2="128.72">
+            <Stop offset="0" stopColor="#da1467" />
+            <Stop offset="1" stopColor="#ff992e" />
+          </SvgLinearGradient>
+        </Defs>
+        <G id="_x33_1_Burning_Heart">
+          <Path d="m142.933 220.386c6.971-11.593-1.443-38.2-2.346-50.661-2.399-28.903 12.105-59.353 35.303-73.965 3.694-2.351 8.698.656 8.105 5.279-2.026 14.505-2.933 26.344 3.84 37.489 2.773-20.371 7.519-47.621 44.955-72.578 38.316-25.62 17.661-49.073 23.411-62.659 1.518-3.502 5.824-4.299 8.479-1.866 38.396 34.663 33.276 54.767 28.317 74.231-4.586 17.865-8.959 34.823 22.451 67.459v-.8c-.64-14.985-1.387-31.996 21.544-42.341 3.373-1.574 7.175.708 7.519 4.373 2.848 31.848 26.486 55.156 46.981 81.856 20.691 27.037 28.21 60.527 21.544 91.882-15.092-35.355-50.234-60.259-91.083-60.259-24.584 0-48.101 9.119-66.125 25.384-18.131-16.478-41.222-25.384-66.179-25.384-40.475 0-75.351 24.477-90.603 59.353-6.932-32.316.906-65.272 23.411-98.548 1.226-1.867 3.519-2.773 5.653-2.24 2.186.533 3.786 2.347 4.053 4.586 1.426 11.997.311 28.09 10.77 39.409zm179.019 8.106c-25.65 0-49.381 10.826-66.125 29.863-16.798-19.037-40.529-29.863-66.179-29.863-48.688 0-88.256 39.622-88.256 88.309 0 90.603 145.263 190.058 151.449 194.271 1.812 1.172 4.048 1.245 5.973 0 6.186-4.212 151.449-103.668 151.449-194.271-.002-48.687-39.624-88.309-88.311-88.309z" fill="url(#SVGID_1_)" />
+        </G>
+      </Svg>
+    </Animated.View>
   );
-}
+};
 
 export default function TaskScratchScreen() {
   const router = useRouter();
 
-  // Auth & profile
   const user = useAuthStore((s) => s.user);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
-  const isPartnerA = useAuthStore((s) => s.isPartnerA);
 
-  // Game store
-  const currentTask = useGameStore((s) => s.currentTask) as Task | null;
-  const previousTask = useGameStore((s) => s.previousTask) as Task | null;
+  const currentTask = useGameStore((s) => s.currentTask);
   const isScratched = useGameStore((s) => s.isScratched);
-  const timerStarted = useGameStore((s) => s.timerStarted);
-  const timerFinished = useGameStore((s) => s.timerFinished);
-  const performingPartnerName = useGameStore((s) => s.performingPartnerName);
   const currentTurn = useGameStore((s) => s.currentTurn);
   const setCurrentTask = useGameStore((s) => s.setCurrentTask);
-  const setPreviousTask = useGameStore((s) => s.setPreviousTask);
   const setIsScratched = useGameStore((s) => s.setIsScratched);
-  const setTimerStarted = useGameStore((s) => s.setTimerStarted);
-  const setTimerFinished = useGameStore((s) => s.setTimerFinished);
-  const setPerformingPartnerName = useGameStore(
-    (s) => s.setPerformingPartnerName
-  );
+  const setPerformingPartnerName = useGameStore((s) => s.setPerformingPartnerName);
   const switchTurn = useGameStore((s) => s.switchTurn);
   const updateStreak = useGameStore((s) => s.updateStreak);
   const fetchData = useGameStore((s) => s.fetchData);
   const resetGameStore = useGameStore((s) => s.reset);
 
-  // Theme
   const isDark = useThemeStore((s) => s.isDark);
   const theme = getTheme(isDark);
 
-  // Hooks
   const { getNextTask, logScratch, getAllHistory } = useScratchHistory();
   const { playScratch, playAlarm } = useSound();
 
-  // Local state
   const [showConfetti, setShowConfetti] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [showPrevious, setShowPrevious] = useState(false);
-  const [emptyState, setEmptyState] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentLevel, setCurrentLevel] = useState(1);
-  const [timerKey, setTimerKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [noTasksRemaining, setNoTasksRemaining] = useState(false);
   const [scratchCountA, setScratchCountA] = useState(0);
   const [scratchCountB, setScratchCountB] = useState(0);
+  const [timerStarted, setTimerStarted] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [previousTask, setPreviousTask] = useState<(Task & { emoji: string; title: string; description: string }) | null>(null);
+  const [showPrevious, setShowPrevious] = useState(false);
 
-  // Timer
-  const timerDuration = 40; // fixed 40-second timer for all tasks
-  const {
-    timeLeft,
-    isRunning,
-    isFinished,
-    formattedTime,
-    start,
-    reset: resetTimer,
-  } = useTimer(timerDuration);
-
-  const timerStartTimeRef = useRef<number>(0);
+  const TIMER_DURATION = 40;
+  const { timeLeft, isRunning, isFinished, formattedTime, start, reset: resetTimer } = useTimer(TIMER_DURATION);
+  const autoStartRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const alarmPlayedRef = useRef(false);
-  // Ref to hold the 10-second auto-start countdown
-  const autoStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Animations
   const pulseOpacity = useRef(new Animated.Value(1)).current;
   const pulseAnimRef = useRef<Animated.CompositeAnimation | null>(null);
   const revealOpacity = useRef(new Animated.Value(0)).current;
-
-  // Background animated loop
   const bgAnim = useRef(new Animated.Value(0)).current;
 
-  // Partner names
   const partnerAName = coupleProfile?.partnerAName ?? "Partner A";
   const partnerBName = coupleProfile?.partnerBName ?? "Partner B";
   const turnName = currentTurn === "A" ? partnerAName : partnerBName;
+  const performingName = currentTurn === "A"
+    ? (coupleProfile?.partnerBName ?? "Partner B")
+    : (coupleProfile?.partnerAName ?? "Partner A");
 
-  // Performing partner is the OPPOSITE of currentTurn
-  const getPerformingPartnerName = useCallback((): string => {
-    if (!coupleProfile) return "Partner";
-    if (currentTurn === "A") {
-      return coupleProfile.partnerBName ?? "Partner B";
-    }
-    return coupleProfile.partnerAName;
-  }, [coupleProfile, currentTurn]);
+  const getPerformingPartnerName = useCallback(() => performingName, [performingName]);
 
-  // Timer pulse animation at ≤10s
-  useEffect(() => {
-    if (isRunning && timeLeft <= 10 && timeLeft > 0) {
-      const anim = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseOpacity, {
-            toValue: 0.3,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseOpacity, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      pulseAnimRef.current = anim;
-      anim.start();
-    } else {
-      if (pulseAnimRef.current) {
-        pulseAnimRef.current.stop();
-        pulseAnimRef.current = null;
-      }
-      pulseOpacity.setValue(1);
-    }
-  }, [isRunning, timeLeft]);
+  useFocusEffect(useCallback(() => { fetchData().catch(() => { }); }, [fetchData]));
 
-  // Timer finished effect
-  useEffect(() => {
-    if (isFinished && !alarmPlayedRef.current) {
-      alarmPlayedRef.current = true;
-      playAlarm();
-      handleComplete();
-    }
-  }, [isFinished]);
-
-  useEffect(() => {
-    if (isFinished) {
-      setTimerFinished(true);
-    }
-  }, [isFinished]);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchData().catch(() => {});
-    }, [fetchData])
-  );
-
-  // Load scratch counts from DB
   const loadScratchCounts = useCallback(async () => {
     if (!coupleProfile) return;
     try {
       const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
-      const history = await getAllHistory(
-        coupleProfile.partnerAUid,
-        partnerBUidFallback
-      );
+      const history = await getAllHistory(coupleProfile.partnerAUid, partnerBUidFallback);
       const textHistory = history.filter((h) => h.taskType === "text" && h.completed);
-
-      const countA = textHistory.filter(
-        (h) => h.userUid === coupleProfile.partnerAUid
-      ).length;
-      setScratchCountA(countA);
-
-      const countB = textHistory.filter(
-        (h) => h.userUid === partnerBUidFallback
-      ).length;
-      setScratchCountB(countB);
+      setScratchCountA(textHistory.filter((h) => h.userUid === coupleProfile.partnerAUid).length);
+      setScratchCountB(textHistory.filter((h) => h.userUid === partnerBUidFallback).length);
     } catch { }
   }, [coupleProfile, getAllHistory]);
 
-  // Load current level from DB
   const loadCurrentLevel = useCallback(async (): Promise<number> => {
     if (!user || !coupleProfile) return 1;
     try {
-      const scratcherUid = currentTurn === "A"
+      const uid = currentTurn === "A"
         ? coupleProfile.partnerAUid
-        : coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
-
-      const BASE_URL = env.EXPO_PUBLIC_API_URL;
-      const res = await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}`);
-      if (res.ok) {
-        const data = await res.json();
-        return data.currentLevel ?? 1;
-      }
+        : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+      const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${uid}`);
+      if (res.ok) { const d = await res.json(); return d.currentLevel ?? 1; }
     } catch { }
     return 1;
   }, [user, coupleProfile, currentTurn]);
 
-  // Load next task
-  async function loadTask() {
+  const loadNextTask = useCallback(async () => {
     if (!user || !coupleProfile) return;
     try {
+      if (currentTask) setPreviousTask(currentTask as Task & { emoji: string; title: string; description: string });
       setIsLoading(true);
-      const level = await loadCurrentLevel();
-      setCurrentLevel(level);
-
-      // Use the current scratcher's UID so seen-task filtering is per-scratcher
-      const scratcherUid = currentTurn === "A"
-        ? coupleProfile.partnerAUid
-        : coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
-
-      const task = await getNextTask(scratcherUid, "text", level);
-
-      if (!task) {
-        setEmptyState(true);
-        setCurrentTask(null);
-        setIsLoading(false);
-        return;
-      }
-
-      setEmptyState(false);
-      setCurrentTask(task as Task);
       setIsScratched(false);
-      setTimerStarted(false);
-      setTimerFinished(false);
-      setIsCompleted(false);
       setShowConfetti(false);
-      setShowPrevious(false);
-      resetTimer();
-      alarmPlayedRef.current = false;
-      setPerformingPartnerName(getPerformingPartnerName());
-      setTimerKey((prev) => prev + 1);
       revealOpacity.setValue(0);
+      resetTimer();
+
+      const level = await loadCurrentLevel();
+      const uid = currentTurn === "A"
+        ? coupleProfile.partnerAUid
+        : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+      const task = await getNextTask(uid, "text", level);
+      if (task) {
+        setCurrentTask(task);
+        setNoTasksRemaining(false);
+        setPerformingPartnerName(getPerformingPartnerName());
+        if ("imageSource" in task && task.imageSource) {
+          try { await Image.prefetch(`${env.EXPO_PUBLIC_API_URL}${task.imageSource}`); } catch { }
+        }
+      } else {
+        setCurrentTask(null);
+        setNoTasksRemaining(true);
+      }
       setIsLoading(false);
-    } catch (e) {
-      setIsLoading(false);
-    }
-  }
+    } catch { setIsLoading(false); }
+  }, [user, coupleProfile, currentTurn, getNextTask, loadCurrentLevel, setCurrentTask, setIsScratched, setPerformingPartnerName, getPerformingPartnerName, revealOpacity, currentTask]);
 
   useEffect(() => {
     loadScratchCounts();
-    loadTask();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(bgAnim, { toValue: 1, duration: 4000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        Animated.timing(bgAnim, { toValue: 0, duration: 4000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      ])
-    ).start();
-
-    return () => {
-      resetGameStore();
-      if (autoStartTimerRef.current) {
-        clearTimeout(autoStartTimerRef.current);
-      }
-    };
+    loadNextTask();
+    Animated.loop(Animated.sequence([
+      Animated.timing(bgAnim, { toValue: 1, duration: 4000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      Animated.timing(bgAnim, { toValue: 0, duration: 4000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+    ])).start();
+    return () => { resetGameStore(); if (autoStartRef.current) clearTimeout(autoStartRef.current); };
   }, []);
+
+  useEffect(() => {
+    if (isRunning && timeLeft <= 10 && timeLeft > 0) {
+      const anim = Animated.loop(Animated.sequence([
+        Animated.timing(pulseOpacity, { toValue: 0.3, duration: 500, useNativeDriver: true }),
+        Animated.timing(pulseOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ]));
+      pulseAnimRef.current = anim;
+      anim.start();
+    } else {
+      pulseAnimRef.current?.stop();
+      pulseAnimRef.current = null;
+      pulseOpacity.setValue(1);
+    }
+  }, [isRunning, timeLeft]);
+
+  useEffect(() => {
+    if (isFinished && !alarmPlayedRef.current) {
+      alarmPlayedRef.current = true;
+      playAlarm();
+      handleDone();
+    }
+  }, [isFinished]);
 
   const canSkip = !!currentTask && !timerStarted && !isCompleted;
   const canComplete = !!currentTask && isScratched && !isCompleted;
 
-  function handleScratchComplete() {
+  const handleSkip = useCallback(async () => {
+    if (!user || !currentTask || !coupleProfile) return;
+    await loadScratchCounts();
+    await loadNextTask();
+  }, [user, currentTask, coupleProfile, loadNextTask]);
+
+  const handleScratchComplete = useCallback(async () => {
     setIsScratched(true);
     setShowConfetti(true);
     playScratch();
-
-    // Fade in revealed content
-    Animated.timing(revealOpacity, {
-      toValue: 1,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
-
-    // Auto-start timer after 10 seconds
-    autoStartTimerRef.current = setTimeout(() => {
-      handleStartTimer();
-    }, 10000);
-  }
-
-  function handleStartTimer() {
-    // Cancel any pending auto-start
-    if (autoStartTimerRef.current) {
-      clearTimeout(autoStartTimerRef.current);
-      autoStartTimerRef.current = null;
-    }
-    setTimerStarted(true);
-    timerStartTimeRef.current = Date.now();
-    start();
-  }
-
-  function handleTimerEnd() {
-    setIsCompleted(true);
-    setTimerFinished(true);
-    logCompletion();
-    switchTurn();
-    updateStreak();
-  }
-
-  async function handleComplete() {
-    setIsCompleted(true);
-    setTimerFinished(true);
-    await logCompletion();
-    switchTurn();
-    updateStreak();
-    await handleNext();
-  }
-
-  async function logCompletion() {
-    if (!user || !currentTask) return;
-    const elapsed = timerStartTimeRef.current
-      ? Math.round((Date.now() - timerStartTimeRef.current) / 1000)
-      : 0;
-
-    const scratcherUid = currentTurn === "A"
-      ? (coupleProfile?.partnerAUid ?? user.uid)
-      : (coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`);
-    const performerUid = currentTurn === "A"
-      ? coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`
-      : coupleProfile?.partnerAUid ?? null;
-
-    const result = await safeDbWrite(
-      () =>
-        logScratch({
-          userUid: scratcherUid,
-          taskId: currentTask.id,
-          taskType: "text",
-          category: currentTask.category,
-          completed: true,
-          skipped: false,
-          timeTaken: elapsed,
-          performerUid: performerUid ?? undefined,
-        }),
-      "Task completion could not be saved. Please try again."
-    );
-
-    if (result !== null) {
-      try {
-        const BASE_URL = env.EXPO_PUBLIC_API_URL;
-        await apiFetch(`${BASE_URL}/api/progress/${scratcherUid}/increment-completed`, {
-          method: "PATCH"
-        });
-      } catch (err) {
-        console.error("Failed to increment completed count", err);
-      }
-    }
-    await loadScratchCounts();
-  }
-
-  async function handleSkip() {
-    if (!user || !currentTask) return;
-
-    // Cancel any pending auto-start
-    if (autoStartTimerRef.current) {
-      clearTimeout(autoStartTimerRef.current);
-      autoStartTimerRef.current = null;
-    }
-
-    const scratcherUid = currentTurn === "A"
-      ? (coupleProfile?.partnerAUid ?? user.uid)
-      : (coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`);
-    const performerUid = currentTurn === "A"
-      ? coupleProfile?.partnerBUid || `partner_b_pending_${coupleProfile?.id || "0"}`
-      : coupleProfile?.partnerAUid ?? null;
-
-    const nextTask = await getNextTask(scratcherUid, "text", currentLevel);
-
-    if (!nextTask) {
-      setEmptyState(true);
-      return;
-    }
-
-    // Do not save skip to server
-
-    await loadScratchCounts();
-    setPreviousTask(currentTask);
-    setCurrentTask(nextTask as Task);
-    setIsScratched(false);
+    Animated.timing(revealOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
     setTimerStarted(false);
-    setTimerFinished(false);
     setIsCompleted(false);
-    setShowConfetti(false);
-    resetTimer();
     alarmPlayedRef.current = false;
-    setTimerKey((prev) => prev + 1);
-    revealOpacity.setValue(0);
-  }
+    autoStartRef.current = setTimeout(() => { setTimerStarted(true); start(); }, 10000);
+  }, [setIsScratched, playScratch, revealOpacity, start]);
 
-  async function handleNext() {
-    if (!user) return;
-    setPreviousTask(currentTask);
+  const handleDone = useCallback(async () => {
+    if (!user || !currentTask || !coupleProfile) return;
+    const scratcherUid = currentTurn === "A"
+      ? coupleProfile.partnerAUid
+      : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+    const performerUid = currentTurn === "A"
+      ? (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`)
+      : coupleProfile.partnerAUid;
+
+    await safeDbWrite(
+      () => logScratch({ userUid: scratcherUid, taskId: currentTask.id, taskType: "text", completed: true, skipped: false, performerUid: performerUid ?? undefined }),
+      "Scratch event could not be saved."
+    );
+    try {
+      await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${scratcherUid}/increment-completed`, { method: "PATCH" });
+    } catch { }
     await loadScratchCounts();
-    await loadTask();
-  }
+    switchTurn();
+    updateStreak();
+    await loadNextTask();
+  }, [user, coupleProfile, currentTurn, currentTask, loadNextTask, switchTurn, updateStreak, loadScratchCounts, logScratch]);
 
-  function handlePrevious() {
-    setShowPrevious(true);
-  }
+  const handleGoBack = useCallback(() => { resetGameStore(); router.back(); }, [resetGameStore, router]);
 
-  function handleBackFromPrevious() {
-    setShowPrevious(false);
-  }
+  const textTask = currentTask as Task & { emoji: string; title: string; description: string };
 
-  function handleGoBack() {
-    resetGameStore();
-    router.back();
-  }
+  // ── Background gradient matching screenshot: warm pink-purple
+  const bgColors = isDark
+    ? (["#3b0764", "#6b21a8", "#be185d"] as any)
+    : (["#e879f9", "#f472b6", "#fb7185"] as any);
 
-  // ─── RENDER: Loading state ────────────────────────────────────────────────
+  // ── Loading ──
   if (isLoading && !showPrevious) {
     return (
-      <LinearGradient colors={theme.background} style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size="large" color={theme.card.text} />
-        <Text style={{ marginTop: 16, color: theme.card.text, fontSize: 16, fontWeight: "600", fontFamily: "DynaPuff_700Bold" }}>Fetching next task...</Text>
+      <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={S.fill_center}>
+        <ActivityIndicator size="large" color="#ffffff" />
+        <Text style={S.loadingText}>Fetching next card...</Text>
       </LinearGradient>
     );
   }
 
-  // ─── RENDER: Empty state ──────────────────────────────────────────────────
-  if (emptyState && !showPrevious) {
-    return (
-      <LinearGradient
-        colors={theme.background}
-        locations={[0, 0.5, 1]}
-        style={{ flex: 1 }}
-      >
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 32,
-          }}
-        >
-          <Ionicons name="trophy-outline" size={48} color={theme.card.text} />
-          <Text
-            style={{
-              color: theme.card.text,
-              fontSize: 22,
-              fontWeight: "bold", fontFamily: "DynaPuff_700Bold",
-              textAlign: "center",
-              marginBottom: 12,
-              marginTop: 16,
-            }}
-          >
-            All Tasks Completed!
-          </Text>
-          <Text
-            style={{
-              color: theme.card.subtext,
-              textAlign: "center",
-              marginBottom: 32,
-            }}
-          >
-            You've seen all available tasks at your current level. Reset your
-            history to replay them!
-          </Text>
-          <View style={{ gap: 12, width: "100%" }}>
-            {previousTask && (
-              <AnimatedButton
-                onPress={handlePrevious}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  borderRadius: 32, overflow: "hidden",
-                  backgroundColor: "transparent",
-                  paddingVertical: 16,
-                }}
-              >
-                <Ionicons
-                  name="arrow-back"
-                  size={20}
-                  color={theme.card.text}
-                />
-                <Text
-                  style={{
-                    color: theme.card.text,
-                    fontSize: 16,
-                    fontWeight: "bold", fontFamily: "DynaPuff_700Bold",
-                  }}
-                >
-                  View Previous Task
-                </Text>
-              </AnimatedButton>
-            )}
-            <AnimatedButton
-              onPress={handleGoBack}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                borderRadius: 32, overflow: "hidden",
-                borderWidth: 1,
-                borderColor: theme.glass.border,
-                backgroundColor: "transparent",
-                paddingVertical: 16,
-              }}
-            >
-              <Ionicons name="arrow-back" size={20} color={theme.card.text} />
-              <Text
-                style={{
-                  color: theme.card.text,
-                  fontSize: 16,
-                  fontWeight: "bold", fontFamily: "DynaPuff_700Bold",
-                }}
-              >
-                Back to Menu
-              </Text>
-            </AnimatedButton>
-          </View>
-        </View>
-      </LinearGradient>
-    );
-  }
-
-  // ─── RENDER: Previous task (read-only) ────────────────────────────────────
+  // ── Previous task read-only ──
   if (showPrevious && previousTask) {
-    const prevTask = previousTask;
     return (
-      <LinearGradient
-        colors={theme.background}
-        locations={[0, 0.5, 1]}
-        style={{ flex: 1 }}
-      >
-        <View
-          style={{
-            flex: 1,
-            paddingHorizontal: 24,
-            paddingTop: 48,
-            paddingBottom: 24,
-            justifyContent: "space-between",
-          }}
-        >
-          {/* Top */}
-          <View style={{ alignItems: "center" }}>
-            <Text
-              style={{
-                color: theme.card.subtext,
-                fontSize: 14,
-                textTransform: "uppercase",
-              }}
+      <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+        <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 52, paddingBottom: 24 }}>
+          <Text style={S.prevLabel}>Previous Task (Read Only)</Text>
+          <View style={{ flex: 1, marginVertical: 20, borderRadius: 24, overflow: "hidden", borderWidth: 4, borderColor: "#7c3aed" }}>
+            <LinearGradient
+              colors={theme.accentGradient as any}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
             >
-              Previous Task (Read Only)
-            </Text>
-          </View>
-
-          {/* Middle */}
-          <View
-            style={{
-              width: "100%",
-              borderRadius: 32, overflow: "hidden",
-              backgroundColor: theme.glass.bg,
-              borderWidth: 1,
-              borderColor: theme.glass.border,
-              padding: 24,
-            }}
-          >
-            <Text
-              style={{
-                color: theme.card.text,
-                fontSize: 22,
-                fontWeight: "bold", fontFamily: "DynaPuff_700Bold",
-                marginBottom: 12,
-                textAlign: "center",
-              }}
-            >
-              {prevTask.title}
-            </Text>
-            <Text
-              style={{
-                color: theme.card.subtext,
-                fontSize: 16,
-                textAlign: "center",
-                lineHeight: 24,
-              }}
-            >
-              {prevTask.description}
-            </Text>
-            <View
-              style={{
-                marginTop: 16,
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: 4,
-              }}
-            >
-              <Ionicons
-                name="timer-outline"
-                size={16}
-                color={theme.card.subtext}
-              />
-              <Text style={{ color: theme.card.subtext, fontSize: 14 }}>
-                {Math.floor(prevTask.timerSeconds / 60)}:
-                {(prevTask.timerSeconds % 60).toString().padStart(2, "0")} timer
+              <Text style={{ fontSize: 48, marginBottom: 12 }}>{previousTask.emoji}</Text>
+              <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
+                {previousTask.title}
               </Text>
-            </View>
+              <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>
+                {previousTask.description}
+              </Text>
+            </LinearGradient>
           </View>
-
-          {/* Bottom */}
-          <AnimatedButton
-            onPress={handleBackFromPrevious}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              borderRadius: 32, overflow: "hidden",
-              borderWidth: 1,
-              borderColor: theme.glass.border,
-              backgroundColor: "transparent",
-              paddingVertical: 16,
-            }}
-          >
-            <Ionicons name="arrow-back" size={20} color={theme.card.text} />
-            <Text
-              style={{
-                color: theme.card.text,
-                fontSize: 16,
-                fontWeight: "bold", fontFamily: "DynaPuff_700Bold",
-              }}
-            >
-              Back to Current
-            </Text>
-          </AnimatedButton>
+          <Pressable onPress={() => setShowPrevious(false)} style={S.completeBtn}>
+            <LinearGradient colors={["#7c3aed", "#db2777"] as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={S.completeBtnInner}>
+              <Text style={S.completeBtnText}>Back to Current Task</Text>
+            </LinearGradient>
+          </Pressable>
         </View>
       </LinearGradient>
     );
   }
 
-  // ─── RENDER: Main game screen ─────────────────────────────────────────────
-  const textTask = currentTask as Task & { emoji: string };
-  const bgColors = (isDark ? ["#2e1065", "#831843"] : ["#fce4f3", "#fbcfe8"]) as any;
-  const iconColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.25)";
+  // ── Empty state ──
+  if (noTasksRemaining) {
+    return (
+      <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={S.fill_center}>
+        <Ionicons name="camera" size={80} color="rgba(255,255,255,0.8)" style={{ marginBottom: 20 }} />
+        <Text style={[S.completeBtnText, { fontSize: 26, marginBottom: 12 }]}>All Done!</Text>
+        <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: 15, textAlign: "center", marginBottom: 32, lineHeight: 22, fontFamily: "Nunito_700Bold", paddingHorizontal: 32 }}>
+          You've completed all Hidden Moments cards!
+        </Text>
+        <Pressable onPress={handleGoBack} style={[S.completeBtn, { paddingVertical: 10 }]}>
+          <LinearGradient colors={["#7c3aed", "#db2777"] as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[S.completeBtnInner, { paddingHorizontal: 32 }]}>
+            <Text style={S.completeBtnText}>Go Back</Text>
+          </LinearGradient>
+        </Pressable>
+      </LinearGradient>
+    );
+  }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // ── MAIN RENDER ──
+  // ─────────────────────────────────────────────────────────────────────────
   return (
-    <LinearGradient
-      colors={bgColors}
-      locations={[0, 1]}
-      style={{ flex: 1 }}
-    >
-      {/* Decorative Background Stars */}
-      <Animated.View style={{ position: "absolute", top: 80, left: -20, transform: [{ rotate: "-15deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -20] }) }] }}>
-        <Ionicons name="star" size={120} color={iconColor} />
+    <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+      {/* Floating background hearts */}
+      <Animated.View style={[S.bgHeart, { top: 80, left: -30, transform: [{ rotate: "-15deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -20] }) }] }]}>
+        <Ionicons name="heart" size={130} color="rgba(255,255,255,0.08)" />
       </Animated.View>
-      <Animated.View style={{ position: "absolute", top: 250, right: -10, transform: [{ rotate: "25deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 30] }) }] }}>
-        <Ionicons name="star" size={80} color={iconColor} />
-      </Animated.View>
-      <Animated.View style={{ position: "absolute", bottom: 150, left: 30, transform: [{ rotate: "-10deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -40] }) }] }}>
-        <Ionicons name="star" size={150} color={iconColor} />
+      <Animated.View style={[S.bgHeart, { top: 260, right: -20, transform: [{ rotate: "20deg" }, { translateY: bgAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 28] }) }] }]}>
+        <Ionicons name="heart" size={90} color="rgba(255,255,255,0.06)" />
       </Animated.View>
 
-      {showConfetti && (
-        <HeartConfetti onComplete={() => setShowConfetti(false)} />
-      )}
+      {showConfetti && <HeartConfetti onComplete={() => setShowConfetti(false)} />}
 
-      <Animated.ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 52, paddingBottom: 40, flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-      >
+      {/* ─── FIXED LAYOUT: not scrollable to keep proportions exact ─── */}
+      <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 52, paddingBottom: 28 }}>
 
-        {/* ── TOP HEADER: Close × top-right ── */}
-        <View style={{ alignItems: "flex-end", marginBottom: 12 }}>
-          <Pressable onPress={handleGoBack} style={{ borderRadius: 32, overflow: "hidden"}}>
-            <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 36, height: 36, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name="close" size={18} color={isDark ? "#ffffff" : "#0f172a"} />
-            </BlurView>
+        {/* ════ 1. HEADER ROW ════ */}
+        <View style={S.headerRow}>
+          {/* History button — navigates to history page */}
+          <Pressable
+            onPress={() => router.push("/(game)/history")}
+            style={S.headerCircleBtn}
+          >
+            <Ionicons name="time-outline" size={22} color="rgba(255,255,255,0.95)" />
+          </Pressable>
+
+          {/* Title */}
+          <Text style={S.headerTitle}>Hidden Moments</Text>
+
+          {/* Close / Go Back button — plain circle, no shadow */}
+          <Pressable onPress={handleGoBack} style={S.headerCircleBtn}>
+            <Ionicons name="close" size={22} color="rgba(255,255,255,0.95)" />
           </Pressable>
         </View>
 
-        {/* ── SCRATCH COUNTER BAR ── */}
-        <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 14 }}>
-          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flexDirection: "row", alignItems: "center", borderRadius: 32, overflow: "hidden", paddingVertical: 10, paddingHorizontal: 16 }}>
-            {/* Partner A */}
-            <View style={{ flex: 1, alignItems: "center" }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                <Ionicons name="star" size={13} color={currentTurn === "A" ? "#facc15" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(30,27,75,0.5)")} />
-                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 15, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerAName}</Text>
+        {/* ════ 2. SCORE CARD ════ */}
+        <View style={{ borderRadius: 24, overflow: "hidden", marginBottom: 12, borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)", shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 12 }}>
+            <LinearGradient colors={isDark ? ["rgba(255,255,255,0.1)", "rgba(255,255,255,0.02)"] : ["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.4)"]} style={StyleSheet.absoluteFill} />
+
+            {/* Row 1: Names + Avatars — both center-aligned */}
+            <View style={S.scoreNamesRow}>
+              <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                {coupleProfile?.partnerAAvatar ? (
+                  <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }} />
+                ) : (
+                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center", borderWidth: 1.5, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }}>
+                    <Ionicons name="person" size={14} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)"} />
+                  </View>
+                )}
+                <Text style={[S.scoreName, { flex: undefined, textAlign: "center", color: isDark ? "#ffffff" : "#9333ea" }]} numberOfLines={1}>{partnerAName}</Text>
               </View>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 14 }}>
-                {scratchCountA} <Text style={{ color: "#facc15" }}>★</Text>
-              </Text>
+
+              <View style={{ width: 10 }} />
+
+              <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                {coupleProfile?.partnerBAvatar ? (
+                  <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }} />
+                ) : (
+                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center", borderWidth: 1.5, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }}>
+                    <Ionicons name="person" size={14} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)"} />
+                  </View>
+                )}
+                <Text style={[S.scoreName, { flex: undefined, textAlign: "center", color: isDark ? "#ffffff" : "#9333ea" }]} numberOfLines={1}>{partnerBName}</Text>
+              </View>
             </View>
 
-            {/* Center: love icon + turn indicator */}
-            <View style={{ alignItems: "center", paddingHorizontal: 8 }}>
-              <Ionicons name="star" size={20} color="#facc15" />
-              <View style={{
-                marginTop: 3,
-                backgroundColor: currentTurn === "A" ? "rgba(250,204,21,0.2)" : "rgba(168,85,247,0.2)",
-                borderRadius: 999, overflow: "hidden",
-                paddingHorizontal: 8,
-                paddingVertical: 2
-              }}>
-                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 11, fontWeight: "700" }}>
-                  {turnName}'s turn
-                </Text>
+            {/* Row 2: Numbers + center icon */}
+            <View style={S.scoreCountRow}>
+              <Text style={[S.scoreCount, { color: isDark ? "#ffffff" : "#0f172a" }]}>{scratchCountA}</Text>
+              <View style={S.scoreIconCenter}>
+                <AnimatedHeartIcon />
               </View>
+              <Text style={[S.scoreCount, { color: isDark ? "#ffffff" : "#0f172a" }]}>{scratchCountB}</Text>
             </View>
 
-            {/* Partner B */}
-            <View style={{ flex: 1, alignItems: "center" }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                <Ionicons name="star" size={13} color={currentTurn === "B" ? "#a855f7" : (isDark ? "rgba(255,255,255,0.5)" : "rgba(30,27,75,0.5)")} />
-                <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 15, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }} numberOfLines={1}>{partnerBName}</Text>
-              </View>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 14 }}>
-                {scratchCountB} <Text style={{ color: "#a855f7" }}>★</Text>
-              </Text>
-            </View>
+            {/* Divider */}
+            <View style={[S.scoreDivider, { backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)" }]} />
+
+            {/* Row 3: Scratches / Performs label */}
+            <Text style={[S.scratchPerformLabel, { color: isDark ? "rgba(255,255,255,0.65)" : "rgba(15,23,42,0.55)" }]}>
+              {turnName} Scratches{" --> "}{performingName} Performs
+            </Text>
           </BlurView>
         </View>
 
-        {/* ── CARD + CONTENT ── */}
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          {/* Scratcher → Performer pill */}
-          {textTask && (
-            <View style={{ borderRadius: 999, overflow: "hidden", marginBottom: 12 }}>
-              <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-                borderRadius: 999, overflow: "hidden",
-                paddingHorizontal: 16,
-                paddingVertical: 7,
-              }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <Ionicons name="flash" size={14} color={isDark ? "#facc15" : "#d97706"} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 14, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{turnName}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 13 }}>scratches</Text>
-                </View>
-                <Text style={{ color: isDark ? "rgba(255,255,255,0.6)" : "rgba(30,27,75,0.6)", fontSize: 14 }}>→</Text>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <Ionicons name="flash-outline" size={14} color={isDark ? "#ffffff" : "#1e1b4b"} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#1e1b4b", fontSize: 14, fontWeight: "700", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>{getPerformingPartnerName()}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(30,27,75,0.8)", fontSize: 13 }}>performs</Text>
-                </View>
-              </BlurView>
-            </View>
-          )}
 
+        {/* ════ 4. SCRATCH CARD ════ */}
+        <View style={S.cardArea}>
+
+          {/* ── BEFORE SCRATCH ── */}
           {!isScratched && textTask ? (
-            <View style={{ width: "100%" }}>
-              <ScratchCard onScratchComplete={handleScratchComplete}>
+            <View style={S.cardWrapper}>
+              {/* Turn pill — absolute on top edge of the wrapper (no overflow hidden here) */}
+              <View style={S.turnPillAbsolute}>
+                <View style={{ borderRadius: 999, overflow: "hidden", }}>
+                  <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={[S.turnPill, {
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
+                    borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(147,51,234,0.3)",
+                  }]}>
+                    <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>
+                      {turnName}'s Turn
+                    </Text>
+                  </BlurView>
+                </View>
+              </View>
+
+              <View style={[S.cardOuter, { position: "relative" }]}>
+                <ScratchCard
+                  onScratchComplete={handleScratchComplete}
+                  overlayImage={
+                    isDark
+                      ? require("@/assets/images/overlay-dark.png")
+                      : require("@/assets/images/overlay-light.png")
+                  }
+                >
+                  {/* Reveal image — this sits underneath and is shown through scratching */}
+                  <LinearGradient
+                    colors={theme.accentGradient as any}
+                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                    style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
+                  >
+                    <Text style={{ fontSize: 48, marginBottom: 12 }}>{textTask.emoji}</Text>
+                    <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
+                      {textTask.title}
+                    </Text>
+                    <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>
+                      {textTask.description}
+                    </Text>
+                  </LinearGradient>
+
+                  {/* Scratch hint at bottom */}
+                  <View style={S.scratchHintOverlay}>
+                    <View style={[S.scratchHintPill, { backgroundColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.7)" }]}>
+                      <Text style={{ fontSize: 14 }}>👆</Text>
+                      <Text style={[S.scratchHintText, { color: isDark ? "#ffffff" : "#0f172a" }]}>Scratch to reveal!</Text>
+                    </View>
+                  </View>
+                </ScratchCard>
+              </View>
+            </View>
+          ) : isScratched && textTask ? (
+            /* ── AFTER SCRATCH ── */
+            <View style={S.cardWrapper}>
+              {/* Turn pill — absolute on top edge of the wrapper */}
+              <View style={S.turnPillAbsolute}>
+                <View style={{ borderRadius: 999, overflow: "hidden" }}>
+                  <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={[S.turnPill, {
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
+                    borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(147,51,234,0.3)",
+                  }]}>
+                    <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>
+                      {turnName}'s Turn
+                    </Text>
+                  </BlurView>
+                </View>
+              </View>
+
+              <Animated.View style={[S.cardOuter, {
+                position: "relative",
+                borderColor: "#7c3aed",
+                borderWidth: 4,
+                backgroundColor: isDark ? "#1e0035" : "#ffffff",
+                opacity: revealOpacity,
+              }]}>
+                {/* Revealed text */}
                 <LinearGradient
                   colors={theme.accentGradient as any}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                  style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden", padding: 24 }}
+                  style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
                 >
-                  <Ionicons name="flame" size={48} color="#ffffff" style={{ marginBottom: 12 }} />
+                  <Text style={{ fontSize: 48, marginBottom: 12 }}>{textTask.emoji}</Text>
                   <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
                     {textTask.title}
                   </Text>
-                  <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontWeight: "600" }}>
+                  <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>
                     {textTask.description}
                   </Text>
                 </LinearGradient>
-              </ScratchCard>
-            </View>
-          ) : isScratched && textTask ? (
-            <Animated.View style={{
-              width: "100%",
-              aspectRatio: 4 / 5,
-              borderRadius: 32, overflow: "hidden", opacity: revealOpacity,
-            }}>
-              <LinearGradient
-                colors={theme.accentGradient as any}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
-              >
-                <Ionicons name="flame" size={48} color="#ffffff" style={{ marginBottom: 12 }} />
-                <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
-                  {textTask.title}
-                </Text>
-                <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontWeight: "600" }}>
-                  {textTask.description}
-                </Text>
 
-                {/* Auto-start countdown or timer display */}
-                {!timerStarted && !isCompleted && (
-                  <View style={{ alignItems: "center", marginTop: 24 }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 32, overflow: "hidden", paddingHorizontal: 14, paddingVertical: 8 }}>
-                      <Ionicons name="timer-outline" size={16} color="#ffffff" />
-                      <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "700" }}>Timer starts in 10s…</Text>
+                {/* Timer/hint overlay at bottom */}
+                <View style={[S.timerOverlay, {
+                  backgroundColor: isDark ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.95)",
+                  borderTopColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(124,58,237,0.2)",
+                }]}>
+                  {timerStarted ? (
+                    <>
+                      <Animated.Text style={[S.timerText, {
+                        color: timeLeft <= 10 ? "#ef4444" : (isDark ? "#ffffff" : "#4c1d95"),
+                        opacity: timeLeft <= 10 ? pulseOpacity : 1,
+                      }]}>
+                        {formattedTime}
+                      </Animated.Text>
+                      <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(76,29,149,0.7)", fontSize: 14, fontFamily: "Nunito_700Bold", marginTop: 2 }}>
+                        {isFinished ? `⏰ Time's up, ${performingName}!` : `${performingName} must complete the task!`}
+                      </Text>
+                    </>
+                  ) : (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                      <Ionicons name="timer-outline" size={15} color="#10b981" />
+                      <Text style={{ color: "#10b981", fontSize: 13, fontFamily: "Nunito_700Bold", fontWeight: "700" }}>
+                        Timer starts in 10s…
+                      </Text>
                     </View>
-                  </View>
-                )}
-
-                {/* Timer display */}
-                {timerStarted && (
-                  <View style={{ alignItems: "center", marginTop: 24 }}>
-                    <Animated.Text style={[
-                      { fontSize: 40, fontWeight: "900", fontFamily: "DynaPuff_700Bold", color: "#ffffff" },
-                      timeLeft <= 10 && isRunning ? { opacity: pulseOpacity } : undefined,
-                    ]}>
-                      {formattedTime}
-                    </Animated.Text>
-                    {isRunning && (
-                      <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 4 }}>Time remaining</Text>
-                    )}
-                    {timerFinished && (
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 }}>
-                        <Ionicons name="alarm-outline" size={16} color="#4ade80" />
-                        <Text style={{ color: "#4ade80", fontSize: 14, fontWeight: "700" }}>Time's up!</Text>
-                      </View>
-                    )}
-                  </View>
-                )}
-              </LinearGradient>
-            </Animated.View>
+                  )}
+                </View>
+              </Animated.View>
+            </View>
           ) : null}
         </View>
 
-        {/* ── BOTTOM ACTION BUTTONS ── */}
-        <View style={{ gap: 10, marginTop: 14 }}>
-          {/* Complete — pink→purple gradient (primary positive action) */}
-          <AnimatedButton
-            onPress={handleComplete}
-            disabled={!canComplete}
-            style={{ opacity: canComplete ? 1 : 0.3, borderRadius: 999, overflow: "hidden" }}
-          >
-            <LinearGradient
-              colors={theme.accentGradient as any}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 999, overflow: "hidden"}}
+        {/* ════ 5. BOTTOM ACTION BUTTONS ════ */}
+        <View style={S.buttonsArea}>
+
+          {/* ── Complete — 3D shadow (lighter purple) ── */}
+          <View style={{ opacity: canComplete ? 1 : 0.35 }}>
+            <View style={[S.btn3dShadow, { backgroundColor: "#e879f9", borderColor: "#e879f9" }]} />
+            <Pressable
+              onPress={handleDone}
+              disabled={!canComplete}
+              style={S.btn3dWrapper}
             >
-              <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
-              <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Complete</Text>
-            </LinearGradient>
-          </AnimatedButton>
+              <LinearGradient
+                colors={["#9333ea", "#c026d3", "#db2777"] as any}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={[S.completeBtnInner, S.btn3dBorder, { borderColor: "rgba(255,255,255,0.35)" }]}
+              >
+                <Text style={S.completeBtnText}>Complete</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
 
-          {/* Previous (left) + Skip (right) */}
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            {/* Previous */}
-            <View style={{ flex: 1, borderRadius: 32, overflow: "hidden", opacity: (previousTask && !showPrevious) ? 1 : 0.35 }}>
-              <Pressable onPress={handlePrevious} disabled={!previousTask || showPrevious} style={{ flex: 1 }}>
-                <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 32, overflow: "hidden", backgroundColor: (previousTask && !showPrevious) ? "rgba(99,102,241,0.12)" : "transparent", paddingVertical: 13, paddingHorizontal: 12 }}>
-                  <Ionicons name="arrow-back" size={16} color={(previousTask && !showPrevious) ? "#6366f1" : (isDark ? "#ffffff" : "#1e1b4b")} />
-                  <Text style={{ color: (previousTask && !showPrevious) ? "#6366f1" : (isDark ? "#ffffff" : "#1e1b4b"), fontSize: 14, fontWeight: "700" }}>Previous</Text>
-                </BlurView>
+          {/* ── Previous | Skip ── */}
+          <View style={S.secondRow}>
+
+            {/* Previous — blue 3D pill (lighter blue shadow) */}
+            <View style={[{ flex: 1 }, { opacity: (previousTask && !showPrevious) ? 1 : 0.4 }]}>
+              <View style={[S.btn3dShadow, { backgroundColor: "#93c5fd", borderColor: "#93c5fd" }]} />
+              <Pressable
+                onPress={() => setShowPrevious(true)}
+                disabled={!previousTask || showPrevious}
+                style={S.btn3dWrapper}
+              >
+                <LinearGradient
+                  colors={["#3b82f6", "#2563eb"] as any}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                  style={[S.secondBtnInner, S.btn3dBorder, { borderColor: "rgba(255,255,255,0.35)" }]}
+                >
+                  <Ionicons name="arrow-back" size={18} color="#ffffff" />
+                  <Text style={S.secondBtnText}>Previous</Text>
+                </LinearGradient>
               </Pressable>
             </View>
 
-            {/* Skip */}
-            <View style={{ flex: 1, borderRadius: 32, overflow: "hidden", opacity: canSkip ? 1 : 0.35 }}>
-              <Pressable onPress={handleSkip} disabled={!canSkip} style={{ flex: 1 }}>
-                <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 32, overflow: "hidden", backgroundColor: canSkip ? "rgba(245,158,11,0.12)" : "transparent", paddingVertical: 13, paddingHorizontal: 12 }}>
-                  <Ionicons name="play-skip-forward" size={16} color={canSkip ? "#f59e0b" : (isDark ? "#ffffff" : "#1e1b4b")} />
-                  <Text style={{ color: canSkip ? "#f59e0b" : (isDark ? "#ffffff" : "#1e1b4b"), fontSize: 14, fontWeight: "700" }}>Skip</Text>
-                </BlurView>
+            {/* Skip — yellow 3D pill (lighter amber shadow) */}
+            <View style={[{ flex: 1 }, { opacity: canSkip ? 1 : 0.4 }]}>
+              <View style={[S.btn3dShadow, { backgroundColor: "#fde68a", borderColor: "#fde68a" }]} />
+              <Pressable
+                onPress={handleSkip}
+                disabled={!canSkip}
+                style={S.btn3dWrapper}
+              >
+                <LinearGradient
+                  colors={["#fbbf24", "#f59e0b"] as any}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                  style={[S.secondBtnInner, S.btn3dBorder, { borderColor: "rgba(255,255,255,0.35)" }]}
+                >
+                  <Text style={S.secondBtnText}>Skip</Text>
+                  <Ionicons name="play-skip-forward" size={18} color="#ffffff" />
+                </LinearGradient>
               </Pressable>
             </View>
+
           </View>
         </View>
-      </Animated.ScrollView>
+
+      </View>
     </LinearGradient>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STYLES
+// ─────────────────────────────────────────────────────────────────────────────
+const S = StyleSheet.create({
+  fill_center: { flex: 1, alignItems: "center", justifyContent: "center", paddingLeft: 50, paddingRight: 50, },
+  loadingText: { marginTop: 16, color: "#ffffff", fontSize: 16, fontFamily: "DynaPuff_700Bold" },
+  bgHeart: { position: "absolute" },
+
+  // Header
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+  // Header buttons — proper 3D circle with border + bottom shadow
+  headerBtnWrapper: {
+    position: "relative",
+  },
+  headerBtnShadow: {
+    position: "absolute",
+    top: 4,
+    left: 0,
+    right: 0,
+    bottom: -4,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  headerBtnInner: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.28)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.55)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  // Legacy — kept for safety
+  headerCircleBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontFamily: "DynaPuff_700Bold",
+    fontSize: 20,
+    color: "#ffffff",
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+
+  // Score card styles
+  scoreNamesRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  scoreName: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: "DynaPuff_700Bold",
+    color: "#9333ea",
+  },
+  scoreCountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  scoreCount: {
+    flex: 1,
+    fontSize: 42,
+    fontFamily: "DynaPuff_700Bold",
+    fontWeight: "900",
+    textAlign: "center",
+  },
+  scoreIconCenter: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 50,
+  },
+  scoreDivider: {
+    height: 1,
+    marginBottom: 8,
+  },
+  scratchPerformLabel: {
+    textAlign: "center",
+    fontSize: 13,
+    fontFamily: "Nunito_700Bold",
+  },
+
+  // Turn pill
+  turnPillWrapper: {
+    alignItems: "center",
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  turnPill: {
+    borderRadius: 999,
+    borderWidth: 1.5,
+    paddingHorizontal: 24,
+    paddingVertical: 7,
+    overflow: "hidden",
+  },
+  turnPillText: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  // Absolute wrapper — floats pill on top edge of the scratch card
+  turnPillAbsolute: {
+    position: "absolute",
+    top: -16,      // half of pill height, so it straddles the top edge
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    borderRadius: 999,
+    zIndex: 20,
+  },
+
+  // Card — sized to match overlay image ratio 616×770 ≈ 0.80
+  // width is ~80% of screen to be smaller and proportional
+  cardArea: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardWrapper: {
+    width: "82%",
+    aspectRatio: 616 / 770,
+    position: "relative",
+  },
+  cardOuter: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 24,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.25)",
+  },
+
+  // Pattern (before scratch)
+  patternGrid: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    padding: 12,
+    gap: 6,
+    alignContent: "center",
+    justifyContent: "center",
+  },
+  scratchHintOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    paddingBottom: 18,
+  },
+  scratchHintPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(0,0,0,0.38)",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  scratchHintText: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontFamily: "Nunito_700Bold",
+    fontWeight: "700",
+  },
+
+  // Timer overlay
+  timerOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    paddingVertical: 14,
+    borderTopWidth: 1,
+  },
+  timerText: {
+    fontSize: 42,
+    fontFamily: "DynaPuff_700Bold",
+    fontWeight: "900",
+  },
+  timerSubText: {
+    fontSize: 14,
+    fontFamily: "Nunito_700Bold",
+    marginTop: 2,
+  },
+
+  // Buttons
+  buttonsArea: {
+    gap: 12,
+    marginTop: 12,
+  },
+  // 3D effect: shadow only at bottom — reduced height (3px)
+  btn3dShadow: {
+    position: "absolute",
+    top: 3,
+    left: 0,
+    right: 0,
+    bottom: -3,
+    borderRadius: 999,
+    borderWidth: 2,
+  },
+  // Actual button sits on top
+  btn3dWrapper: {
+    borderRadius: 999,
+    overflow: "hidden",
+    marginBottom: 3,  // space for shadow below
+  },
+  // Outline border on the gradient itself
+  btn3dBorder: {
+    borderWidth: 2,
+    borderRadius: 999,
+  },
+  completeBtn: {
+    borderRadius: 999,
+    overflow: "hidden",
+    marginBottom: 16,
+  },
+  completeBtnInner: {
+    paddingVertical: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+  },
+  completeBtnText: {
+    color: "#ffffff",
+    fontSize: 20,
+    fontFamily: "DynaPuff_700Bold",
+    fontWeight: "900",
+  },
+  secondRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  secondBtnInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 999,
+  },
+  secondBtnText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontFamily: "DynaPuff_700Bold",
+    fontWeight: "800",
+  },
+
+  // Previous screen
+  prevLabel: {
+    textAlign: "center",
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 13,
+    fontFamily: "Nunito_700Bold",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+});

@@ -2,7 +2,7 @@
   "expo": {
     "name": "WePlay",
     "slug": "couples-scratch-game",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -29,6 +29,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.couples.scratchgame",
+      "versionCode": 3,
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
@@ -46,10 +47,13 @@
         {
           "android": {
             "enableProguardInReleaseBuilds": true,
-            "shrinkResources": true
+            "shrinkResources": true,
+            "minSdkVersion": 24,
+            "enableMinifyInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
@@ -57,8 +61,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "9d88f4c2-af13-4603-accc-131ec5da880f"
+        "projectId": "6d8727bc-703c-47af-a979-7ffe1735118e"
       }
-    }
+    },
+    "owner": "pix_sans"
   }
 }

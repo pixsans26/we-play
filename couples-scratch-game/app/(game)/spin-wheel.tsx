@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, Pressable, StyleSheet, Dimensions, Animated, Easing, Modal, ScrollView } from "react-native";
+import { View, Text, Pressable, StyleSheet, Dimensions, Animated, Easing, Modal, ScrollView, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import { useSound } from "@/hooks/useSound";
+import { getAvatarSource } from "@/lib/apiClient";
 
 const { width, height } = Dimensions.get("window");
 const WHEEL_SIZE = width * 0.82;
@@ -277,11 +278,34 @@ export default function SpinWheelScreen() {
           </BlurView>
         </Pressable>
         
-        <View style={{ backgroundColor: "rgba(0,0,0,0.3)", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Ionicons name="sync" size={16} color="#facc15" />
-          <Text style={{ color: "#fff", fontWeight: "bold", fontFamily: "DynaPuff_700Bold", fontSize: 13 }}>
-            {coupleProfile?.partnerAName?.split(' ')[0] || "A"}: {spinCountA}  •  {coupleProfile?.partnerBName?.split(' ')[0] || "B"}: {spinCountB}
-          </Text>
+        <View style={{ backgroundColor: "rgba(0,0,0,0.3)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 24, flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {coupleProfile?.partnerAAvatar ? (
+              <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: currentTurn === "A" ? "#facc15" : "rgba(255,255,255,0.2)" }} />
+            ) : (
+              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: currentTurn === "A" ? "#facc15" : "rgba(255,255,255,0.2)" }}>
+                <Ionicons name="person" size={10} color="rgba(255,255,255,0.8)" />
+              </View>
+            )}
+            <Text style={{ color: "#fff", fontWeight: "bold", fontFamily: "DynaPuff_700Bold", fontSize: 13 }}>
+              {coupleProfile?.partnerAName?.split(' ')[0] || "A"} <Text style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Nunito_700Bold" }}>{spinCountA}</Text>
+            </Text>
+          </View>
+          
+          <View style={{ width: 1, height: 12, backgroundColor: "rgba(255,255,255,0.2)" }} />
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {coupleProfile?.partnerBAvatar ? (
+              <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: currentTurn === "B" ? "#facc15" : "rgba(255,255,255,0.2)" }} />
+            ) : (
+              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: currentTurn === "B" ? "#facc15" : "rgba(255,255,255,0.2)" }}>
+                <Ionicons name="person" size={10} color="rgba(255,255,255,0.8)" />
+              </View>
+            )}
+            <Text style={{ color: "#fff", fontWeight: "bold", fontFamily: "DynaPuff_700Bold", fontSize: 13 }}>
+              {coupleProfile?.partnerBName?.split(' ')[0] || "B"} <Text style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Nunito_700Bold" }}>{spinCountB}</Text>
+            </Text>
+          </View>
         </View>
         
         <View style={{ width: 44 }} />

@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   tagline: {
     fontSize: 15,
     color: "rgba(220,180,255,0.75)",
-    fontFamily: "Nunito_600SemiBold",
+    fontFamily: "Nunito_700Bold",
     letterSpacing: 0.3,
     marginTop: 4,
   },

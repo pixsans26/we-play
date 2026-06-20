@@ -2,7 +2,7 @@ import "@/patch";
 import { env } from "@/lib/env";
 import { useEffect, useState } from "react";
 import { LogBox } from "react-native";
-import { Slot, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -204,7 +204,7 @@ export default function RootLayout() {
       <View style={{ flex: 1, backgroundColor: "#150025", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <Ionicons name="cloud-download-outline" size={80} color="#f953c6" style={{ marginBottom: 20 }} />
         <Text style={{ fontFamily: "DynaPuff_700Bold", fontSize: 28, color: "#fff", marginBottom: 12, textAlign: "center" }}>Update Available</Text>
-        <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 16, color: "rgba(255,255,255,0.7)", textAlign: "center", marginBottom: 32 }}>
+        <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: "rgba(255,255,255,0.7)", textAlign: "center", marginBottom: 32 }}>
           A new version of {brandingAppName} ({latestVersion}) is available. Please update to continue.
         </Text>
         <Pressable 
@@ -217,5 +217,5 @@ export default function RootLayout() {
     );
   }
 
-  return <Slot />;
+  return <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 400 }} />;
 }

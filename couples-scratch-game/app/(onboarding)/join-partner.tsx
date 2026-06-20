@@ -88,13 +88,13 @@ export default function JoinPartnerScreen() {
         <Text style={{ fontSize: 32, fontFamily: "DynaPuff_700Bold", color: theme.card.text, marginBottom: 8 }}>
           Join Your Partner 💌
         </Text>
-        <Text style={{ fontSize: 16, color: theme.card.subtext, fontFamily: "Nunito_400Regular", marginBottom: 40 }}>
+        <Text style={{ fontSize: 16, color: theme.card.subtext, fontFamily: "Nunito_700Bold", marginBottom: 40 }}>
           Enter the invite code your partner shared with you.
         </Text>
 
         {/* Code Input */}
         <View style={{ backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)", borderRadius: 24, borderWidth: 2, borderColor: error ? "#ef4444" : theme.accent, padding: 24, alignItems: "center", marginBottom: 24 }}>
-          <Text style={{ fontSize: 13, color: theme.card.subtext, fontFamily: "Nunito_600SemiBold", letterSpacing: 2, marginBottom: 16 }}>INVITE CODE</Text>
+          <Text style={{ fontSize: 13, color: theme.card.subtext, fontFamily: "Nunito_700Bold", letterSpacing: 2, marginBottom: 16 }}>INVITE CODE</Text>
           <TextInput
             value={code}
             onChangeText={(t) => setCode(t.toUpperCase())}
@@ -116,7 +116,7 @@ export default function JoinPartnerScreen() {
 
         {!!error && (
           <View style={{ backgroundColor: "rgba(239,68,68,0.1)", borderRadius: 12, padding: 12, marginBottom: 16 }}>
-            <Text style={{ color: "#ef4444", textAlign: "center", fontFamily: "Nunito_600SemiBold" }}>{error}</Text>
+            <Text style={{ color: "#ef4444", textAlign: "center", fontFamily: "Nunito_700Bold" }}>{error}</Text>
           </View>
         )}
 

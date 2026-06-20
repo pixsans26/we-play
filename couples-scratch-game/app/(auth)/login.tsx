@@ -129,7 +129,7 @@ export default function LoginScreen() {
               <Text style={{ fontSize: 32, color: theme.card.text, fontWeight: "900", marginBottom: 6, fontFamily: "DynaPuff_700Bold" }}>
                 Welcome Back
               </Text>
-              <Text style={{ fontSize: 15, color: theme.card.subtext, textAlign: "center" }}>
+              <Text style={{ fontSize: 15, color: theme.card.subtext, textAlign: "center", fontFamily: "Nunito_700Bold" }}>
                 Your love story continues ✨
               </Text>
             </View>
@@ -200,7 +200,7 @@ export default function LoginScreen() {
                   >
                     {isLoading
                       ? <ActivityIndicator color="#ffffff" />
-                      : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800" }}>Log In</Text>
+                      : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Log In</Text>
                     }
                   </LinearGradient>
                 </TouchableOpacity>
@@ -209,11 +209,11 @@ export default function LoginScreen() {
 
             {/* Sign up link */}
             <View style={{ marginTop: 28, alignItems: "center" }}>
-              <Text style={{ color: theme.card.subtext, fontSize: 14 }}>
+              <Text style={{ color: theme.card.subtext, fontSize: 14, fontFamily: "Nunito_700Bold" }}>
                 Don't have an account?{" "}
                 <Link href="/(auth)/signup" asChild>
                   <TouchableOpacity>
-                    <Text style={{ color: "#f953c6", fontWeight: "800" }}>Sign Up</Text>
+                    <Text style={{ color: "#f953c6", fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Sign Up</Text>
                   </TouchableOpacity>
                 </Link>
               </Text>

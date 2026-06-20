@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useCycleStore } from "@/store/cycleStore";
 import { calculateCyclePredictions, generatePredictionCalendarMarks, CyclePredictions } from "@/lib/cycleCalculations";
 import { getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
+import { useNotificationStore } from "@/store/notificationStore";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -42,6 +43,7 @@ export default function PartnerScreen() {
   const fetchCycleConfig = useCycleStore((s) => s.fetchCycleConfig);
   const updateCycleConfig = useCycleStore((s) => s.updateCycleConfig);
   const isLoading = useCycleStore((s) => s.isLoading);
+  const hasUnreadNotifications = useNotificationStore((s) => s.hasUnread);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [predictions, setPredictions] = useState<CyclePredictions | null>(null);
@@ -242,7 +244,12 @@ export default function PartnerScreen() {
               </View>
             </View>
             <Pressable onPress={() => router.push("/notifications")} style={{ padding: 8 }}>
-              <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+              <View style={{ position: "relative" }}>
+                <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+                {hasUnreadNotifications && (
+                  <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
+                )}
+              </View>
             </Pressable>
           </View>
         </View>
@@ -263,7 +270,7 @@ export default function PartnerScreen() {
               <Text style={{ fontFamily: "DynaPuff_700Bold", fontSize: 26, color: theme.card.text, textAlign: "center" }}>
                 Invite Your Partner 💑
               </Text>
-              <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 15, color: theme.card.subtext, textAlign: "center", lineHeight: 22 }}>
+              <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 15, color: theme.card.subtext, textAlign: "center", lineHeight: 22 }}>
                 Connect with your partner to start tracking her period cycle together and unlock sharing moods and desires.
               </Text>
             </View>
@@ -274,7 +281,7 @@ export default function PartnerScreen() {
                 borderRadius: 24, borderWidth: 2, borderColor: theme.accent,
                 paddingHorizontal: 40, paddingVertical: 24, alignItems: "center", width: "100%"
               }}>
-                <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_600SemiBold", marginBottom: 8, letterSpacing: 2 }}>INVITE CODE</Text>
+                <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_700Bold", marginBottom: 8, letterSpacing: 2 }}>INVITE CODE</Text>
                 <Text style={{ color: theme.accent, fontSize: 40, fontFamily: "DynaPuff_700Bold", letterSpacing: 6 }}>{coupleProfile.inviteCode}</Text>
               </View>
             ) : (
@@ -369,7 +376,12 @@ export default function PartnerScreen() {
             onPress={() => router.push("/notifications")}
             style={{ padding: 8 }}
           >
-            <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+            <View style={{ position: "relative" }}>
+              <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
+              {hasUnreadNotifications && (
+                <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
+              )}
+            </View>
           </Pressable>
         </View>
       </View>
@@ -390,7 +402,7 @@ export default function PartnerScreen() {
               <Text style={{ fontFamily: "DynaPuff_700Bold", fontSize: 32, color: theme.card.text, textAlign: "center" }}>
                 {activePredictions.daysUntilNextPeriod} Days Left
               </Text>
-              <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 18, color: theme.card.subtext, marginTop: 8 }}>
+              <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: theme.card.subtext, marginTop: 8 }}>
                 {activePredictions.nextPeriodDate ? formatDateShort(activePredictions.nextPeriodDate) : "Not Set"} - Next Period
               </Text>
 
@@ -418,86 +430,94 @@ export default function PartnerScreen() {
               <View style={{ flexDirection: "row", gap: 16, marginBottom: 16 }}>
 
                 {/* Ovulation Day Card */}
-                <LinearGradient
-                  colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
-                  style={{ flex: 1, borderRadius: 24, padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
-                >
-                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(168,85,247,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : "#a855f7", shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                    <MaterialCommunityIcons name="flower" size={20} color="#a855f7" />
-                  </View>
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>Ovulation</Text>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: isDark ? theme.card.text : "#0f172a", marginBottom: 4 }}>
-                    {activePredictions.nextOvulationDate ? formatDateShort(activePredictions.nextOvulationDate as Date) : "N/A"}
-                  </Text>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: isDark ? "#ef4444" : "#dc2626" }}>High Pregnancy Risk</Text>
-                </LinearGradient>
+                <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
+                  <LinearGradient
+                    colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
+                    style={{ padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                  >
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(168,85,247,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : "#a855f7", shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                      <MaterialCommunityIcons name="flower" size={20} color="#a855f7" />
+                    </View>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>Ovulation</Text>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: isDark ? theme.card.text : "#0f172a", marginBottom: 4 }}>
+                      {activePredictions.nextOvulationDate ? formatDateShort(activePredictions.nextOvulationDate as Date) : "N/A"}
+                    </Text>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: isDark ? "#ef4444" : "#dc2626" }}>High Pregnancy Risk</Text>
+                  </LinearGradient>
+                </BlurView>
 
                 {/* Safe Sex Card */}
-                <LinearGradient
-                  colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : activePredictions.safeSex ? ["#f0fdf4", "#ffffff"] : ["#f8fafc", "#ffffff"]}
-                  style={{ flex: 1, borderRadius: 24, padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
-                >
-                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? (activePredictions.safeSex ? "rgba(34,197,94,0.15)" : "rgba(107,114,128,0.15)") : "#ffffff", shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                    <Ionicons name="shield-checkmark" size={20} color={activePredictions.safeSex ? "#22c55e" : theme.card.subtext} />
-                  </View>
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>Safe Sex</Text>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: activePredictions.safeSex ? (isDark ? "#22c55e" : "#16a34a") : (isDark ? theme.card.subtext : "#475569") }}>
-                    {activePredictions.safeSex ? "Yes" : "No"}
-                  </Text>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: activePredictions.safeSex ? (isDark ? "#22c55e" : "#16a34a") : (isDark ? theme.card.subtext : "#475569") }}>Based on Cycle</Text>
-                </LinearGradient>
+                <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
+                  <LinearGradient
+                    colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : activePredictions.safeSex ? ["#f0fdf4", "#ffffff"] : ["#f8fafc", "#ffffff"]}
+                    style={{ padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                  >
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? (activePredictions.safeSex ? "rgba(34,197,94,0.15)" : "rgba(107,114,128,0.15)") : "#ffffff", shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                      <Ionicons name="shield-checkmark" size={20} color={activePredictions.safeSex ? "#22c55e" : theme.card.subtext} />
+                    </View>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>Safe Sex</Text>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: activePredictions.safeSex ? (isDark ? "#22c55e" : "#16a34a") : (isDark ? theme.card.subtext : "#475569") }}>
+                      {activePredictions.safeSex ? "Yes" : "No"}
+                    </Text>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: activePredictions.safeSex ? (isDark ? "#22c55e" : "#16a34a") : (isDark ? theme.card.subtext : "#475569") }}>Based on Cycle</Text>
+                  </LinearGradient>
+                </BlurView>
 
               </View>
 
               {/* Fertility Window Card */}
-              <LinearGradient
-                colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
-                style={{ borderRadius: 24, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#9333ea", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
-              >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(147,51,234,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : "#9333ea", shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginRight: 16 }}>
-                    <Ionicons name="pulse" size={20} color="#9333ea" />
+              <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 16 }}>
+                <LinearGradient
+                  colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
+                  style={{ padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#9333ea", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(147,51,234,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : "#9333ea", shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginRight: 16 }}>
+                      <Ionicons name="pulse" size={20} color="#9333ea" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>Fertility Window</Text>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: isDark ? theme.card.text : "#0f172a" }}>
+                        {activePredictions.fertileWindowStart ? formatDateShort(activePredictions.fertileWindowStart as Date) : "N/A"} - {activePredictions.fertileWindowEnd ? formatDateShort(activePredictions.fertileWindowEnd as Date) : "N/A"}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color={theme.card.subtext} />
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: theme.card.subtext }}>Fertility Window</Text>
-                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: isDark ? theme.card.text : "#0f172a" }}>
-                      {activePredictions.fertileWindowStart ? formatDateShort(activePredictions.fertileWindowStart as Date) : "N/A"} - {activePredictions.fertileWindowEnd ? formatDateShort(activePredictions.fertileWindowEnd as Date) : "N/A"}
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color={theme.card.subtext} />
-                </View>
-              </LinearGradient>
+                </LinearGradient>
+              </BlurView>
 
               {/* Moods and Desires Widget */}
-              <LinearGradient
-                colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
-                style={{ borderRadius: 24, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
-              >
-                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
-                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : theme.accent, shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginRight: 12 }}>
-                    <GradientIcon name="heart" size={18} />
+              <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 16 }}>
+                <LinearGradient
+                  colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
+                  style={{ padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : theme.accent, shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                      <GradientIcon name="heart" size={18} />
+                    </View>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: isDark ? theme.card.text : "#0f172a" }}>Phase: {activePredictions.currentPhase}</Text>
                   </View>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: isDark ? theme.card.text : "#0f172a" }}>Phase: {activePredictions.currentPhase}</Text>
-                </View>
 
-                <View style={{ marginBottom: 12 }}>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>
-                    {isMeFemale ? "Your Current Mood" : "Current Mood"}
-                  </Text>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: isDark ? theme.card.text : "#0f172a" }}>
-                    {activePredictions.partnerMood}
-                  </Text>
-                </View>
+                  <View style={{ marginBottom: 12 }}>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>
+                      {isMeFemale ? "Your Current Mood" : "Current Mood"}
+                    </Text>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: isDark ? theme.card.text : "#0f172a" }}>
+                      {activePredictions.partnerMood}
+                    </Text>
+                  </View>
 
-                <View>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>
-                    {isMeFemale ? "What You Might Want" : "What She Might Want"}
-                  </Text>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: isDark ? theme.card.text : "#0f172a" }}>
-                    {activePredictions.partnerDesires}
-                  </Text>
-                </View>
-              </LinearGradient>
+                  <View>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>
+                      {isMeFemale ? "What You Might Want" : "What She Might Want"}
+                    </Text>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: isDark ? theme.card.text : "#0f172a" }}>
+                      {activePredictions.partnerDesires}
+                    </Text>
+                  </View>
+                </LinearGradient>
+              </BlurView>
 
             </Pressable>
           </ScrollView>
@@ -517,7 +537,7 @@ export default function PartnerScreen() {
 
             <View style={{ marginBottom: 20 }}>
               <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 15, color: theme.card.text, marginBottom: 8 }}>Select Period Dates</Text>
-              <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 13, color: theme.card.subtext, marginBottom: 12 }}>Tap start date, then tap end date.</Text>
+              <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: theme.card.subtext, marginBottom: 12 }}>Tap start date, then tap end date.</Text>
               <View style={{ borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: theme.glass.border }}>
                 <Calendar
                   onDayPress={handleDayPress}
@@ -531,8 +551,8 @@ export default function PartnerScreen() {
                     selectedDayTextColor: "#ffffff",
                     monthTextColor: theme.card.text,
                     arrowColor: theme.accent,
-                    textDayFontFamily: "Nunito_600SemiBold",
-                    textMonthFontFamily: "DynaPuff_600SemiBold",
+                    textDayFontFamily: "Nunito_700Bold",
+                    textMonthFontFamily: "DynaPuff_700Bold",
                     textDayHeaderFontFamily: "Nunito_700Bold",
                   }}
                 />

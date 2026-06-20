@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
 
   kpiRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20, gap: 8 },
   kpiCard: { flex: 1, borderRadius: 32, overflow: "hidden", paddingVertical: 10, alignItems: "center", borderWidth: 1 },
-  kpiLabel: { fontSize: 9, fontWeight: "800", marginBottom: 4, textAlign: "center" },
+  kpiLabel: { fontSize: 9, fontWeight: "800", marginBottom: 4, textAlign: "center", fontFamily: "Nunito_700Bold" },
   kpiValue: { fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold" },
 
   machineWrapper: { flex: 1, justifyContent: "center", alignItems: "center", marginBottom: 40, overflow: "hidden" },

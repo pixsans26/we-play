@@ -50,17 +50,18 @@ function getTaskLabel(entry: HistoryEntry): string {
   }
   if (entry.taskType === "image") {
     const imageTask = store.imageTasks.find((t) => t.id === entry.taskId);
-    return imageTask ? `Image: ${imageTask.title}` : `Image ${entry.taskId}`;
+    return imageTask ? imageTask.title : `Image ${entry.taskId}`;
   }
   if (entry.taskType === "lottery") {
     const parts = entry.taskId.split("_");
     if (parts.length >= 5) {
-      return `Lvl ${parts[1]}: ${parts[2]} + ${parts[3]} + ${parts[4]}`;
+      // Format: "word1, word2 and word3" — no + signs
+      return `${parts[2]}, ${parts[3]} and ${parts[4]}`;
     }
     return `Heart Draw: ${entry.taskId}`;
   }
   if (entry.taskType === "spin_wheel") {
-    return `Fate Wheel: ${entry.taskId}`;
+    return entry.taskId.replace(/_/g, " ");
   }
   return `Task ${entry.taskId}`;
 }
@@ -175,24 +176,23 @@ export default function HistoryScreen() {
     const performerName = resolvePartnerName(item.performerUid, coupleProfile);
 
     return (
-      <Pressable onPress={() => setSelectedEntry(item)}>
-        <LinearGradient
-          colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
-          style={{
-            borderWidth: 1,
-            borderColor: theme.card.border,
-            borderRadius: 24,
-            padding: 16,
-            marginBottom: 12,
-            shadowColor: isDark ? "transparent" : "#a855f7",
-            shadowOffset: {width: 0, height: 4},
-            shadowOpacity: 0.05,
-            shadowRadius: 8,
-            elevation: isDark ? 0 : 2,
-          }}
-        >
-          {/* Title row with heart status icon */}
-          <View
+      <Pressable onPress={() => setSelectedEntry(item)} style={{ marginBottom: 12 }}>
+        <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden" }}>
+          <LinearGradient
+            colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
+            style={{
+              borderWidth: 1,
+              borderColor: theme.card.border,
+              padding: 16,
+              shadowColor: isDark ? "transparent" : "#a855f7",
+              shadowOffset: {width: 0, height: 4},
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+              elevation: isDark ? 0 : 2,
+            }}
+          >
+            {/* Title row with heart status icon */}
+            <View
             style={{
               flexDirection: "row",
               alignItems: "flex-start",
@@ -200,18 +200,10 @@ export default function HistoryScreen() {
               marginBottom: 10,
             }}
           >
-            <Text
-              style={{
-                color: theme.card.text,
-                fontSize: 15,
-                fontWeight: "700",
-                flex: 1,
-                marginRight: 10,
-              }}
-              numberOfLines={2}
-            >
+            <Text style={{ color: theme.card.text, fontSize: 15, fontWeight: "700", flex: 1, marginRight: 10, fontFamily: "Nunito_700Bold" }}>
               {label}
             </Text>
+
             <GradientIcon
               name={item.completed ? "heart" : "heart-outline"}
               size={22}
@@ -230,7 +222,7 @@ export default function HistoryScreen() {
             }}
           >
             <Text style={{ fontSize: 14 }}>💝</Text>
-            <Text style={{ color: theme.card.subtext, fontSize: 13 }}>
+            <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_700Bold" }}>
               <Text style={{ fontWeight: "600", color: theme.card.text }}>
                 Scratched by:
               </Text>{" "}
@@ -248,7 +240,7 @@ export default function HistoryScreen() {
             }}
           >
             <Ionicons name="heart-outline" size={14} color={theme.card.subtext} />
-            <Text style={{ color: theme.card.subtext, fontSize: 13 }}>
+            <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_700Bold" }}>
               <Text style={{ fontWeight: "600", color: theme.card.text }}>
                 Performer:
               </Text>{" "}
@@ -277,9 +269,10 @@ export default function HistoryScreen() {
             >
               {item.completed ? "Completed" : "Skipped"}
             </GradientText>
-            <Text style={{ color: theme.card.subtext, fontSize: 12 }}>{dateStr}</Text>
-          </View>
-        </LinearGradient>
+              <Text style={{ color: theme.card.subtext, fontSize: 12, fontFamily: "Nunito_700Bold" }}>{dateStr}</Text>
+            </View>
+          </LinearGradient>
+        </BlurView>
       </Pressable>
     );
   };
@@ -289,14 +282,7 @@ export default function HistoryScreen() {
       style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 80 }}
     >
       <Ionicons name="heart-outline" size={48} color={theme.card.subtext} />
-      <Text
-        style={{
-          color: theme.card.subtext,
-          fontSize: 16,
-          textAlign: "center",
-          marginTop: 16,
-        }}
-      >
+      <Text style={{ color: theme.card.subtext, fontSize: 16, textAlign: "center", marginTop: 16, fontFamily: "Nunito_700Bold" }}>
         No cards scratched yet
       </Text>
     </View>
@@ -416,16 +402,6 @@ export default function HistoryScreen() {
               {/* Image task detail */}
               {isImageTask && imageTask && (
                 <View>
-                  <Image
-                    source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
-                    style={{
-                      width: "100%",
-                      height: 224,
-                      borderRadius: 32, overflow: "hidden",
-                      marginBottom: 16,
-                    }}
-                    resizeMode="cover"
-                  />
                   <Text
                     style={{
                       color: theme.card.text,
@@ -436,28 +412,52 @@ export default function HistoryScreen() {
                   >
                     {imageTask.title}
                   </Text>
+                  <View
+                    style={{
+                      width: "100%",
+                      borderRadius: 24,
+                      overflow: "hidden",
+                      marginBottom: 16,
+                      backgroundColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.05)",
+                    }}
+                  >
+                    <Image
+                      source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
+                      style={{
+                        width: "100%",
+                        aspectRatio: 4 / 5,
+                      }}
+                      resizeMode="contain"
+                    />
+                  </View>
                 </View>
               )}
 
               {/* Lottery / Fate Wheel Detail */}
               {(isLottery || isSpinWheel) && (
-                <View>
+                <View style={{ marginBottom: 16 }}>
+                  {/* Game type label small above */}
+                  <Text
+                    style={{
+                      color: theme.card.subtext,
+                      fontSize: 12,
+                      fontWeight: "700",
+                      fontFamily: "Nunito_700Bold",
+                      textTransform: "uppercase",
+                      letterSpacing: 1,
+                      marginBottom: 6,
+                    }}
+                  >
+                    {isLottery ? "❤️ Heart Draw" : "🎡 Fate Wheel"}
+                  </Text>
+                  {/* Task combination — big */}
                   <Text
                     style={{
                       color: theme.card.text,
                       fontSize: 22,
-                      fontWeight: "bold", fontFamily: "DynaPuff_700Bold",
-                      marginBottom: 12,
-                    }}
-                  >
-                    {isLottery ? "Heart Draw Result" : "Fate Wheel Result"}
-                  </Text>
-                  <Text
-                    style={{
-                      color: theme.card.subtext,
-                      fontSize: 16,
-                      lineHeight: 24,
-                      marginBottom: 16,
+                      fontWeight: "bold",
+                      fontFamily: "DynaPuff_700Bold",
+                      lineHeight: 30,
                     }}
                   >
                     {getTaskLabel(selectedEntry)}
@@ -517,7 +517,7 @@ export default function HistoryScreen() {
                       colors={selectedEntry.completed ? (theme.accentGradient as any) : undefined}
                       color={!selectedEntry.completed ? (theme.card.subtext as string) : undefined}
                     />
-                    <Text style={{ color: theme.card.text, fontSize: 14 }}>
+                    <Text style={{ color: theme.card.text, fontSize: 14, fontFamily: "Nunito_700Bold" }}>
                       {selectedEntry.completed ? "Completed" : "Skipped"}
                     </Text>
                   </View>
@@ -534,7 +534,7 @@ export default function HistoryScreen() {
                   <Text style={{ color: theme.card.subtext, fontSize: 14 }}>
                     Scratched by
                   </Text>
-                  <Text style={{ color: theme.card.text, fontSize: 14 }}>
+                  <Text style={{ color: theme.card.text, fontSize: 14, fontFamily: "Nunito_700Bold" }}>
                     {resolvePartnerName(selectedEntry.userUid, coupleProfile)}
                   </Text>
                 </View>
@@ -550,7 +550,7 @@ export default function HistoryScreen() {
                   <Text style={{ color: theme.card.subtext, fontSize: 14 }}>
                     Performer
                   </Text>
-                  <Text style={{ color: theme.card.text, fontSize: 14 }}>
+                  <Text style={{ color: theme.card.text, fontSize: 14, fontFamily: "Nunito_700Bold" }}>
                     {resolvePartnerName(selectedEntry.performerUid, coupleProfile)}
                   </Text>
                 </View>
@@ -565,15 +565,15 @@ export default function HistoryScreen() {
                   <Text style={{ color: theme.card.subtext, fontSize: 14 }}>
                     Date
                   </Text>
-                  <Text style={{ color: theme.card.text, fontSize: 14 }}>{dateStr}</Text>
+                  <Text style={{ color: theme.card.text, fontSize: 14, fontFamily: "Nunito_700Bold" }}>{dateStr}</Text>
                 </View>
 
                 {selectedEntry.timeTaken != null && selectedEntry.timeTaken > 0 && (
                   <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                    <Text style={{ color: theme.card.subtext, fontSize: 14 }}>
+                    <Text style={{ color: theme.card.subtext, fontSize: 12, fontFamily: "Nunito_700Bold" }}>
                       Time Taken
                     </Text>
-                    <Text style={{ color: theme.card.text, fontSize: 14 }}>
+                    <Text style={{ color: theme.card.text, fontSize: 14, fontFamily: "Nunito_700Bold" }}>
                       {Math.floor(selectedEntry.timeTaken / 60)}m{" "}
                       {Math.round(selectedEntry.timeTaken % 60)}s
                     </Text>

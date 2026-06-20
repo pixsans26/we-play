@@ -129,12 +129,7 @@ const GenderSelector = ({ value, onChange, theme }: { value: string, onChange: (
   </View>
 );
 
-const PRESET_AVATARS_LOCAL = [
-  { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.jpg") },
-  { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.jpg") },
-  { url: "/uploads/presets/avatar_cat.png", source: require("@/assets/images/avatars/avatar_cat.jpg") },
-  { url: "/uploads/presets/avatar_dog.png", source: require("@/assets/images/avatars/avatar_dog.jpg") },
-];
+const PRESET_AVATARS_LOCAL: { url: string; source?: any; name?: string }[] = [];
 
 const PREFERENCE_CHIPS = [
   "Romantic Dates", "Spicy Challenges", "Foreplay", "Roleplay", "Deep Conversations",
@@ -205,6 +200,7 @@ export default function ProfileSetupScreen() {
     fontWeight: "600" as const,
     marginBottom: 4,
     marginLeft: 4,
+    fontFamily: "Nunito_700Bold",
   };
 
   const pickImage = async () => {
@@ -464,7 +460,7 @@ export default function ProfileSetupScreen() {
               {step === 4 && "Your Interests"}
               {step === 5 && (isLinkedOnSignup ? "Profile Ready! 💖" : "Invite Your Partner 💌")}
             </Text>
-            <Text style={{ color: theme.card.subtext, fontSize: 16 }}>
+            <Text style={{ color: theme.card.subtext, fontSize: 16, fontFamily: "Nunito_700Bold" }}>
               {step === 1 && "Let's get to know you first."}
               {step === 2 && "You must be 18 or older to play."}
               {step === 3 && "Show off your personality."}
@@ -527,7 +523,7 @@ export default function ProfileSetupScreen() {
                   ) : (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                       <Ionicons name="camera-outline" size={48} color={theme.input.placeholder} />
-                      <Text style={{ fontSize: 14, color: theme.input.placeholder, marginTop: 8, fontWeight: "600" }}>Add Photo</Text>
+                <Text style={{ fontSize: 14, color: theme.input.placeholder, marginTop: 8, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>Add Photo</Text>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -551,7 +547,8 @@ export default function ProfileSetupScreen() {
                     >
                       <Text style={{
                         fontSize: 16, fontWeight: "600",
-                        color: selected ? "#fff" : theme.card.text
+                      color: selected ? "#fff" : theme.card.text,
+                        fontFamily: "Nunito_700Bold",
                       }}>
                         {chip}
                       </Text>
@@ -576,13 +573,13 @@ export default function ProfileSetupScreen() {
                     <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "bold", fontFamily: "DynaPuff_700Bold", textAlign: "center" }}>
                       Successfully Linked! 🎉
                     </Text>
-                    <Text style={{ color: theme.card.subtext, fontSize: 16, textAlign: "center", fontFamily: "Nunito_600SemiBold", paddingHorizontal: 12 }}>
+                    <Text style={{ color: theme.card.subtext, fontSize: 16, textAlign: "center", fontFamily: "Nunito_700Bold", paddingHorizontal: 12 }}>
                       You are now linked with <Text style={{ color: theme.accent, fontWeight: "bold" }}>{partnerName}</Text>. Let's start playing!
                     </Text>
                   </>
                 ) : inviteCode ? (
                   <>
-                    <Text style={{ color: theme.card.subtext, fontSize: 15, textAlign: "center", fontFamily: "Nunito_600SemiBold" }}>
+                    <Text style={{ color: theme.card.subtext, fontSize: 15, textAlign: "center", fontFamily: "Nunito_700Bold" }}>
                       Share this code with your partner so they can join you in the app.
                     </Text>
                     <View style={{
@@ -590,10 +587,10 @@ export default function ProfileSetupScreen() {
                       borderRadius: 24, borderWidth: 2, borderColor: theme.accent,
                       paddingHorizontal: 40, paddingVertical: 24, alignItems: "center"
                     }}>
-                      <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_600SemiBold", marginBottom: 8, letterSpacing: 2 }}>INVITE CODE</Text>
+                      <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_700Bold", marginBottom: 8, letterSpacing: 2 }}>INVITE CODE</Text>
                       <Text style={{ color: theme.accent, fontSize: 40, fontFamily: "DynaPuff_700Bold", letterSpacing: 6 }}>{inviteCode}</Text>
                     </View>
-                    <Text style={{ color: theme.card.subtext, fontSize: 13, textAlign: "center", fontFamily: "Nunito_400Regular" }}>
+                    <Text style={{ color: theme.card.subtext, fontSize: 13, textAlign: "center", fontFamily: "Nunito_700Bold" }}>
                       Your partner can enter this code after signing up to link your accounts.
                     </Text>
                   </>
@@ -610,12 +607,12 @@ export default function ProfileSetupScreen() {
               <>
                 <TouchableOpacity onPress={handleNext} activeOpacity={0.8}>
                   <LinearGradient colors={["#ff2d6b", "#a82dff"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 32, paddingVertical: 18, alignItems: "center" }}>
-                    <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold" }}>Continue</Text>
+                    <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" }}>Continue</Text>
                   </LinearGradient>
                 </TouchableOpacity>
                 {(step === 3 || step === 4) && (
                   <TouchableOpacity onPress={handleNext} style={{ alignItems: "center", paddingVertical: 12 }}>
-                    <Text style={{ color: theme.card.subtext, fontSize: 16, fontWeight: "600" }}>Skip for now</Text>
+                    <Text style={{ color: theme.card.subtext, fontSize: 16, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>Skip for now</Text>
                   </TouchableOpacity>
                 )}
               </>
@@ -654,7 +651,7 @@ export default function ProfileSetupScreen() {
             </View>
             <Pressable onPress={pickImage} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999, backgroundColor: theme.input.bg }}>
               <Ionicons name="image-outline" size={20} color={theme.accent} />
-              <Text style={{ color: theme.accent, fontWeight: "700" }}>Upload from Gallery</Text>
+                  <Text style={{ color: theme.accent, fontWeight: "700", fontFamily: "Nunito_700Bold" }}>Upload from Gallery</Text>
             </Pressable>
           </Pressable>
         </Pressable>

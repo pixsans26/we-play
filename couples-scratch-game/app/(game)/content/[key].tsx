@@ -314,7 +314,7 @@ export default function ContentScreen() {
               <Text style={{
                 color: "rgba(255,255,255,0.8)",
                 fontSize: 13,
-                fontFamily: "Nunito_600SemiBold",
+                fontFamily: "Nunito_700Bold",
                 marginTop: 2,
               }}>
                 {meta.subtitle}
@@ -337,7 +337,7 @@ export default function ContentScreen() {
               borderRadius: 28, padding: 40, alignItems: "center", minHeight: 300, justifyContent: "center"
             }}>
               <ActivityIndicator size="large" color={meta.accentColor} />
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", marginTop: 16, fontSize: 14, fontFamily: "Nunito_600SemiBold" }}>
+              <Text style={{ color: isDark ? "rgba(255,255,255,0.5)" : "rgba(15,23,42,0.5)", marginTop: 16, fontSize: 14, fontFamily: "Nunito_700Bold" }}>
                 Loading content...
               </Text>
             </View>
@@ -360,7 +360,7 @@ export default function ContentScreen() {
                   <Text style={{ fontSize: 24, fontFamily: "DynaPuff_700Bold", color: isDark ? "#fff" : "#000", marginTop: 12 }}>
                     {branding.appName || "WePlay"}
                   </Text>
-                  <Text style={{ fontSize: 14, fontFamily: "Nunito_600SemiBold", color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)", marginTop: 4 }}>
+                  <Text style={{ fontSize: 14, fontFamily: "Nunito_700Bold", color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)", marginTop: 4 }}>
                     Version {branding.appVersion || "1.0.0"}
                   </Text>
                 </View>
@@ -372,7 +372,7 @@ export default function ContentScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: isDark ? "#fff" : "#000", fontFamily: "Nunito_700Bold", fontSize: 16 }}>Email Support</Text>
-                    <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)", fontFamily: "Nunito_400Regular", fontSize: 14 }}>{branding.supportEmail}</Text>
+                    <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)", fontFamily: "Nunito_700Bold", fontSize: 14 }}>{branding.supportEmail}</Text>
                   </View>
                 </View>
               )}
@@ -383,7 +383,7 @@ export default function ContentScreen() {
                   color: isDark ? "#f1f5f9" : "#0f172a",
                   fontSize: 15,
                   lineHeight: 26,
-                  fontFamily: "Nunito_400Regular",
+                  fontFamily: "Nunito_700Bold",
                 }}
                 tagsStyles={{
                   h1: {
@@ -413,7 +413,7 @@ export default function ContentScreen() {
                   },
                   p: {
                     marginBottom: 12,
-                    fontFamily: "Nunito_400Regular",
+                    fontFamily: "Nunito_700Bold",
                     color: isDark ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.85)",
                   },
                   strong: {
@@ -422,7 +422,7 @@ export default function ContentScreen() {
                     color: isDark ? "#ffffff" : "#0f172a",
                   },
                   a: {
-                    fontFamily: "Nunito_600SemiBold",
+                    fontFamily: "Nunito_700Bold",
                     color: meta.accentColor,
                     textDecorationLine: "underline",
                   },
@@ -430,7 +430,7 @@ export default function ContentScreen() {
                   ol: { marginBottom: 12 },
                   li: {
                     marginBottom: 4,
-                    fontFamily: "Nunito_400Regular",
+                    fontFamily: "Nunito_700Bold",
                     color: isDark ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.85)",
                   },
                 }}
@@ -447,7 +447,7 @@ export default function ContentScreen() {
                   {branding?.appName || "WePlay"}
                 </Text>
               </View>
-              <Text style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(15,23,42,0.4)", fontSize: 11, fontFamily: "Nunito_400Regular" }}>
+              <Text style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(15,23,42,0.4)", fontSize: 11, fontFamily: "Nunito_700Bold" }}>
                 Version {branding?.appVersion || "1.0.0"} • {branding?.appName || "WePlay"}
               </Text>
             </View>

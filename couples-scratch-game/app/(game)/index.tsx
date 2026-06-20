@@ -11,6 +11,7 @@ import MaskedView from "@react-native-masked-view/masked-view";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
+import { useNotificationStore } from "@/store/notificationStore";
 import { UserProgress, LEVEL_BADGES } from "@/types";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 
@@ -26,6 +27,7 @@ export default function MainGameScreen() {
   const fetchData = useGameStore((s) => s.fetchData);
   const isDark = useThemeStore((s) => s.isDark);
   const theme = getTheme(isDark);
+  const hasUnreadNotifications = useNotificationStore((s) => s.hasUnread);
 
   const [progressA, setProgressA] = useState<UserProgress | null>(null);
   const [progressB, setProgressB] = useState<UserProgress | null>(null);
@@ -174,15 +176,23 @@ export default function MainGameScreen() {
               {displayName}
             </Text>
           </View>
-          <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden" }}>
-            <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-              {(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) ? (
-                <Image source={getAvatarSource(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar)} style={{ width: "100%", height: "100%", borderRadius: 32 }} resizeMode="cover" />
-              ) : (
-                <MaterialCommunityIcons name={myAvatarIcon} size={24} color={isDark ? "#ffffff" : "#4c0519"} style={{ marginTop: 2 }} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <Pressable onPress={() => router.push("/notifications")} style={{ position: "relative" }}>
+              <Ionicons name="notifications-outline" size={28} color={isDark ? "#ffffff" : "#0f172a"} />
+              {hasUnreadNotifications && (
+                <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
               )}
-            </BlurView>
-          </Pressable>
+            </Pressable>
+            <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden" }}>
+              <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ width: 44, height: 44, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+                {(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar) ? (
+                  <Image source={getAvatarSource(isPartnerA ? coupleProfile?.partnerAAvatar : coupleProfile?.partnerBAvatar)} style={{ width: "100%", height: "100%", borderRadius: 32 }} resizeMode="cover" />
+                ) : (
+                  <MaterialCommunityIcons name={myAvatarIcon} size={24} color={isDark ? "#ffffff" : "#4c0519"} style={{ marginTop: 2 }} />
+                )}
+              </BlurView>
+            </Pressable>
+          </View>
         </View>
       </View>
 
@@ -204,7 +214,7 @@ export default function MainGameScreen() {
                 <Text style={{ color: theme.card.text, fontSize: 18, fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 4 }}>
                   Invite Your Partner 💌
                 </Text>
-                <Text style={{ color: theme.card.subtext, fontSize: 13, textAlign: "center", fontFamily: "Nunito_600SemiBold", marginBottom: 12 }}>
+                <Text style={{ color: theme.card.subtext, fontSize: 13, textAlign: "center", fontFamily: "Nunito_700Bold", marginBottom: 12 }}>
                   Your partner needs to enter this code to connect:
                 </Text>
                 <View style={{
@@ -295,27 +305,27 @@ export default function MainGameScreen() {
           </View>
 
           {/* Whose turn */}
-          <LinearGradient
-            colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-              borderRadius: 24,
-              borderWidth: 1,
-              borderColor: theme.card.border,
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-              marginBottom: 20,
-            }}
-          >
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : theme.accent, marginRight: 10, shadowColor: isDark ? "#fff" : theme.accent, shadowOpacity: 0.8, shadowRadius: 4, shadowOffset: {width: 0, height: 0} }} />
-            <Text style={{ color: isDark ? "#ffffff" : theme.accent, fontSize: 14, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>
-              {turnName}'s turn to play
-            </Text>
-            <View style={{ flex: 1 }} />
-            <Ionicons name="heart" size={16} color={isDark ? "#ffffff" : theme.accent} />
-          </LinearGradient>
+          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 20 }}>
+            <LinearGradient
+              colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                borderWidth: 1,
+                borderColor: theme.card.border,
+                paddingVertical: 12,
+                paddingHorizontal: 16,
+              }}
+            >
+              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : theme.accent, marginRight: 10, shadowColor: isDark ? "#fff" : theme.accent, shadowOpacity: 0.8, shadowRadius: 4, shadowOffset: {width: 0, height: 0} }} />
+              <Text style={{ color: isDark ? "#ffffff" : theme.accent, fontSize: 14, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>
+                {turnName}'s turn to play
+              </Text>
+              <View style={{ flex: 1 }} />
+              <Ionicons name="heart" size={16} color={isDark ? "#ffffff" : theme.accent} />
+            </LinearGradient>
+          </BlurView>
 
           {/* Game mode cards - 2x2 Grid */}
           <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>

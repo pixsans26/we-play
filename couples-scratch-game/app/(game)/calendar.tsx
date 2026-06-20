@@ -66,8 +66,8 @@ export default function CalendarScreen() {
                 selectedDayTextColor: "#ffffff",
                 monthTextColor: theme.card.text,
                 arrowColor: theme.accent,
-                textDayFontFamily: "Nunito_600SemiBold",
-                textMonthFontFamily: "DynaPuff_600SemiBold",
+                textDayFontFamily: "Nunito_700Bold",
+                textMonthFontFamily: "DynaPuff_700Bold",
                 textDayHeaderFontFamily: "Nunito_700Bold",
               }}
               dayComponent={({ date, state, marking }: any) => {
@@ -117,7 +117,7 @@ export default function CalendarScreen() {
             />
           </LinearGradient>
 
-          <Text style={{ fontFamily: "DynaPuff_600SemiBold", fontSize: 18, color: theme.card.text, marginBottom: 16 }}>
+          <Text style={{ fontFamily: "DynaPuff_700Bold", fontSize: 18, color: theme.card.text, marginBottom: 16 }}>
             Legend
           </Text>
 
@@ -132,7 +132,7 @@ export default function CalendarScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: theme.card.text }}>Heavy Flow</Text>
-                <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: theme.card.subtext }}>Peak period days predicted based on cycle</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>Peak period days predicted based on cycle</Text>
               </View>
             </View>
 
@@ -142,7 +142,7 @@ export default function CalendarScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: theme.card.text }}>Light Flow</Text>
-                <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: theme.card.subtext }}>Winding down period days</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>Winding down period days</Text>
               </View>
             </View>
 
@@ -152,7 +152,7 @@ export default function CalendarScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: theme.card.text }}>Fertility Window</Text>
-                <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: theme.card.subtext }}>High chance of conception during this phase</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>High chance of conception during this phase</Text>
               </View>
             </View>
 
@@ -162,7 +162,7 @@ export default function CalendarScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: theme.card.text }}>Ovulation Day</Text>
-                <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: theme.card.subtext }}>Highest chance of conception</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>Highest chance of conception</Text>
               </View>
             </View>
 

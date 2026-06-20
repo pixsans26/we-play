@@ -25,12 +25,7 @@ import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 
 const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
-const PRESET_AVATARS_LOCAL = [
-  { url: "/uploads/presets/avatar_boy.png", source: require("@/assets/images/avatars/avatar_boy.jpg") },
-  { url: "/uploads/presets/avatar_girl.png", source: require("@/assets/images/avatars/avatar_girl.jpg") },
-  { url: "/uploads/presets/avatar_cat.png", source: require("@/assets/images/avatars/avatar_cat.jpg") },
-  { url: "/uploads/presets/avatar_dog.png", source: require("@/assets/images/avatars/avatar_dog.jpg") },
-];
+const PRESET_AVATARS_LOCAL: { url: string; source?: any; name?: string }[] = [];
 
 interface SettingRowProps {
   icon: any;
@@ -47,31 +42,32 @@ interface SettingRowProps {
 function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, danger, isDark }: SettingRowProps) {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed && onPress ? 0.75 : 1, marginBottom: 8 })}>
-      <LinearGradient
-        colors={danger ? (isDark ? ["rgba(239,68,68,0.15)", "rgba(239,68,68,0.05)"] : ["#fef2f2", "#ffffff"]) : (isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#f8fafc", "#ffffff"])}
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          borderRadius: 24,
-          padding: 18,
-          gap: 14,
-          borderWidth: 1,
-          borderColor: theme.card.border,
-          shadowColor: danger ? "#ef4444" : "#94a3b8", shadowOpacity: isDark ? 0 : 0.05, shadowRadius: 8, shadowOffset: {width:0, height:4}, elevation: isDark ? 0 : 2
-        }}>
-          <View style={{
-            width: 42, height: 42, borderRadius: 21,
-            backgroundColor: danger ? (isDark ? "rgba(239,68,68,0.2)" : "#fee2e2") : (isDark ? "rgba(255,255,255,0.1)" : "#ffffff"),
-            alignItems: "center", justifyContent: "center",
+      <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden" }}>
+        <LinearGradient
+          colors={danger ? (isDark ? ["rgba(239,68,68,0.15)", "rgba(239,68,68,0.05)"] : ["#fef2f2", "#ffffff"]) : (isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#f8fafc", "#ffffff"])}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 18,
+            gap: 14,
+            borderWidth: 1,
+            borderColor: theme.card.border,
+            shadowColor: danger ? "#ef4444" : "#94a3b8", shadowOpacity: isDark ? 0 : 0.05, shadowRadius: 8, shadowOffset: {width:0, height:4}, elevation: isDark ? 0 : 2
           }}>
-            <Ionicons name={icon} size={20} color={danger ? "#ef4444" : iconColor} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: danger ? "#ef4444" : (isDark ? "#ffffff" : "#0f172a"), fontSize: 16, fontWeight: "500", fontFamily: "DynaPuff_700Bold" }}>{label}</Text>
-            {sublabel && <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(15,23,42,0.7)", fontSize: 12, marginTop: 2 }}>{sublabel}</Text>}
-          </View>
-          {right}
-      </LinearGradient>
+            <View style={{
+              width: 42, height: 42, borderRadius: 21,
+              backgroundColor: danger ? (isDark ? "rgba(239,68,68,0.2)" : "#fee2e2") : (isDark ? "rgba(255,255,255,0.1)" : "#ffffff"),
+              alignItems: "center", justifyContent: "center",
+            }}>
+              <Ionicons name={icon} size={20} color={danger ? "#ef4444" : iconColor} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: danger ? "#ef4444" : (isDark ? "#ffffff" : "#0f172a"), fontSize: 16, fontWeight: "500", fontFamily: "DynaPuff_700Bold" }}>{label}</Text>
+              {sublabel && <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(15,23,42,0.7)", fontSize: 12, marginTop: 2 }}>{sublabel}</Text>}
+            </View>
+            {right}
+        </LinearGradient>
+      </BlurView>
     </Pressable>
   );
 }
@@ -246,7 +242,7 @@ export default function SettingsScreen() {
         >
           <View>
             <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
-            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_600SemiBold" }}>Customize your experience</Text>
+            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_700Bold" }}>Customize your experience</Text>
           </View>
         </View>
       </View>
@@ -272,6 +268,16 @@ export default function SettingsScreen() {
               theme={theme}
             />
             <SettingRow icon="person-circle-outline" iconColor="#a855f7" label="Edit Profile" onPress={() => router.push("/(game)/edit-profile")} theme={theme} isDark={isDark} right={<Ionicons name="chevron-forward" size={16} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />} />
+            <SettingRow
+              isDark={isDark}
+              icon="notifications-outline"
+              iconColor="#10b981"
+              label="Notifications"
+              sublabel="Manage app notifications"
+              theme={theme}
+              onPress={() => router.push("/(game)/notifications")}
+              right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
+            />
             <SettingRow
               isDark={isDark}
               icon="refresh-circle-outline"
@@ -391,13 +397,17 @@ export default function SettingsScreen() {
 
           {/* Logout & Delete Buttons */}
           <View style={{ alignItems: "center", marginTop: 32, gap: 16 }}>
-            <Pressable onPress={handleLogout} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" })}>
-              <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 13, fontWeight: "700" }}>Log Out</Text>
-            </Pressable>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden" }}>
+              <Pressable onPress={handleLogout} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" })}>
+                <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 13, fontWeight: "700" }}>Log Out</Text>
+              </Pressable>
+            </BlurView>
 
-            <Pressable onPress={handleDeleteAccount} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 32, overflow: "hidden", backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)" })}>
-              <Text style={{ color: "#ef4444", fontSize: 13, fontWeight: "700" }}>Delete Account</Text>
-            </Pressable>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden" }}>
+              <Pressable onPress={handleDeleteAccount} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)" })}>
+                <Text style={{ color: "#ef4444", fontSize: 13, fontWeight: "700" }}>Delete Account</Text>
+              </Pressable>
+            </BlurView>
           </View>
         </ScrollView>
       </FadingEdgeMask>

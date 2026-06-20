@@ -10,7 +10,7 @@ import {
   Animated,
   Text,
 } from "react-native";
-import Svg, { Path, Mask, Rect, LinearGradient, Stop, Defs } from "react-native-svg";
+import Svg, { Path, Mask, Rect, LinearGradient, Stop, Defs, Image as SvgImage } from "react-native-svg";
 
 export interface ScratchCardProps {
   onScratchComplete: () => void;
@@ -212,14 +212,26 @@ export function ScratchCard({
                   )}
                 </Mask>
               </Defs>
-              <Rect
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                fill="url(#scratchGradient)"
-                mask="url(#scratchMask)"
-              />
+              {overlayImage ? (
+                <SvgImage
+                  x="0"
+                  y="0"
+                  width="100%"
+                  height="100%"
+                  preserveAspectRatio="xMidYMid slice"
+                  href={overlayImage as any}
+                  mask="url(#scratchMask)"
+                />
+              ) : (
+                <Rect
+                  x="0"
+                  y="0"
+                  width="100%"
+                  height="100%"
+                  fill="url(#scratchGradient)"
+                  mask="url(#scratchMask)"
+                />
+              )}
             </Svg>
           </View>
 
