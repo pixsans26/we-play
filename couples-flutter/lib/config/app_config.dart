@@ -1,4 +1,4 @@
-const String kApiBaseUrl = 'http://127.0.0.1:4000';
+const String kApiBaseUrl = 'https://test-we-play-server.fqjdvf.easypanel.host';
 const String kApiUrl = '$kApiBaseUrl/api';
 
 // Firebase config is loaded via google-services.json / GoogleService-Info.plist
