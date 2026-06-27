@@ -10,6 +10,7 @@ export interface CyclePredictions {
   safeSex: boolean;
   partnerMood: string;
   partnerDesires: string;
+  sexStatus: string;
 }
 
 /**
@@ -24,7 +25,8 @@ function normalizeDate(d: Date): Date {
  */
 export function calculateCyclePredictions(
   lastPeriodStartStr: string | null,
-  averageCycleLength: number = 28
+  averageCycleLength: number = 28,
+  averagePeriodLength: number = 5
 ): CyclePredictions | null {
   if (!lastPeriodStartStr) return null;
 
@@ -82,8 +84,23 @@ export function calculateCyclePredictions(
   let currentPhase: "Menstrual" | "Follicular" | "Ovulation" | "Luteal" = "Menstrual";
   let partnerMood = "";
   let partnerDesires = "";
+  let sexStatus = "";
 
-  if (currentCycleDay >= 1 && currentCycleDay <= 5) { // Assuming 5 day period
+  const isPeriod = currentCycleDay >= 1 && currentCycleDay <= averagePeriodLength;
+  const isProtectedSafe = (currentCycleDay >= fertileStartDay - 3 && currentCycleDay < fertileStartDay) ||
+                          (currentCycleDay > fertileEndDay && currentCycleDay <= fertileEndDay + 3);
+
+  if (isPeriod) {
+    sexStatus = "No Sex";
+  } else if (isFertile) {
+    sexStatus = "No Sex";
+  } else if (isProtectedSafe) {
+    sexStatus = "Protected Sex";
+  } else {
+    sexStatus = "Safe Sex";
+  }
+
+  if (isPeriod) { // Using accurate period length
     currentPhase = "Menstrual";
     partnerMood = "Might feel fatigued, introspective, or craving comfort.";
     partnerDesires = "Gentle affection, warm cuddles, emotional support, and relaxation.";
@@ -113,6 +130,7 @@ export function calculateCyclePredictions(
     safeSex,
     partnerMood,
     partnerDesires,
+    sexStatus,
   };
 }
 

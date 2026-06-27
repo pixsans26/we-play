@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Calendar } from "react-native-calendars";
+import { CalendarList } from "react-native-calendars";
 
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useCycleStore } from "@/store/cycleStore";
@@ -55,7 +55,13 @@ export default function CalendarScreen() {
             colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
             style={{ borderRadius: 24, overflow: "hidden", borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, marginBottom: 24, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
           >
-            <Calendar
+            <CalendarList
+              horizontal={true}
+              pagingEnabled={true}
+              calendarWidth={Math.floor(Dimensions.get('window').width - (isDark ? 44 : 46))}
+              calendarStyle={{ width: Math.floor(Dimensions.get('window').width - (isDark ? 44 : 46)), margin: 0, padding: 0 }}
+              pastScrollRange={12}
+              futureScrollRange={12}
               markingType={'period'}
               markedDates={markedDates}
               monthFormat={'MMMM yyyy'}
@@ -72,7 +78,14 @@ export default function CalendarScreen() {
                 textDayFontFamily: "Nunito_700Bold",
                 textMonthFontFamily: "DynaPuff_700Bold",
                 textDayHeaderFontFamily: "Nunito_700Bold",
-              }}
+                'stylesheet.calendar.main': {
+                  container: {
+                    paddingLeft: 0,
+                    paddingRight: 0,
+                    backgroundColor: 'transparent'
+                  }
+                }
+              } as any}
               dayComponent={({ date, state, marking }: any) => {
                 const isSelected = !!marking?.color;
                 const isHeavyFlow = marking?.flowType === "heavy";

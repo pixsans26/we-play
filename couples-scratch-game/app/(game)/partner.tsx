@@ -118,7 +118,11 @@ export default function PartnerScreen() {
 
   useEffect(() => {
     if (cycleConfig?.lastPeriodStart) {
-      const preds = calculateCyclePredictions(cycleConfig.lastPeriodStart, cycleConfig.averageCycleLength);
+      const preds = calculateCyclePredictions(
+        cycleConfig.lastPeriodStart,
+        cycleConfig.averageCycleLength,
+        cycleConfig.averagePeriodLength
+      );
       setPredictions(preds);
       setLastPeriodStart(cycleConfig.lastPeriodStart);
       setLastPeriodEnd(cycleConfig.lastPeriodEnd || "");
@@ -562,20 +566,24 @@ export default function PartnerScreen() {
                   </LinearGradient>
                 </BlurView>
 
-                {/* Safe Sex Card */}
+                {/* Sex Status Card */}
                 <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
                   <LinearGradient
-                    colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : activePredictions.safeSex ? ["#f0fdf4", "#ffffff"] : ["#f8fafc", "#ffffff"]}
-                    style={{ flex: 1, padding: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                    colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : activePredictions.sexStatus === "Safe Sex" ? ["#f0fdf4", "#ffffff"] : activePredictions.sexStatus === "Protected Sex" ? ["#fefce8", "#ffffff"] : ["#fef2f2", "#ffffff"]}
+                    style={{ flex: 1, padding: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : (activePredictions.sexStatus === "Safe Sex" ? "#22c55e" : activePredictions.sexStatus === "Protected Sex" ? "#eab308" : "#ef4444"), shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
                   >
-                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? (activePredictions.safeSex ? "rgba(34,197,94,0.15)" : "rgba(107,114,128,0.15)") : "#ffffff", shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                      <Ionicons name="shield-checkmark" size={20} color={activePredictions.safeSex ? "#22c55e" : theme.card.subtext} />
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? (activePredictions.sexStatus === "Safe Sex" ? "rgba(34,197,94,0.15)" : activePredictions.sexStatus === "Protected Sex" ? "rgba(234,179,8,0.15)" : "rgba(239,68,68,0.15)") : "#ffffff", shadowColor: isDark ? "transparent" : (activePredictions.sexStatus === "Safe Sex" ? "#22c55e" : activePredictions.sexStatus === "Protected Sex" ? "#eab308" : "#ef4444"), shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                      <Ionicons 
+                        name={activePredictions.sexStatus === "Safe Sex" ? "shield-checkmark" : activePredictions.sexStatus === "Protected Sex" ? "shield-half" : "close-circle"} 
+                        size={20} 
+                        color={activePredictions.sexStatus === "Safe Sex" ? "#22c55e" : activePredictions.sexStatus === "Protected Sex" ? "#eab308" : "#ef4444"} 
+                      />
                     </View>
-                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>Safe Sex</Text>
-                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 24, color: activePredictions.safeSex ? (isDark ? "#22c55e" : "#16a34a") : (isDark ? theme.card.subtext : "#475569"), marginBottom: 4 }}>
-                      {activePredictions.safeSex ? "Yes" : "No"}
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext, marginBottom: 4 }}>Sex Status</Text>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: activePredictions.sexStatus === "Safe Sex" ? (isDark ? "#22c55e" : "#16a34a") : activePredictions.sexStatus === "Protected Sex" ? (isDark ? "#eab308" : "#ca8a04") : (isDark ? "#ef4444" : "#dc2626"), marginBottom: 4, height: 26 }} numberOfLines={1} adjustsFontSizeToFit>
+                      {activePredictions.sexStatus}
                     </Text>
-                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: activePredictions.safeSex ? (isDark ? "#22c55e" : "#16a34a") : (isDark ? theme.card.subtext : "#475569") }}>Based on Cycle</Text>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: activePredictions.sexStatus === "Safe Sex" ? (isDark ? "#22c55e" : "#16a34a") : activePredictions.sexStatus === "Protected Sex" ? (isDark ? "#eab308" : "#ca8a04") : (isDark ? "#ef4444" : "#dc2626") }}>Based on Cycle</Text>
                   </LinearGradient>
                 </BlurView>
 
@@ -601,6 +609,8 @@ export default function PartnerScreen() {
                   </View>
                 </LinearGradient>
               </BlurView>
+
+
 
               {/* Moods and Desires Widget */}
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 16 }}>
