@@ -1169,9 +1169,11 @@ class _SettingRow extends StatelessWidget {
             ),
             trailing ??
                 (onTap != null
-                        color: isDark ? Colors.white38 : Colors.black26)
+                    ? Icon(Icons.chevron_right, color: isDark ? Colors.white38 : Colors.black26)
                     : const SizedBox.shrink()),
-          ]),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
