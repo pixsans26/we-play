@@ -193,6 +193,8 @@ export function generatePredictionCalendarMarks(
     while (fCurr <= fertileEnd) {
       const key = dateToKey(fCurr);
       const isOvulation = key === ovDateStr;
+      const daysToOvulation = Math.floor((ovulationDate.getTime() - fCurr.getTime()) / (1000 * 60 * 60 * 24));
+      const isMostDesired = daysToOvulation >= 0 && daysToOvulation <= 2;
 
       // Don't overwrite period marks with fertile marks (just in case of extremely short cycles)
       if (!marked[key]) {
@@ -201,9 +203,60 @@ export function generatePredictionCalendarMarks(
           textColor: isOvulation ? "#fff" : "#6b21a8",
           startingDay: key === dateToKey(fertileStart),
           endingDay: key === dateToKey(fertileEnd),
+          isMostDesired,
         };
+      } else {
+        marked[key].isMostDesired = isMostDesired;
       }
       fCurr.setDate(fCurr.getDate() + 1);
+    }
+
+    // 3. Mark Protected Safe (3 days before fertile, 3 days after fertile)
+    const protectedStart = new Date(fertileStart);
+    protectedStart.setDate(fertileStart.getDate() - 3);
+    const protectedEndPre = new Date(fertileStart);
+    protectedEndPre.setDate(fertileStart.getDate() - 1);
+
+    const protectedStartPost = new Date(fertileEnd);
+    protectedStartPost.setDate(fertileEnd.getDate() + 1);
+    const protectedEndPost = new Date(fertileEnd);
+    protectedEndPost.setDate(fertileEnd.getDate() + 3);
+
+    const markProtected = (start: Date, end: Date) => {
+      let curr = new Date(start);
+      while (curr <= end) {
+        const key = dateToKey(curr);
+        if (!marked[key]) {
+          marked[key] = { isProtectedSafe: true };
+        } else {
+          marked[key].isProtectedSafe = true;
+        }
+        curr.setDate(curr.getDate() + 1);
+      }
+    };
+
+    markProtected(protectedStart, protectedEndPre);
+    markProtected(protectedStartPost, protectedEndPost);
+
+    // 4. Mark Safe Sex (all other days in the cycle)
+    // A cycle is from cycleStart to nextCycleStart - 1
+    const nextCycleStart = new Date(cycleStart);
+    nextCycleStart.setDate(cycleStart.getDate() + averageCycleLength);
+    
+    let cCurr = new Date(cycleStart);
+    while (cCurr < nextCycleStart) {
+      const key = dateToKey(cCurr);
+      // If a day has no color/flowType and is not protected and not fertile, it's a completely regular safe day
+      if (!marked[key]) {
+        marked[key] = { isSafeSex: true };
+      } else if (!marked[key].color && !marked[key].isProtectedSafe && !marked[key].isMostDesired) {
+        // Just in case it was initialized for today
+        marked[key].isSafeSex = true;
+      } else if (marked[key].flowType) {
+        // During period, pregnancy risk is very low, so it can be considered safe sex
+        marked[key].isSafeSex = true;
+      }
+      cCurr.setDate(cCurr.getDate() + 1);
     }
   }
 

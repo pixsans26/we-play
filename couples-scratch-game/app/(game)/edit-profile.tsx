@@ -160,14 +160,14 @@ export default function EditProfileScreen() {
           <Pressable onPress={() => router.back()} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="close" size={24} color={isDark ? "#ffffff" : "#0f172a"} />
           </Pressable>
-          <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 20, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>Edit Profile</Text>
+          <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 20,  fontFamily: "DynaPuff_700Bold" }}>Edit Profile</Text>
           <View style={{ width: 40 }} />
         </View>
 
         <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
           {/* Partner A */}
           <View style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.6)", borderRadius: 24, padding: 20, marginBottom: 20 }}>
-            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "800", marginBottom: 16, fontFamily: "Nunito_700Bold" }}>
+            <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12,  marginBottom: 16, fontFamily: "Nunito_700Bold" }}>
               {isPartnerA ? "PARTNER A (YOU)" : "PARTNER A"}
             </Text>
 
@@ -179,7 +179,7 @@ export default function EditProfileScreen() {
                     setAvatarPickerVisible(true);
                   }
                 }}
-                style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
+                style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
               >
                 {avatarA ? (
                   <Image source={getAvatarSource(avatarA)} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
@@ -267,7 +267,7 @@ export default function EditProfileScreen() {
                     setAvatarPickerVisible(true);
                   }
                 }}
-                style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
+                style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#f3e8ff", borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(168,85,247,0.2)", alignItems: "center", justifyContent: "center", overflow: "hidden" }}
               >
                 {avatarB ? (
                   <Image source={getAvatarSource(avatarB)} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
@@ -355,7 +355,7 @@ export default function EditProfileScreen() {
               style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16, borderRadius: 999, overflow: "hidden" }}
             >
               <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
-              <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>
+              <Text style={{ color: "#ffffff", fontSize: 16,  fontFamily: "DynaPuff_700Bold" }}>
                 {savingProfile ? "Saving..." : "Save Profile"}
               </Text>
             </LinearGradient>
@@ -367,11 +367,11 @@ export default function EditProfileScreen() {
       <Modal visible={avatarPickerVisible} animationType="fade" transparent onRequestClose={() => setAvatarPickerVisible(false)}>
         <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }} onPress={() => setAvatarPickerVisible(false)}>
           <Pressable style={{ width: "100%", backgroundColor: isDark ? "#1e293b" : "#ffffff", borderRadius: 24, padding: 24, alignItems: "center" }}>
-            <Text style={{ color: isDark ? "#fff" : "#0f172a", fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
+            <Text style={{ color: isDark ? "#fff" : "#0f172a", fontSize: 18,  fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
 
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
               {presetAvatars.map((preset, i) => (
-                <Pressable key={i} onPress={() => selectPreset(preset.url)} style={{ width: 70, height: 70, borderRadius: 50, overflow: "hidden", borderWidth: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
+                <Pressable key={i} onPress={() => selectPreset(preset.url)} style={{ width: 70, height: 70, borderRadius: 50, overflow: "hidden", borderWidth: isDark ? 0 : 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
                   <Image source={getAvatarSource(preset.url)} style={{ width: "100%", height: "100%", borderRadius: 50 }} resizeMode="cover" />
                 </Pressable>
               ))}
@@ -379,7 +379,7 @@ export default function EditProfileScreen() {
 
             <Pressable onPress={() => pickImage(activePartnerAvatar === "A" ? setAvatarA : setAvatarB)} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#f1f5f9" }}>
               <Ionicons name="image-outline" size={20} color={isDark ? "#fff" : "#3b82f6"} />
-              <Text style={{ color: isDark ? "#fff" : "#3b82f6", fontWeight: "700", fontFamily: "Nunito_700Bold" }}>Upload from Gallery</Text>
+              <Text style={{ color: isDark ? "#fff" : "#3b82f6",  fontFamily: "Nunito_700Bold" }}>Upload from Gallery</Text>
             </Pressable>
           </Pressable>
         </Pressable>

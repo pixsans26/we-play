@@ -149,7 +149,7 @@ export default function SignupScreen() {
                 resizeMode="cover"
               />
             </View>
-            <Text style={{ fontSize: 30, color: theme.card.text, fontWeight: "900", marginBottom: 6, fontFamily: "DynaPuff_700Bold" }}>Create Account</Text>
+            <Text style={{ fontSize: 30, color: theme.card.text,  marginBottom: 6, fontFamily: "DynaPuff_700Bold" }}>Create Account</Text>
             <Text style={{ fontSize: 14, color: theme.card.subtext, fontFamily: "Nunito_700Bold" }}>Start your journey together ❤️</Text>
           </View>
 
@@ -165,7 +165,7 @@ export default function SignupScreen() {
 
             {/* Name */}
             <View style={{ marginBottom: 14 }}>
-              <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7, fontFamily: "Nunito_700Bold" }}>NAME</Text>
+              <Text style={{ color: theme.card.subtext, fontSize: 12,  marginBottom: 7, fontFamily: "Nunito_700Bold" }}>NAME</Text>
               <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.name), borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
                 <Ionicons name="person-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
                 <TextInput
@@ -179,7 +179,7 @@ export default function SignupScreen() {
 
             {/* Email */}
             <View style={{ marginBottom: 14 }}>
-              <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7, fontFamily: "Nunito_700Bold" }}>EMAIL</Text>
+              <Text style={{ color: theme.card.subtext, fontSize: 12,  marginBottom: 7, fontFamily: "Nunito_700Bold" }}>EMAIL</Text>
               <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.email), borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
                 <Ionicons name="mail-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
                 <TextInput
@@ -193,7 +193,7 @@ export default function SignupScreen() {
 
             {/* Password */}
             <View style={{ marginBottom: 14 }}>
-              <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7, fontFamily: "Nunito_700Bold" }}>PASSWORD</Text>
+              <Text style={{ color: theme.card.subtext, fontSize: 12,  marginBottom: 7, fontFamily: "Nunito_700Bold" }}>PASSWORD</Text>
               <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.password), borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
                 <Ionicons name="lock-closed-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
                 <TextInput
@@ -210,7 +210,7 @@ export default function SignupScreen() {
 
             {/* Confirm Password */}
             <View style={{ marginBottom: 26 }}>
-              <Text style={{ color: theme.card.subtext, fontSize: 12, fontWeight: "700", marginBottom: 7, fontFamily: "Nunito_700Bold" }}>CONFIRM PASSWORD</Text>
+              <Text style={{ color: theme.card.subtext, fontSize: 12,  marginBottom: 7, fontFamily: "Nunito_700Bold" }}>CONFIRM PASSWORD</Text>
               <View style={{ backgroundColor: theme.input.bg, borderWidth: 1, borderColor: fieldBorder(errors.confirmPassword), borderRadius: 32, overflow: "hidden", flexDirection: "row", alignItems: "center", paddingHorizontal: 14 }}>
                 <Ionicons name="shield-checkmark-outline" size={17} color={theme.card.subtext} style={{ marginRight: 10 }} />
                 <TextInput
@@ -230,7 +230,7 @@ export default function SignupScreen() {
               >
                 {isLoading
                   ? <ActivityIndicator color="#ffffff" />
-                  : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Create Account</Text>
+                  : <Text style={{ color: "#ffffff", fontSize: 17,  fontFamily: "DynaPuff_700Bold" }}>Create Account</Text>
                 }
               </LinearGradient>
             </TouchableOpacity>
@@ -239,7 +239,7 @@ export default function SignupScreen() {
             <TouchableOpacity onPress={handleGoogleSignIn} disabled={isLoading} activeOpacity={0.85} style={{ marginTop: 16 }}>
               <View style={{ backgroundColor: "#ffffff", borderRadius: 999, paddingVertical: 15, alignItems: "center", flexDirection: "row", justifyContent: "center" }}>
                 <Ionicons name="logo-google" size={20} color="#000000" style={{ marginRight: 10 }} />
-                <Text style={{ color: "#000000", fontSize: 16, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>Continue with Google</Text>
+                <Text style={{ color: "#000000", fontSize: 16,  fontFamily: "Nunito_700Bold" }}>Continue with Google</Text>
               </View>
             </TouchableOpacity>
             </BlurView>
@@ -251,7 +251,7 @@ export default function SignupScreen() {
               Already have an account?{" "}</Text>
             <Link href="/(auth)/login" asChild>
               <TouchableOpacity>
-                <Text style={{ color: "#f953c6", fontSize: 14, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Log In</Text>
+                <Text style={{ color: "#f953c6", fontSize: 14,  fontFamily: "DynaPuff_700Bold" }}>Log In</Text>
               </TouchableOpacity>
             </Link>
           </View>

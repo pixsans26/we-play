@@ -12,14 +12,17 @@ import { BlurView as ExpoBlurView, BlurViewProps } from 'expo-blur';
 export function BlurView(props: BlurViewProps) {
   if (Platform.OS === 'android') {
     const isDark = props.tint === 'dark';
-    const fallbackBg = isDark ? "rgba(21, 0, 37, 0.95)" : "rgba(255, 255, 255, 0.95)";
+    // Use a solid but translucent background for Android to avoid the weird "glow" effect 
+    // from Android's RenderEffect blur. We omit overflow: 'hidden' here so we don't 
+    // clip children or break nested borders!
+    const fallbackBg = isDark ? "rgba(25, 10, 40, 0.90)" : "rgba(255, 255, 255, 0.90)";
     
     return (
       <View 
         {...(props as ViewProps)}
         style={[
           props.style,
-          { backgroundColor: fallbackBg, overflow: 'hidden' }
+          { backgroundColor: fallbackBg }
         ]}
       >
         {props.children}

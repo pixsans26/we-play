@@ -24,6 +24,9 @@ export const getAvatarUrl = (path?: string | null) => {
   return `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 };
 
+export const getImageUrl = getAvatarUrl;
+
+
 const PRESET_AVATARS_LOCAL: Record<string, any> = {};
 
 export const getAvatarSource = (path?: string | null) => {

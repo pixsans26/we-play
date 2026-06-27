@@ -31,6 +31,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
+import { useThemeStore } from "@/store/themeStore";
 
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View, Text } from "react-native";
@@ -74,6 +75,7 @@ export default function RootLayout() {
   const setUser = useAuthStore((s) => s.setUser);
   const setSessionToken = useAuthStore((s) => s.setSessionToken);
   const setIsLoading = useAuthStore((s) => s.setIsLoading);
+  const isDark = useThemeStore((s) => s.isDark);
   
   const { expoPushToken } = usePushNotifications();
   const sessionToken = useAuthStore((s) => s.sessionToken);
@@ -217,5 +219,5 @@ export default function RootLayout() {
     );
   }
 
-  return <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 400 }} />;
+  return <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 400, contentStyle: { backgroundColor: isDark ? "#150025" : "#ffffff" } }} />;
 }

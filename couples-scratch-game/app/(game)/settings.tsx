@@ -50,8 +50,7 @@ function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, d
             alignItems: "center",
             padding: 18,
             gap: 14,
-            borderWidth: 1,
-            borderColor: theme.card.border,
+            borderWidth: isDark ? 0 : 1, borderColor: theme.card.border,
             shadowColor: danger ? "#ef4444" : "#94a3b8", shadowOpacity: isDark ? 0 : 0.05, shadowRadius: 8, shadowOffset: {width:0, height:4}, elevation: isDark ? 0 : 2
           }}>
             <View style={{
@@ -62,7 +61,7 @@ function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, d
               <Ionicons name={icon} size={20} color={danger ? "#ef4444" : iconColor} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: danger ? "#ef4444" : (isDark ? "#ffffff" : "#0f172a"), fontSize: 16, fontWeight: "500", fontFamily: "DynaPuff_700Bold" }}>{label}</Text>
+              <Text style={{ color: danger ? "#ef4444" : (isDark ? "#ffffff" : "#0f172a"), fontSize: 16,  fontFamily: "DynaPuff_700Bold" }}>{label}</Text>
               {sublabel && <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(15,23,42,0.7)", fontSize: 12, marginTop: 2 }}>{sublabel}</Text>}
             </View>
             {right}
@@ -279,7 +278,7 @@ export default function SettingsScreen() {
           }}
         >
           <View>
-            <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
+            <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24,  fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Settings</Text>
             <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_700Bold" }}>Customize your experience</Text>
           </View>
         </View>
@@ -293,7 +292,7 @@ export default function SettingsScreen() {
         >
 
           {/* Account */}
-          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 10, marginLeft: 4, letterSpacing: 1 }}>
+          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 11,  fontFamily: "DynaPuff_700Bold", marginBottom: 10, marginLeft: 4, letterSpacing: 1 }}>
             ACCOUNT
           </Text>
           <View style={{ gap: 10, marginBottom: 28 }}>
@@ -342,7 +341,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* Preferences */}
-          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 10, marginLeft: 4, letterSpacing: 1, marginTop: 10 }}>
+          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 11,  fontFamily: "DynaPuff_700Bold", marginBottom: 10, marginLeft: 4, letterSpacing: 1, marginTop: 10 }}>
             PREFERENCES
           </Text>
           <View style={{ gap: 10, marginBottom: 28 }}>
@@ -388,7 +387,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* About & Support */}
-          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 10, marginLeft: 4, letterSpacing: 1, marginTop: 10 }}>
+          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 11,  fontFamily: "DynaPuff_700Bold", marginBottom: 10, marginLeft: 4, letterSpacing: 1, marginTop: 10 }}>
             ABOUT & SUPPORT
           </Text>
           <View style={{ gap: 10, marginBottom: 28 }}>

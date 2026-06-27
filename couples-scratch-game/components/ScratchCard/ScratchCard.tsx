@@ -264,6 +264,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 24,
     overflow: "hidden",
+    backgroundColor: "transparent",
   },
   overlayImage: {
     width: "100%",

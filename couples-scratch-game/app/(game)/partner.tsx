@@ -48,7 +48,6 @@ export default function PartnerScreen() {
   const hasUnreadNotifications = useNotificationStore((s) => s.hasUnread);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [predictions, setPredictions] = useState<CyclePredictions | null>(null);
 
   const [inviteCodeInput, setInviteCodeInput] = useState("");
   const [isJoining, setIsJoining] = useState(false);
@@ -111,6 +110,7 @@ export default function PartnerScreen() {
   const [lastPeriodStart, setLastPeriodStart] = useState("");
   const [lastPeriodEnd, setLastPeriodEnd] = useState("");
   const [cycleLength, setCycleLength] = useState("28");
+  const [predictions, setPredictions] = useState<any>(null);
 
   useEffect(() => {
     fetchCycleConfig();
@@ -297,7 +297,7 @@ export default function PartnerScreen() {
               justifyContent: "space-between",
             }}
           >
-            <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
+            <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: isDark ? 0 : 2, borderColor: theme.glass.border }}>
               <View style={{ flex: 1, backgroundColor: theme.glass.bg, alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="person" size={24} color={theme.card.subtext} />
               </View>
@@ -306,7 +306,7 @@ export default function PartnerScreen() {
               <View style={{ position: "relative" }}>
                 <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
                 {hasUnreadNotifications && (
-                  <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
+                  <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: isDark ? 0 : 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
                 )}
               </View>
             </Pressable>
@@ -324,7 +324,7 @@ export default function PartnerScreen() {
               width: 80, height: 80, borderRadius: 40,
               backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
               alignItems: "center", justifyContent: "center",
-              borderWidth: 2, borderColor: theme.accent,
+              borderWidth: isDark ? 0 : 2, borderColor: theme.accent,
             }}>
               <Ionicons name="heart-outline" size={40} color={theme.accent} />
             </View>
@@ -351,7 +351,7 @@ export default function PartnerScreen() {
                 }}
                 style={{
                   backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
-                  borderRadius: 24, borderWidth: 2, borderColor: theme.accent,
+                  borderRadius: 24, borderWidth: isDark ? 0 : 2, borderColor: theme.accent,
                   paddingHorizontal: 40, paddingVertical: 16, alignItems: "center", width: "100%"
                 }}
               >
@@ -402,7 +402,7 @@ export default function PartnerScreen() {
               style={{
                 width: "100%",
                 backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#ffffff",
-                borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                borderWidth: isDark ? 0 : 1, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
                 borderRadius: 16, padding: 12,
                 color: theme.card.text, fontSize: 16, textAlign: "center", fontFamily: "Nunito_700Bold",
                 marginBottom: 8
@@ -421,7 +421,7 @@ export default function PartnerScreen() {
               {isJoining ? (
                 <ActivityIndicator color="#ffffff" size="small" />
               ) : (
-                <Text style={{ color: "#ffffff", fontSize: 16, fontFamily: "Nunito_700Bold", fontWeight: "800" }}>Connect Partner</Text>
+                <Text style={{ color: "#ffffff", fontSize: 16, fontFamily: "Nunito_700Bold",  }}>Connect Partner</Text>
               )}
             </Pressable>
           </View>
@@ -479,7 +479,7 @@ export default function PartnerScreen() {
             justifyContent: "space-between",
           }}
         >
-          <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: 2, borderColor: theme.glass.border }}>
+          <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", borderWidth: isDark ? 0 : 2, borderColor: theme.glass.border }}>
             {displayAvatarSource ? (
               <Image source={displayAvatarSource} style={{ width: "100%", height: "100%", borderRadius: 24 }} />
             ) : (
@@ -495,7 +495,7 @@ export default function PartnerScreen() {
             <View style={{ position: "relative" }}>
               <Ionicons name="notifications-outline" size={28} color={theme.card.text} />
               {hasUnreadNotifications && (
-                <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
+                <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: isDark ? 0 : 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
               )}
             </View>
           </Pressable>
@@ -549,7 +549,7 @@ export default function PartnerScreen() {
                 <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
                   <LinearGradient
                     colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
-                    style={{ flex: 1, padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                    style={{ flex: 1, padding: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
                   >
                     <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(168,85,247,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : "#a855f7", shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
                       <MaterialCommunityIcons name="flower" size={20} color="#a855f7" />
@@ -566,7 +566,7 @@ export default function PartnerScreen() {
                 <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
                   <LinearGradient
                     colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : activePredictions.safeSex ? ["#f0fdf4", "#ffffff"] : ["#f8fafc", "#ffffff"]}
-                    style={{ flex: 1, padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                    style={{ flex: 1, padding: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
                   >
                     <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? (activePredictions.safeSex ? "rgba(34,197,94,0.15)" : "rgba(107,114,128,0.15)") : "#ffffff", shadowColor: isDark ? "transparent" : (activePredictions.safeSex ? "#22c55e" : "#6b7280"), shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
                       <Ionicons name="shield-checkmark" size={20} color={activePredictions.safeSex ? "#22c55e" : theme.card.subtext} />
@@ -585,7 +585,7 @@ export default function PartnerScreen() {
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 16 }}>
                 <LinearGradient
                   colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
-                  style={{ padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#9333ea", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                  style={{ padding: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#9333ea", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
                 >
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(147,51,234,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : "#9333ea", shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginRight: 16 }}>
@@ -606,7 +606,7 @@ export default function PartnerScreen() {
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 16 }}>
                 <LinearGradient
                   colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
-                  style={{ padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                  style={{ padding: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
                 >
                   <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
                     <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(236,72,153,0.15)" : "#ffffff", shadowColor: isDark ? "transparent" : theme.accent, shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: isDark ? 0 : 4, alignItems: "center", justifyContent: "center", marginRight: 12 }}>
@@ -654,7 +654,7 @@ export default function PartnerScreen() {
             <View style={{ marginBottom: 20 }}>
               <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 15, color: theme.card.text, marginBottom: 8 }}>Select Period Dates</Text>
               <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: theme.card.subtext, marginBottom: 12 }}>Tap start date, then tap end date.</Text>
-              <View style={{ borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: theme.glass.border }}>
+              <View style={{ borderRadius: 16, overflow: "hidden", borderWidth: isDark ? 0 : 1, borderColor: theme.glass.border }}>
                 <Calendar
                   onDayPress={handleDayPress}
                   markingType={'period'}

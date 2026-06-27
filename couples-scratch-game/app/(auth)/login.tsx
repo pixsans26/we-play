@@ -184,7 +184,7 @@ export default function LoginScreen() {
                   resizeMode="cover"
                 />
               </View>
-              <Text style={{ fontSize: 32, color: theme.card.text, fontWeight: "900", marginBottom: 6, fontFamily: "DynaPuff_700Bold" }}>
+              <Text style={{ fontSize: 32, color: theme.card.text,  marginBottom: 6, fontFamily: "DynaPuff_700Bold" }}>
                 Welcome Back
               </Text>
               <Text style={{ fontSize: 15, color: theme.card.subtext, textAlign: "center", fontFamily: "Nunito_700Bold" }}>
@@ -263,7 +263,7 @@ export default function LoginScreen() {
                   >
                     {isLoading
                       ? <ActivityIndicator color="#ffffff" />
-                      : <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Log In</Text>
+                      : <Text style={{ color: "#ffffff", fontSize: 17,  fontFamily: "DynaPuff_700Bold" }}>Log In</Text>
                     }
                   </LinearGradient>
                 </TouchableOpacity>
@@ -272,7 +272,7 @@ export default function LoginScreen() {
                 <TouchableOpacity onPress={handleGoogleSignIn} disabled={isLoading} activeOpacity={0.85} style={{ marginTop: 16 }}>
                   <View style={{ backgroundColor: "#ffffff", borderRadius: 999, paddingVertical: 15, alignItems: "center", flexDirection: "row", justifyContent: "center" }}>
                     <Ionicons name="logo-google" size={20} color="#000000" style={{ marginRight: 10 }} />
-                    <Text style={{ color: "#000000", fontSize: 16, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>Continue with Google</Text>
+                    <Text style={{ color: "#000000", fontSize: 16,  fontFamily: "Nunito_700Bold" }}>Continue with Google</Text>
                   </View>
                 </TouchableOpacity>
               </BlurView>
@@ -284,7 +284,7 @@ export default function LoginScreen() {
                 Don't have an account?{" "}
                 <Link href="/(auth)/signup" asChild>
                   <TouchableOpacity>
-                    <Text style={{ color: "#f953c6", fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>Sign Up</Text>
+                    <Text style={{ color: "#f953c6",  fontFamily: "DynaPuff_700Bold" }}>Sign Up</Text>
                   </TouchableOpacity>
                 </Link>
               </Text>

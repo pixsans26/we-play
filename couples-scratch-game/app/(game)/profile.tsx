@@ -167,7 +167,7 @@ export default function ProfileScreen() {
           }}
         >
           <View>
-            <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Our Profile</Text>
+            <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24,  fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Our Profile</Text>
             <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_700Bold" }}>Your couple stats</Text>
           </View>
         </View>
@@ -207,12 +207,12 @@ export default function ProfileScreen() {
                   )}
                 </View>
               </View>
-              <Text style={{ color: "#ffffff", fontSize: 22, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 4, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
+              <Text style={{ color: "#ffffff", fontSize: 22,  fontFamily: "DynaPuff_700Bold", marginBottom: 4, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
                 {displayName}
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(0,0,0,0.2)", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 32, overflow: "hidden" }}>
                 <Text style={{ fontSize: 18 }}>{badge.emoji}</Text>
-                <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>
+                <Text style={{ color: "#ffffff", fontSize: 14,  fontFamily: "Nunito_700Bold" }}>
                   Level {currentLevel} • {badge.label}
                 </Text>
               </View>
@@ -223,37 +223,37 @@ export default function ProfileScreen() {
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
             <View style={{ width: "48%", borderRadius: 32, overflow: "hidden" }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
-                <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#eff6ff", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#3b82f6", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+                <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#eff6ff", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#3b82f6", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                   <Ionicons name="image-outline" size={24} color="#3b82f6" style={{ marginBottom: 4 }} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{imageCount}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#64748b", fontSize: 10, marginTop: 2, fontWeight: "700", fontFamily: "Nunito_700Bold" }}>Moments</Text>
+                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 18,  fontFamily: "DynaPuff_700Bold" }}>{imageCount}</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#64748b", fontSize: 10, marginTop: 2,  fontFamily: "Nunito_700Bold" }}>Moments</Text>
                 </LinearGradient>
               </BlurView>
             </View>
             <View style={{ width: "48%", borderRadius: 32, overflow: "hidden" }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
-                <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#f0fdf4", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#10b981", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+                <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#f0fdf4", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#10b981", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                   <Ionicons name="document-text-outline" size={24} color="#10b981" style={{ marginBottom: 4 }} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{taskCount}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#64748b", fontSize: 10, marginTop: 2, fontWeight: "700", fontFamily: "Nunito_700Bold" }}>Missions</Text>
+                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 18,  fontFamily: "DynaPuff_700Bold" }}>{taskCount}</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#64748b", fontSize: 10, marginTop: 2,  fontFamily: "Nunito_700Bold" }}>Missions</Text>
                 </LinearGradient>
               </BlurView>
             </View>
             <View style={{ width: "48%", borderRadius: 32, overflow: "hidden" }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
-                <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fffbeb", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#fbbf24", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+                <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fffbeb", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#fbbf24", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                   <Ionicons name="disc-outline" size={24} color="#f59e0b" style={{ marginBottom: 4 }} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{spinCount}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#64748b", fontSize: 10, marginTop: 2, fontWeight: "700", fontFamily: "Nunito_700Bold" }}>Spins</Text>
+                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 18,  fontFamily: "DynaPuff_700Bold" }}>{spinCount}</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#64748b", fontSize: 10, marginTop: 2,  fontFamily: "Nunito_700Bold" }}>Spins</Text>
                 </LinearGradient>
               </BlurView>
             </View>
             <View style={{ width: "48%", borderRadius: 32, overflow: "hidden" }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
-                <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+                <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                   <GradientIcon name="dice-outline" size={24} style={{ marginBottom: 4 }} />
-                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{lotteryCount}</Text>
-                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#64748b", fontSize: 10, marginTop: 2, fontWeight: "700", fontFamily: "Nunito_700Bold" }}>Heart Draws</Text>
+                  <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 18,  fontFamily: "DynaPuff_700Bold" }}>{lotteryCount}</Text>
+                  <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#64748b", fontSize: 10, marginTop: 2,  fontFamily: "Nunito_700Bold" }}>Heart Draws</Text>
                 </LinearGradient>
               </BlurView>
             </View>
@@ -263,7 +263,7 @@ export default function ProfileScreen() {
           {isPartnerA ? (
             <>
               {/* Partner A card (YOU) */}
-              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
                   <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "#fce7f3", alignItems: "center", justifyContent: "center" }}>
                     {coupleProfile?.partnerAAvatar ? (
@@ -274,7 +274,7 @@ export default function ProfileScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17,  fontFamily: "DynaPuff_700Bold" }}>{partnerAName}</Text>
                     </View>
                     <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
                       {coupleProfile?.partnerAAge ? `Age ${coupleProfile.partnerAAge}` : ""}
@@ -283,13 +283,13 @@ export default function ProfileScreen() {
                     </Text>
                   </View>
                   <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
-                    <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
+                    <Text style={{ color: "#ffffff", fontSize: 11,  fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
                   </View>
                 </View>
               </LinearGradient>
 
               {/* Partner B card */}
-              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
                   <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "#f3e8ff", alignItems: "center", justifyContent: "center" }}>
                     {coupleProfile?.partnerBAvatar ? (
@@ -300,11 +300,11 @@ export default function ProfileScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{!isLinked ? "Not Linked" : partnerBName}</Text>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17,  fontFamily: "DynaPuff_700Bold" }}>{!isLinked ? "Not Linked" : partnerBName}</Text>
                     </View>
                     {!isLinked ? (
                       <TouchableOpacity onPress={() => router.push("/(game)/partner")} style={{ marginTop: 6, alignSelf: "flex-start", backgroundColor: "#3b82f6", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 }}>
-                        <Text style={{ color: "#ffffff", fontSize: 12, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>Link Partner</Text>
+                        <Text style={{ color: "#ffffff", fontSize: 12,  fontFamily: "Nunito_700Bold" }}>Link Partner</Text>
                       </TouchableOpacity>
                     ) : (
                       <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
@@ -320,7 +320,7 @@ export default function ProfileScreen() {
           ) : (
             <>
               {/* Partner B card (YOU) */}
-              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
                   <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(168,85,247,0.3)" : "#f3e8ff", alignItems: "center", justifyContent: "center" }}>
                     {coupleProfile?.partnerBAvatar ? (
@@ -331,7 +331,7 @@ export default function ProfileScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17,  fontFamily: "DynaPuff_700Bold" }}>{partnerBName}</Text>
                     </View>
                     <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
                       {coupleProfile?.partnerBAge ? `Age ${coupleProfile.partnerBAge}` : ""}
@@ -340,13 +340,13 @@ export default function ProfileScreen() {
                     </Text>
                   </View>
                   <View style={{ backgroundColor: "#10b981", borderRadius: 999, overflow: "hidden", paddingHorizontal: 12, paddingVertical: 6 }}>
-                    <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
+                    <Text style={{ color: "#ffffff", fontSize: 11,  fontFamily: "DynaPuff_700Bold" }}>YOU</Text>
                   </View>
                 </View>
               </LinearGradient>
 
               {/* Partner A card */}
-              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+              <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
                   <View style={{ width: 48, height: 48, borderRadius: 24, overflow: "hidden", backgroundColor: isDark ? "rgba(233,30,140,0.3)" : "#fce7f3", alignItems: "center", justifyContent: "center" }}>
                     {coupleProfile?.partnerAAvatar ? (
@@ -357,11 +357,11 @@ export default function ProfileScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>{!isLinked ? "Not Linked" : partnerAName}</Text>
+                      <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17,  fontFamily: "DynaPuff_700Bold" }}>{!isLinked ? "Not Linked" : partnerAName}</Text>
                     </View>
                     {!isLinked ? (
                       <TouchableOpacity onPress={() => router.push("/(game)/partner")} style={{ marginTop: 6, alignSelf: "flex-start", backgroundColor: "#3b82f6", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 }}>
-                        <Text style={{ color: "#ffffff", fontSize: 12, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>Link Partner</Text>
+                        <Text style={{ color: "#ffffff", fontSize: 12,  fontFamily: "Nunito_700Bold" }}>Link Partner</Text>
                       </TouchableOpacity>
                     ) : (
                       <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "#475569", fontSize: 13, marginTop: 2, fontWeight: "600" }}>
@@ -402,7 +402,7 @@ export default function ProfileScreen() {
                 })}
               >
                 <Ionicons name="heart" size={20} color={isDark ? "#ffffff" : "#4c0519"} />
-                <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 16, fontWeight: "800", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>Our History</Text>
+                <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 16,  fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>Our History</Text>
               </Pressable>
             </BlurView>
           </View>

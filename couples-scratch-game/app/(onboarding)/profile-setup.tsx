@@ -91,7 +91,7 @@ const AgeWheelPicker = ({ selectedAge, setAgeValue, theme, isDark }: { selectedA
               <Text style={{
                 fontSize: 28,
                 color: item === selectedAge ? theme.accent : theme.text,
-                fontWeight: "900",
+                
                 fontFamily: "DynaPuff_700Bold",
               }}>{item}</Text>
             </Animated.View>
@@ -121,7 +121,7 @@ const GenderSelector = ({ value, onChange, theme }: { value: string, onChange: (
       >
         <Text style={{
           color: value === g ? "#fff" : theme.input.text,
-          fontWeight: "800",
+          
           fontFamily: "DynaPuff_700Bold",
         }}>{g}</Text>
       </TouchableOpacity>
@@ -197,7 +197,6 @@ export default function ProfileSetupScreen() {
   const labelStyle = {
     color: theme.card.subtext,
     fontSize: 14,
-    fontWeight: "600" as const,
     marginBottom: 4,
     marginLeft: 4,
     fontFamily: "Nunito_700Bold",
@@ -454,7 +453,7 @@ export default function ProfileSetupScreen() {
                 }} />
               ))}
             </View>
-            <Text style={{ color: theme.card.text, fontSize: 32, fontWeight: "bold", fontFamily: "DynaPuff_700Bold", marginBottom: 8 }}>
+            <Text style={{ color: theme.card.text, fontSize: 32,  fontFamily: "DynaPuff_700Bold", marginBottom: 8 }}>
               {step === 1 && "What's your name?"}
               {step === 2 && "How old are you?"}
               {step === 3 && "Pick an Avatar"}
@@ -524,7 +523,7 @@ export default function ProfileSetupScreen() {
                   ) : (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                       <Ionicons name="camera-outline" size={48} color={theme.input.placeholder} />
-                <Text style={{ fontSize: 14, color: theme.input.placeholder, marginTop: 8, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>Add Photo</Text>
+                <Text style={{ fontSize: 14, color: theme.input.placeholder, marginTop: 8,  fontFamily: "Nunito_700Bold" }}>Add Photo</Text>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -547,7 +546,7 @@ export default function ProfileSetupScreen() {
                       }}
                     >
                       <Text style={{
-                        fontSize: 16, fontWeight: "600",
+                        fontSize: 16, 
                       color: selected ? "#fff" : theme.card.text,
                         fontFamily: "Nunito_700Bold",
                       }}>
@@ -571,11 +570,11 @@ export default function ProfileSetupScreen() {
                     }}>
                       <Ionicons name="checkmark-circle" size={64} color="#22c55e" />
                     </View>
-                    <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "bold", fontFamily: "DynaPuff_700Bold", textAlign: "center" }}>
+                    <Text style={{ color: theme.card.text, fontSize: 24,  fontFamily: "DynaPuff_700Bold", textAlign: "center" }}>
                       Successfully Linked! 🎉
                     </Text>
                     <Text style={{ color: theme.card.subtext, fontSize: 16, textAlign: "center", fontFamily: "Nunito_700Bold", paddingHorizontal: 12 }}>
-                      You are now linked with <Text style={{ color: theme.accent, fontWeight: "bold" }}>{partnerName}</Text>. Let's start playing!
+                      You are now linked with <Text style={{ color: theme.accent,  }}>{partnerName}</Text>. Let's start playing!
                     </Text>
                   </>
                 ) : inviteCode ? (
@@ -608,12 +607,12 @@ export default function ProfileSetupScreen() {
               <>
                 <TouchableOpacity onPress={handleNext} activeOpacity={0.8}>
                   <LinearGradient colors={["#ff2d6b", "#a82dff"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ borderRadius: 32, paddingVertical: 18, alignItems: "center" }}>
-                    <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" }}>Continue</Text>
+                    <Text style={{ color: "#ffffff", fontSize: 18,  fontFamily: "DynaPuff_700Bold" }}>Continue</Text>
                   </LinearGradient>
                 </TouchableOpacity>
                 {(step === 3 || step === 4) && (
                   <TouchableOpacity onPress={handleNext} style={{ alignItems: "center", paddingVertical: 12 }}>
-                    <Text style={{ color: theme.card.subtext, fontSize: 16, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>Skip for now</Text>
+                    <Text style={{ color: theme.card.subtext, fontSize: 16,  fontFamily: "Nunito_700Bold" }}>Skip for now</Text>
                   </TouchableOpacity>
                 )}
               </>
@@ -642,7 +641,7 @@ export default function ProfileSetupScreen() {
       <Modal visible={avatarPickerVisible} animationType="fade" transparent onRequestClose={() => setAvatarPickerVisible(false)}>
         <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }} onPress={() => setAvatarPickerVisible(false)}>
           <Pressable style={{ width: "100%", backgroundColor: theme.card.bg, borderRadius: 24, padding: 24, alignItems: "center", borderWidth: 1, borderColor: theme.card.border }}>
-            <Text style={{ color: theme.card.text, fontSize: 18, fontWeight: "800", fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
+            <Text style={{ color: theme.card.text, fontSize: 18,  fontFamily: "DynaPuff_700Bold", marginBottom: 20 }}>Choose Avatar</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
               {presetAvatars.map((preset, i) => (
                 <Pressable key={i} onPress={() => selectPreset(preset.url)} style={{ width: 80, height: 80, borderRadius: 40, overflow: "hidden", borderWidth: 2, borderColor: theme.accent }}>
@@ -652,7 +651,7 @@ export default function ProfileSetupScreen() {
             </View>
             <Pressable onPress={pickImage} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 999, backgroundColor: theme.input.bg }}>
               <Ionicons name="image-outline" size={20} color={theme.accent} />
-                  <Text style={{ color: theme.accent, fontWeight: "700", fontFamily: "Nunito_700Bold" }}>Upload from Gallery</Text>
+                  <Text style={{ color: theme.accent,  fontFamily: "Nunito_700Bold" }}>Upload from Gallery</Text>
             </Pressable>
           </Pressable>
         </Pressable>

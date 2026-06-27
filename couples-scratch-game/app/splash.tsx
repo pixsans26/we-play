@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   },
   appName: {
     fontSize: 42,
-    fontWeight: "900",
+    
     color: "#f8f0ff",
     fontFamily: "DynaPuff_700Bold",
     letterSpacing: -0.5,
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   },
   appNameAccent: {
     fontSize: 42,
-    fontWeight: "900",
+    
     color: "#f953c6",
     fontFamily: "DynaPuff_700Bold",
     letterSpacing: -0.5,

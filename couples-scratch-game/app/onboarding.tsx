@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 16,
   },
-  skipText: { color: "rgba(220,180,255,0.75)", fontSize: 14, fontWeight: "600", fontFamily: "Nunito_700Bold" },
+  skipText: { color: "rgba(220,180,255,0.75)", fontSize: 14,  fontFamily: "Nunito_700Bold" },
   bottomContainer: {
     paddingBottom: 48,
     paddingHorizontal: 32,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   dotInactive: { width: 8, backgroundColor: "rgba(220,180,255,0.3)" },
   btnWrapper: { width: "100%" },
   btn: { borderRadius: 999, overflow: "hidden", paddingVertical: 17, alignItems: "center" },
-  btnText: { color: "#ffffff", fontSize: 17, fontWeight: "800", fontFamily: "DynaPuff_700Bold" },
+  btnText: { color: "#ffffff", fontSize: 17,  fontFamily: "DynaPuff_700Bold" },
   page: {
     flex: 1,
     alignItems: "center",
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    fontWeight: "900",
+    
     color: "#f8f0ff",
     textAlign: "center",
     fontFamily: "DynaPuff_700Bold",
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     color: "rgba(220,180,255,0.7)",
     textAlign: "center",
     lineHeight: 26,
-    fontWeight: "600",
+    
     fontFamily: "Nunito_700Bold",
   },
 });

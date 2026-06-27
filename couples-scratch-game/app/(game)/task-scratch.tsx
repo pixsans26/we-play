@@ -2,7 +2,7 @@ import { env } from "@/lib/env";
 import { apiFetch, getAvatarSource } from "@/lib/apiClient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View, Text, Pressable, Animated, Image,
+  Platform, View, Text, Pressable, Animated, Image,
   Easing, ActivityIndicator, StyleSheet, Dimensions
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -12,6 +12,7 @@ import { BlurView } from "@/components/CustomBlurView";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { useTimer } from "@/hooks/useTimer";
 import { useSound } from "@/hooks/useSound";
@@ -70,6 +71,7 @@ export default function TaskScratchScreen() {
   const resetGameStore = useGameStore((s) => s.reset);
 
   const isDark = useThemeStore((s) => s.isDark);
+  const isAndroidDark = Platform.OS === 'android' && isDark;
   const theme = getTheme(isDark);
 
   const { getNextTask, logScratch, getAllHistory } = useScratchHistory();
@@ -81,6 +83,7 @@ export default function TaskScratchScreen() {
   const [scratchCountA, setScratchCountA] = useState(0);
   const [scratchCountB, setScratchCountB] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
+  const [startCountdown, setStartCountdown] = useState<number | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [previousTask, setPreviousTask] = useState<(Task & { emoji: string; title: string; description: string }) | null>(null);
   const [showPrevious, setShowPrevious] = useState(false);
@@ -106,10 +109,10 @@ export default function TaskScratchScreen() {
   const getPerformingPartnerName = useCallback(() => performingName, [performingName]);
 
   const isLinked = coupleProfile?.status !== "pending" && !!coupleProfile?.partnerBUid;
-  
-  useFocusEffect(useCallback(() => { 
+
+  useFocusEffect(useCallback(() => {
     if (isLinked) {
-      fetchData().catch(() => { }); 
+      fetchData().catch(() => { });
     }
   }, [isLinked, fetchData]));
 
@@ -118,7 +121,7 @@ export default function TaskScratchScreen() {
     try {
       const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
       const history = await getAllHistory(coupleProfile.partnerAUid, partnerBUidFallback);
-      const textHistory = history.filter((h) => h.taskType === "text" && h.completed);
+      const textHistory = history.filter((h) => h.taskType === "text" && (h.completed === true || (h.completed as any) === 1 || String(h.completed) === "true" || String(h.completed) === "1"));
       setScratchCountA(textHistory.filter((h) => h.userUid === coupleProfile.partnerAUid).length);
       setScratchCountB(textHistory.filter((h) => h.userUid === partnerBUidFallback).length);
     } catch { }
@@ -198,7 +201,17 @@ export default function TaskScratchScreen() {
       handleDone();
     }
   }, [isFinished]);
-
+  useEffect(() => {
+    if (startCountdown === null) return;
+    if (startCountdown === 0) {
+      setStartCountdown(null);
+      setTimerStarted(true);
+      start();
+      return;
+    }
+    const timer = setTimeout(() => setStartCountdown(c => (c !== null ? c - 1 : null)), 1000);
+    return () => clearTimeout(timer);
+  }, [startCountdown, start]);
   const canSkip = !!currentTask && !timerStarted && !isCompleted;
   const canComplete = !!currentTask && isScratched && !isCompleted;
 
@@ -217,13 +230,31 @@ export default function TaskScratchScreen() {
     setIsCompleted(false);
     isProcessingDoneRef.current = false;
     alarmPlayedRef.current = false;
-    autoStartRef.current = setTimeout(() => { setTimerStarted(true); start(); }, 10000);
-  }, [setIsScratched, playScratch, revealOpacity, start]);
+    setStartCountdown(10);
+
+    if (user && currentTask && coupleProfile) {
+      const scratcherUid = currentTurn === "A"
+        ? coupleProfile.partnerAUid
+        : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+      const performerUid = currentTurn === "A"
+        ? (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`)
+        : coupleProfile.partnerAUid;
+
+      logScratch({
+        userUid: scratcherUid,
+        taskId: currentTask.id,
+        taskType: "text",
+        completed: false,
+        skipped: false,
+        performerUid: performerUid ?? undefined
+      }).catch(console.error);
+    }
+  }, [setIsScratched, playScratch, revealOpacity, start, user, currentTask, coupleProfile, currentTurn, logScratch]);
 
   const handleDone = useCallback(async () => {
     if (isProcessingDoneRef.current) return;
     if (!user || !currentTask || !coupleProfile) return;
-    
+
     isProcessingDoneRef.current = true;
     setIsCompleted(true);
     const scratcherUid = currentTurn === "A"
@@ -256,11 +287,50 @@ export default function TaskScratchScreen() {
     : (["#e879f9", "#f472b6", "#fb7185"] as any);
 
   // ── Loading ──
-  if (isLoading && !showPrevious) {
+  if (!isLoading && !currentTask) {
     return (
-      <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={S.fill_center}>
-        <ActivityIndicator size="large" color="#ffffff" />
-        <Text style={S.loadingText}>Fetching next card...</Text>
+      <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+        <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 52, paddingBottom: 28 }}>
+          <View style={[S.headerRow, { justifyContent: 'space-between', marginBottom: 24 }]}>
+            <Pressable onPress={handleGoBack} style={S.iconBtn}>
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </Pressable>
+            <Text style={S.headerTitle}>All Done!</Text>
+            <View style={{ width: 44 }} />
+          </View>
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name="checkmark-circle" size={80} color="#ffffff" style={{ marginBottom: 16 }} />
+            <Text style={{ fontSize: 24, color: "#ffffff", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8 }}>You're all caught up!</Text>
+            <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.8)", fontFamily: "Nunito_700Bold", textAlign: "center" }}>More cards will be available soon.</Text>
+          </View>
+        </View>
+      </LinearGradient>
+    );
+  }
+
+  if (isLoading || !currentTask) {
+    return (
+      <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+        <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 52, paddingBottom: 28 }}>
+          {/* Header Row Skeleton */}
+          <View style={[S.headerRow, { justifyContent: 'space-between', marginBottom: 24 }]}>
+            <Skeleton width={44} height={44} borderRadius={22} />
+            <Skeleton width={180} height={28} borderRadius={14} />
+            <Skeleton width={44} height={44} borderRadius={22} />
+          </View>
+
+          {/* Score Card Skeleton */}
+          <Skeleton width="100%" height={110} borderRadius={24} style={{ marginBottom: 20 }} />
+
+          {/* Main Card Skeleton */}
+          <Skeleton width="100%" height={400} borderRadius={24} style={{ marginBottom: 24, flex: 1 }} />
+
+          {/* Buttons Skeleton */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+            <Skeleton width="48%" height={56} borderRadius={28} />
+            <Skeleton width="48%" height={56} borderRadius={28} />
+          </View>
+        </View>
       </LinearGradient>
     );
   }
@@ -271,20 +341,22 @@ export default function TaskScratchScreen() {
       <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
         <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 52, paddingBottom: 24 }}>
           <Text style={S.prevLabel}>Previous Task (Read Only)</Text>
-          <View style={{ flex: 1, marginVertical: 20, borderRadius: 24, overflow: "hidden", borderWidth: 4, borderColor: "#7c3aed" }}>
-            <LinearGradient
-              colors={theme.accentGradient as any}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
-            >
-              <Text style={{ fontSize: 48, marginBottom: 12 }}>{previousTask.emoji}</Text>
-              <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
-                {previousTask.title}
-              </Text>
-              <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>
-                {previousTask.description}
-              </Text>
-            </LinearGradient>
+          <View style={{ flex: 1, marginVertical: 20, borderRadius: 24, borderWidth: isDark ? 0 : 4, borderColor: "#7c3aed" }}>
+            <View style={{ flex: 1, borderRadius: 20, overflow: "hidden" }}>
+              <LinearGradient
+                colors={["#4c1d95", "#2e1065"] as any}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
+              >
+                <Text style={{ fontSize: 48, marginBottom: 12 }}>{previousTask.emoji}</Text>
+                <Text style={{ color: "#ffffff", fontSize: 24, fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
+                  {previousTask.title}
+                </Text>
+                <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontFamily: "Nunito_700Bold" }}>
+                  {previousTask.description}
+                </Text>
+              </LinearGradient>
+            </View>
           </View>
           <Pressable onPress={() => setShowPrevious(false)} style={S.completeBtn}>
             <LinearGradient colors={["#7c3aed", "#db2777"] as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={S.completeBtnInner}>
@@ -352,54 +424,56 @@ export default function TaskScratchScreen() {
         </View>
 
         {/* ════ 2. SCORE CARD ════ */}
-        <View style={{ borderRadius: 24, overflow: "hidden", marginBottom: 12, borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)", shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
-          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 12 }}>
-            <LinearGradient colors={isDark ? ["rgba(255,255,255,0.1)", "rgba(255,255,255,0.02)"] : ["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.4)"]} style={StyleSheet.absoluteFill} />
+        <View style={{ borderRadius: 24, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(255,255,255,0.6)", shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+          <View style={{ borderRadius: 23, overflow: "hidden" }}>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 12 }}>
+              <LinearGradient colors={isDark ? ["rgba(255,255,255,0.1)", "rgba(255,255,255,0.02)"] : ["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.4)"]} style={StyleSheet.absoluteFill} />
 
-            {/* Row 1: Names + Avatars — both center-aligned */}
-            <View style={S.scoreNamesRow}>
-              <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                {coupleProfile?.partnerAAvatar ? (
-                  <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }} />
-                ) : (
-                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center", borderWidth: 1.5, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }}>
-                    <Ionicons name="person" size={14} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)"} />
-                  </View>
-                )}
-                <Text style={[S.scoreName, { flex: undefined, textAlign: "center", color: isDark ? "#ffffff" : "#9333ea" }]} numberOfLines={1}>{partnerAName}</Text>
+              {/* Row 1: Names + Avatars — both center-aligned */}
+              <View style={S.scoreNamesRow}>
+                <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  {coupleProfile?.partnerAAvatar ? (
+                    <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: 28, height: 28, borderRadius: 14, borderWidth: isDark ? 0 : 1.5, borderColor: isDark ? "transparent" : "rgba(0,0,0,0.1)" }} />
+                  ) : (
+                    <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center", borderWidth: isDark ? 0 : 1.5, borderColor: isDark ? "transparent" : "rgba(0,0,0,0.1)" }}>
+                      <Ionicons name="person" size={14} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)"} />
+                    </View>
+                  )}
+                  <Text style={[S.scoreName, { flex: undefined, textAlign: "center", color: isDark ? "#ffffff" : "#9333ea" }]} numberOfLines={1}>{partnerAName}</Text>
+                </View>
+
+                <View style={{ width: 10 }} />
+
+                <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  {coupleProfile?.partnerBAvatar ? (
+                    <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: 28, height: 28, borderRadius: 14, borderWidth: isDark ? 0 : 1.5, borderColor: isDark ? "transparent" : "rgba(0,0,0,0.1)" }} />
+                  ) : (
+                    <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center", borderWidth: isDark ? 0 : 1.5, borderColor: isDark ? "transparent" : "rgba(0,0,0,0.1)" }}>
+                      <Ionicons name="person" size={14} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)"} />
+                    </View>
+                  )}
+                  <Text style={[S.scoreName, { flex: undefined, textAlign: "center", color: isDark ? "#ffffff" : "#9333ea" }]} numberOfLines={1}>{partnerBName}</Text>
+                </View>
               </View>
 
-              <View style={{ width: 10 }} />
-
-              <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                {coupleProfile?.partnerBAvatar ? (
-                  <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }} />
-                ) : (
-                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center", borderWidth: 1.5, borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }}>
-                    <Ionicons name="person" size={14} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)"} />
-                  </View>
-                )}
-                <Text style={[S.scoreName, { flex: undefined, textAlign: "center", color: isDark ? "#ffffff" : "#9333ea" }]} numberOfLines={1}>{partnerBName}</Text>
+              {/* Row 2: Numbers + center icon */}
+              <View style={S.scoreCountRow}>
+                <Text style={[S.scoreCount, { color: isDark ? "#ffffff" : "#0f172a" }]}>{scratchCountA}</Text>
+                <View style={S.scoreIconCenter}>
+                  <AnimatedHeartIcon />
+                </View>
+                <Text style={[S.scoreCount, { color: isDark ? "#ffffff" : "#0f172a" }]}>{scratchCountB}</Text>
               </View>
-            </View>
 
-            {/* Row 2: Numbers + center icon */}
-            <View style={S.scoreCountRow}>
-              <Text style={[S.scoreCount, { color: isDark ? "#ffffff" : "#0f172a" }]}>{scratchCountA}</Text>
-              <View style={S.scoreIconCenter}>
-                <AnimatedHeartIcon />
-              </View>
-              <Text style={[S.scoreCount, { color: isDark ? "#ffffff" : "#0f172a" }]}>{scratchCountB}</Text>
-            </View>
+              {/* Divider */}
+              <View style={[S.scoreDivider, { backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)" }]} />
 
-            {/* Divider */}
-            <View style={[S.scoreDivider, { backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)" }]} />
-
-            {/* Row 3: Scratches / Performs label */}
-            <Text style={[S.scratchPerformLabel, { color: isDark ? "rgba(255,255,255,0.65)" : "rgba(15,23,42,0.55)" }]}>
-              {turnName} Scratches{" --> "}{performingName} Performs
-            </Text>
-          </BlurView>
+              {/* Row 3: Scratches / Performs label */}
+              <Text style={[S.scratchPerformLabel, { color: isDark ? "rgba(255,255,255,0.65)" : "rgba(15,23,42,0.55)" }]}>
+                {turnName} Scratches{" --> "}{performingName} Performs
+              </Text>
+            </BlurView>
+          </View>
         </View>
 
 
@@ -414,7 +488,7 @@ export default function TaskScratchScreen() {
                 <View style={{ borderRadius: 999, overflow: "hidden", }}>
                   <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={[S.turnPill, {
                     backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
-                    borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(147,51,234,0.3)",
+                    borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)",
                   }]}>
                     <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>
                       {turnName}'s Turn
@@ -423,7 +497,7 @@ export default function TaskScratchScreen() {
                 </View>
               </View>
 
-              <View style={[S.cardOuter, { position: "relative" }]}>
+              <View style={[S.cardOuter, { position: "relative", borderRadius: 30, borderWidth: isDark ? 0 : 6 }]}>
                 <ScratchCard
                   onScratchComplete={handleScratchComplete}
                   overlayImage={
@@ -434,15 +508,15 @@ export default function TaskScratchScreen() {
                 >
                   {/* Reveal image — this sits underneath and is shown through scratching */}
                   <LinearGradient
-                    colors={theme.accentGradient as any}
+                    colors={["#4c1d95", "#2e1065"] as any}
                     start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                     style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
                   >
                     <Text style={{ fontSize: 48, marginBottom: 12 }}>{textTask.emoji}</Text>
-                    <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
+                    <Text style={{ color: "#ffffff", fontSize: 24, fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
                       {textTask.title}
                     </Text>
-                    <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>
+                    <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontFamily: "Nunito_700Bold" }}>
                       {textTask.description}
                     </Text>
                   </LinearGradient>
@@ -465,63 +539,50 @@ export default function TaskScratchScreen() {
                 <View style={{ borderRadius: 999, overflow: "hidden" }}>
                   <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={[S.turnPill, {
                     backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
-                    borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(147,51,234,0.3)",
+                    borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)",
                   }]}>
-                    <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>
-                      {turnName}'s Turn
-                    </Text>
+                    {!timerStarted ? (
+                      <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>
+                        {startCountdown !== null ? `${turnName}'s Turn - Starts in ${startCountdown}s` : `${turnName}'s Turn`}
+                      </Text>
+                    ) : isFinished ? (
+                      <Text style={[S.turnPillText, { color: isDark ? "#ef4444" : "#ef4444" }]}>
+                        Time's up!
+                      </Text>
+                    ) : (
+                      <Animated.Text style={[S.turnPillText, {
+                        color: timeLeft <= 10 ? "#ef4444" : (isDark ? "#ffffff" : "#6b21a8"),
+                        opacity: timeLeft <= 10 ? pulseOpacity : 1,
+                      }]}>
+                        {turnName}'s Turn - {formattedTime}
+                      </Animated.Text>
+                    )}
                   </BlurView>
                 </View>
               </View>
 
               <Animated.View style={[S.cardOuter, {
                 position: "relative",
+                borderRadius: 30,
                 borderColor: "#7c3aed",
-                borderWidth: 4,
-                backgroundColor: isDark ? "#1e0035" : "#ffffff",
+                borderWidth: isDark ? 0 : 6,
                 opacity: revealOpacity,
               }]}>
                 {/* Revealed text */}
                 <LinearGradient
-                  colors={theme.accentGradient as any}
+                  colors={["#4c1d95", "#2e1065"] as any}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                   style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}
                 >
                   <Text style={{ fontSize: 48, marginBottom: 12 }}>{textTask.emoji}</Text>
-                  <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
+                  <Text style={{ color: "#ffffff", fontSize: 24, fontFamily: "DynaPuff_700Bold", textAlign: "center", marginBottom: 8, textShadowColor: "rgba(0,0,0,0.3)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
                     {textTask.title}
                   </Text>
-                  <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontWeight: "600", fontFamily: "Nunito_700Bold" }}>
+                  <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 16, textAlign: "center", lineHeight: 22, fontFamily: "Nunito_700Bold" }}>
                     {textTask.description}
                   </Text>
                 </LinearGradient>
 
-                {/* Timer/hint overlay at bottom */}
-                <View style={[S.timerOverlay, {
-                  backgroundColor: isDark ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.95)",
-                  borderTopColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(124,58,237,0.2)",
-                }]}>
-                  {timerStarted ? (
-                    <>
-                      <Animated.Text style={[S.timerText, {
-                        color: timeLeft <= 10 ? "#ef4444" : (isDark ? "#ffffff" : "#4c1d95"),
-                        opacity: timeLeft <= 10 ? pulseOpacity : 1,
-                      }]}>
-                        {formattedTime}
-                      </Animated.Text>
-                      <Text style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(76,29,149,0.7)", fontSize: 14, fontFamily: "Nunito_700Bold", marginTop: 2 }}>
-                        {isFinished ? `⏰ Time's up, ${performingName}!` : `${performingName} must complete the task!`}
-                      </Text>
-                    </>
-                  ) : (
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                      <Ionicons name="timer-outline" size={15} color="#10b981" />
-                      <Text style={{ color: "#10b981", fontSize: 13, fontFamily: "Nunito_700Bold", fontWeight: "700" }}>
-                        Timer starts in 10s…
-                      </Text>
-                    </View>
-                  )}
-                </View>
               </Animated.View>
             </View>
           ) : null}
@@ -532,14 +593,14 @@ export default function TaskScratchScreen() {
 
           {/* ── Complete — 3D shadow (lighter purple) ── */}
           <View style={{ opacity: canComplete ? 1 : 0.35 }}>
-            <View style={[S.btn3dShadow, { backgroundColor: "#e879f9", borderColor: "#e879f9" }]} />
+            <View style={[S.btn3dShadow, { backgroundColor: "#34d399", borderColor: "#34d399" }]} />
             <Pressable
               onPress={handleDone}
               disabled={!canComplete}
               style={S.btn3dWrapper}
             >
               <LinearGradient
-                colors={["#9333ea", "#c026d3", "#db2777"] as any}
+                colors={["#10b981", "#059669"] as any}
                 start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
                 style={[S.completeBtnInner, S.btn3dBorder, { borderColor: "rgba(255,255,255,0.35)" }]}
               >
@@ -624,16 +685,14 @@ const S = StyleSheet.create({
     bottom: -4,
     borderRadius: 21,
     backgroundColor: "rgba(255,255,255,0.2)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderWidth: 1.5, borderColor: "rgba(255,255,255,0.3)",
   },
   headerBtnInner: {
     width: 42,
     height: 42,
     borderRadius: 21,
     backgroundColor: "rgba(255,255,255,0.28)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.55)",
+    borderWidth: 1.5, borderColor: "rgba(255,255,255,0.55)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 4,
@@ -654,6 +713,14 @@ const S = StyleSheet.create({
     textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
+  },
+  iconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // Score card styles
@@ -679,7 +746,6 @@ const S = StyleSheet.create({
     flex: 1,
     fontSize: 42,
     fontFamily: "DynaPuff_700Bold",
-    fontWeight: "900",
     textAlign: "center",
   },
   scoreIconCenter: {
@@ -713,7 +779,7 @@ const S = StyleSheet.create({
   turnPillText: {
     fontFamily: "Nunito_700Bold",
     fontSize: 15,
-    fontWeight: "700",
+
   },
   // Absolute wrapper — floats pill on top edge of the scratch card
   turnPillAbsolute: {
@@ -734,17 +800,16 @@ const S = StyleSheet.create({
     justifyContent: "center",
   },
   cardWrapper: {
-    width: "82%",
-    aspectRatio: 616 / 770,
+    width: "80%",
+    aspectRatio: 600 / 740,
     position: "relative",
   },
   cardOuter: {
     width: "100%",
     height: "100%",
-    borderRadius: 24,
+    borderRadius: 30,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.25)",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
   },
 
   // Pattern (before scratch)
@@ -778,7 +843,6 @@ const S = StyleSheet.create({
     color: "#ffffff",
     fontSize: 13,
     fontFamily: "Nunito_700Bold",
-    fontWeight: "700",
   },
 
   // Timer overlay
@@ -794,7 +858,6 @@ const S = StyleSheet.create({
   timerText: {
     fontSize: 42,
     fontFamily: "DynaPuff_700Bold",
-    fontWeight: "900",
   },
   timerSubText: {
     fontSize: 14,
@@ -843,7 +906,6 @@ const S = StyleSheet.create({
     color: "#ffffff",
     fontSize: 20,
     fontFamily: "DynaPuff_700Bold",
-    fontWeight: "900",
   },
   secondRow: {
     flexDirection: "row",
@@ -861,7 +923,6 @@ const S = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontFamily: "DynaPuff_700Bold",
-    fontWeight: "800",
   },
 
   // Previous screen

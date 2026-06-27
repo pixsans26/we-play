@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, Image } from "react-native";
+import { Platform, ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { Stack, useRouter, usePathname } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { BlurView } from "@/components/CustomBlurView";
+import { BlurView } from "expo-blur";
 
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
@@ -64,7 +64,7 @@ function TabItem({
     <Pressable style={styles.tabItem} onPress={handlePress}>
       <Animated.View style={[styles.tabInner, { transform: [{ scale }] }]}>
         {tab.imageSource ? (
-          <View style={{ width: 30, height: 30, borderRadius: 15, overflow: "hidden", borderWidth: 2, borderColor: isActive ? theme.nav.active : theme.nav.inactive }}>
+          <View style={{ width: 30, height: 30, borderRadius: 15, overflow: "hidden", borderWidth: isDark ? 0 : 2, borderColor: isActive ? theme.nav.active : theme.nav.inactive }}>
             <Image source={tab.imageSource} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
           </View>
         ) : tab.icon.startsWith("face-") || tab.icon === "account" ? (
@@ -110,6 +110,7 @@ export default function GameLayout() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const isDark = useThemeStore((s) => s.isDark);
+  const isAndroidDark = Platform.OS === 'android' && isDark;
   const theme = getTheme(isDark);
   const isPartnerA = useAuthStore((s) => s.isPartnerA);
   const isDataLoaded = useGameStore((s) => s.isDataLoaded);
@@ -231,27 +232,32 @@ export default function GameLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 300 }} />
+      <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 300, contentStyle: { backgroundColor: isDark ? "#150025" : "#ffffff" } }} />
       {!shouldHideTabs && (
         <View
           style={[
             styles.navContainerShadow,
             {
               shadowColor: isDark ? "#000000" : "#94a3b8",
+              elevation: isAndroidDark ? 0 : 10,
+              borderRadius: 30,
             }
           ]}
         >
           <BlurView
+            experimentalBlurMethod="dimezisBlurView"
             intensity={80}
             tint={isDark ? "dark" : "light"}
             style={[
               styles.navContainer,
               {
-                backgroundColor: isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.85)", // dark blue or white glass
+                backgroundColor: isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(255, 255, 255, 0.5)",
+                borderRadius: 30,
               },
             ]}
           >
-            {TABS.map((tab) => {
+            <View style={{ flex: 1, flexDirection: 'row' }}>
+              {TABS.map((tab) => {
               const isActive =
                 tab.route === "/(game)"
                   ? pathname === "/" || pathname === "/(game)" || pathname === ""
@@ -267,6 +273,7 @@ export default function GameLayout() {
                 />
               );
             })}
+            </View>
           </BlurView>
         </View>
       )}
@@ -290,10 +297,10 @@ const styles = StyleSheet.create({
   navContainer: {
     flexDirection: "row",
     borderRadius: 30,
+    overflow: "hidden",
     paddingBottom: 12,
     paddingTop: 12,
     paddingHorizontal: 8,
-    overflow: "hidden",
     width: "100%",
   },
   tabItem: {

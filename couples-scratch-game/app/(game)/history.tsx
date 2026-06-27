@@ -20,6 +20,7 @@ import { useHistoryStore } from "@/store/historyStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { HistoryEntry, CoupleProfile, Task, ImageTask } from "@/types";
+import { getImageUrl } from "@/lib/apiClient";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -181,8 +182,7 @@ export default function HistoryScreen() {
           <LinearGradient
             colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
             style={{
-              borderWidth: 1,
-              borderColor: theme.card.border,
+              borderWidth: isDark ? 0 : 1, borderColor: theme.card.border,
               padding: 16,
               shadowColor: isDark ? "transparent" : "#a855f7",
               shadowOffset: {width: 0, height: 4},
@@ -200,7 +200,7 @@ export default function HistoryScreen() {
               marginBottom: 10,
             }}
           >
-            <Text style={{ color: theme.card.text, fontSize: 15, fontWeight: "700", flex: 1, marginRight: 10, fontFamily: "Nunito_700Bold" }}>
+            <Text style={{ color: theme.card.text, fontSize: 15,  flex: 1, marginRight: 10, fontFamily: "Nunito_700Bold" }}>
               {label}
             </Text>
 
@@ -223,7 +223,7 @@ export default function HistoryScreen() {
           >
             <Text style={{ fontSize: 14 }}>💝</Text>
             <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_700Bold" }}>
-              <Text style={{ fontWeight: "600", color: theme.card.text }}>
+              <Text style={{  color: theme.card.text }}>
                 Scratched by:
               </Text>{" "}
               {scratcherName}
@@ -241,7 +241,7 @@ export default function HistoryScreen() {
           >
             <Ionicons name="heart-outline" size={14} color={theme.card.subtext} />
             <Text style={{ color: theme.card.subtext, fontSize: 13, fontFamily: "Nunito_700Bold" }}>
-              <Text style={{ fontWeight: "600", color: theme.card.text }}>
+              <Text style={{  color: theme.card.text }}>
                 Performer:
               </Text>{" "}
               {performerName}
@@ -338,11 +338,10 @@ export default function HistoryScreen() {
                   borderRadius: 999, overflow: "hidden",
                   paddingHorizontal: 16,
                   paddingVertical: 8,
-                  borderWidth: 1,
-                  borderColor: theme.glass.border,
+                  borderWidth: isDark ? 0 : 1, borderColor: theme.glass.border,
                 }}
               >
-                <Text style={{ color: theme.card.text, fontSize: 14, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" }}>
+                <Text style={{ color: theme.card.text, fontSize: 14,  fontFamily: "DynaPuff_700Bold" }}>
                   Close
                 </Text>
               </Pressable>
@@ -358,8 +357,7 @@ export default function HistoryScreen() {
                     borderRadius: 999, overflow: "hidden",
                     paddingHorizontal: 12,
                     paddingVertical: 4,
-                    borderWidth: 1,
-                    borderColor: theme.glass.border,
+                    borderWidth: isDark ? 0 : 1, borderColor: theme.glass.border,
                   }}
                 >
                   <Ionicons
@@ -380,7 +378,7 @@ export default function HistoryScreen() {
                     style={{
                       color: theme.card.text,
                       fontSize: 22,
-                      fontWeight: "bold", fontFamily: "DynaPuff_700Bold",
+                       fontFamily: "DynaPuff_700Bold",
                       marginBottom: 12,
                     }}
                   >
@@ -406,7 +404,7 @@ export default function HistoryScreen() {
                     style={{
                       color: theme.card.text,
                       fontSize: 22,
-                      fontWeight: "bold", fontFamily: "DynaPuff_700Bold",
+                       fontFamily: "DynaPuff_700Bold",
                       marginBottom: 12,
                     }}
                   >
@@ -422,7 +420,7 @@ export default function HistoryScreen() {
                     }}
                   >
                     <Image
-                      source={{ uri: `${env.EXPO_PUBLIC_API_URL}${imageTask.imageSource}` }}
+                      source={{ uri: getImageUrl(imageTask.imageSource) || "" }}
                       style={{
                         width: "100%",
                         aspectRatio: 4 / 5,
@@ -441,7 +439,7 @@ export default function HistoryScreen() {
                     style={{
                       color: theme.card.subtext,
                       fontSize: 12,
-                      fontWeight: "700",
+                      
                       fontFamily: "Nunito_700Bold",
                       textTransform: "uppercase",
                       letterSpacing: 1,
@@ -455,7 +453,7 @@ export default function HistoryScreen() {
                     style={{
                       color: theme.card.text,
                       fontSize: 22,
-                      fontWeight: "bold",
+                      
                       fontFamily: "DynaPuff_700Bold",
                       lineHeight: 30,
                     }}
@@ -493,8 +491,7 @@ export default function HistoryScreen() {
               <View
                 style={{
                   backgroundColor: theme.glass.bg,
-                  borderWidth: 1,
-                  borderColor: theme.glass.border,
+                  borderWidth: isDark ? 0 : 1, borderColor: theme.glass.border,
                   borderRadius: 32, overflow: "hidden",
                   padding: 16,
                   marginTop: 8,
@@ -592,13 +589,12 @@ export default function HistoryScreen() {
                   marginTop: 24,
                   borderRadius: 999, overflow: "hidden",
                   backgroundColor: "rgba(239, 68, 68, 0.1)",
-                  borderWidth: 1,
-                  borderColor: "rgba(239, 68, 68, 0.3)",
+                  borderWidth: isDark ? 0 : 1, borderColor: "rgba(239, 68, 68, 0.3)",
                   paddingVertical: 14,
                 }}
               >
                 <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                <Text style={{ color: "#ef4444", fontSize: 15, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" }}>
+                <Text style={{ color: "#ef4444", fontSize: 15,  fontFamily: "DynaPuff_700Bold" }}>
                   Delete Entry
                 </Text>
               </Pressable>
@@ -668,7 +664,7 @@ export default function HistoryScreen() {
           {/* Header Content */}
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16, paddingHorizontal: 22 }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: theme.card.text, fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>Our History</Text>
+              <Text style={{ color: theme.card.text, fontSize: 24,  fontFamily: "DynaPuff_700Bold" }}>Our History</Text>
               <Text style={{ color: theme.card.subtext, fontSize: 13, marginTop: 1 }}>Your past moments</Text>
             </View>
             <View style={{ position: "relative" }}>

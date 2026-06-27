@@ -38,19 +38,19 @@ export function AnimatedBackground({ currentPhase, isDark }: AnimatedBackgroundP
     ? ["rgba(236,72,153,0.15)", "rgba(168,85,247,0.1)", "rgba(13,0,26,0)"]
     : ["rgba(236,72,153,0.2)", "rgba(168,85,247,0.15)", "rgba(221,214,254,0)"];
 
-  if (currentPhase === "Period Expected") {
+  if (currentPhase === "Menstrual") {
     phaseColors = isDark 
       ? ["rgba(239,68,68,0.25)", "rgba(244,63,94,0.1)", "rgba(0,0,0,0)"]
       : ["rgba(239,68,68,0.3)", "rgba(244,63,94,0.15)", "rgba(255,255,255,0)"];
-  } else if (currentPhase === "Fertile Window") {
+  } else if (currentPhase === "Follicular") {
     phaseColors = isDark 
       ? ["rgba(168,85,247,0.25)", "rgba(192,132,252,0.1)", "rgba(0,0,0,0)"]
       : ["rgba(168,85,247,0.3)", "rgba(192,132,252,0.15)", "rgba(255,255,255,0)"];
-  } else if (currentPhase === "Ovulation Day") {
+  } else if (currentPhase === "Ovulation") {
     phaseColors = isDark 
       ? ["rgba(147,51,234,0.35)", "rgba(168,85,247,0.2)", "rgba(0,0,0,0)"]
       : ["rgba(147,51,234,0.4)", "rgba(168,85,247,0.25)", "rgba(255,255,255,0)"];
-  } else if (currentPhase === "Safe/Luteal Phase") {
+  } else if (currentPhase === "Luteal") {
     phaseColors = isDark 
       ? ["rgba(52,211,153,0.15)", "rgba(16,185,129,0.1)", "rgba(0,0,0,0)"]
       : ["rgba(52,211,153,0.2)", "rgba(16,185,129,0.15)", "rgba(255,255,255,0)"];

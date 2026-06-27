@@ -482,8 +482,8 @@ const styles = StyleSheet.create({
 
   kpiRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20, gap: 8 },
   kpiCard: { flex: 1, borderRadius: 32, overflow: "hidden", paddingVertical: 10, alignItems: "center", borderWidth: 1 },
-  kpiLabel: { fontSize: 9, fontWeight: "800", marginBottom: 4, textAlign: "center", fontFamily: "Nunito_700Bold" },
-  kpiValue: { fontSize: 18, fontWeight: "900", fontFamily: "DynaPuff_700Bold" },
+  kpiLabel: { fontSize: 9,  marginBottom: 4, textAlign: "center", fontFamily: "Nunito_700Bold" },
+  kpiValue: { fontSize: 18,  fontFamily: "DynaPuff_700Bold" },
 
   machineWrapper: { flex: 1, justifyContent: "center", alignItems: "center", marginBottom: 40, overflow: "hidden" },
 
@@ -503,8 +503,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     paddingBottom: 15,
-    borderWidth: 2,
-    borderColor: "#e2e8f0",
+    borderWidth: 2, borderColor: "#e2e8f0",
     borderBottomWidth: 0,
   },
   marqueeBg: {
@@ -514,22 +513,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 10,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "#fde047",
+    borderWidth: 2, borderColor: "#fde047",
     overflow: "hidden",
   },
   ribbonText: {
     color: "#78350f",
     fontSize: 22,
-    fontWeight: "900",
+    
     fontFamily: "DynaPuff_700Bold",
   },
 
   machineBody: {
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    borderWidth: 2,
-    borderColor: "#e2e8f0",
+    borderWidth: 2, borderColor: "#e2e8f0",
     padding: 16,
     paddingTop: 10,
   },
@@ -594,8 +591,7 @@ const styles = StyleSheet.create({
   controlPanel: {
     borderRadius: 32, overflow: "hidden",
     padding: 16,
-    borderWidth: 2,
-    borderColor: "#475569",
+    borderWidth: 2, borderColor: "#475569",
   },
 
   statsScreen: {
@@ -605,8 +601,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 20,
-    borderWidth: 2,
-    borderColor: "#4c0519",
+    borderWidth: 2, borderColor: "#4c0519",
   },
   statBox: {
     alignItems: "center",
@@ -620,7 +615,7 @@ const styles = StyleSheet.create({
   statValue: {
     color: "#fb7185",
     fontSize: 24,
-    fontWeight: "900",
+    
     fontFamily: "DynaPuff_700Bold",
   },
 
@@ -652,8 +647,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#db2777",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#f472b6",
+    borderWidth: 1, borderColor: "#f472b6",
   },
   levelBtnText: {
     color: "#fff",
@@ -686,13 +680,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#ef4444",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#f87171",
+    borderWidth: 2, borderColor: "#f87171",
   },
   spinBtnText: {
     color: "#fff",
     fontSize: 22,
-    fontWeight: "900",
+    
     fontFamily: "DynaPuff_700Bold",
     textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 2 },

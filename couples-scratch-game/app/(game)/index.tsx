@@ -239,7 +239,7 @@ export default function MainGameScreen() {
             <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, fontWeight: "600", marginBottom: 2 }}>
               Welcome back 💕
             </Text>
-            <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
+            <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24,  fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>
               {displayName}
             </Text>
           </View>
@@ -247,7 +247,7 @@ export default function MainGameScreen() {
             <Pressable onPress={() => router.push("/notifications")} style={{ position: "relative" }}>
               <Ionicons name="notifications-outline" size={28} color={isDark ? "#ffffff" : "#0f172a"} />
               {hasUnreadNotifications && (
-                <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
+                <View style={{ position: "absolute", top: 2, right: 3, width: 10, height: 10, borderRadius: 5, backgroundColor: "#ff2d6b", borderWidth: isDark ? 0 : 2, borderColor: isDark ? "rgba(21, 0, 37, 1)" : "rgba(255, 255, 255, 1)" }} />
               )}
             </Pressable>
             <Pressable onPress={() => router.push("/(game)/profile")} style={{ borderRadius: 32, overflow: "hidden" }}>
@@ -274,7 +274,7 @@ export default function MainGameScreen() {
           {coupleProfile?.status === "pending" && isPartnerA && (
             <View style={{
               borderRadius: 32, overflow: "hidden", marginBottom: 20,
-              borderWidth: 1.5, borderColor: theme.accent,
+              borderWidth: isDark ? 0 : 1.5, borderColor: theme.accent,
             }}>
               <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ padding: 20, alignItems: "center" }}>
                 <Ionicons name="mail-open-outline" size={32} color={theme.accent} style={{ marginBottom: 8 }} />
@@ -297,7 +297,7 @@ export default function MainGameScreen() {
                   style={{
                     backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
                     borderRadius: 16, paddingHorizontal: 24, paddingVertical: 10,
-                    borderWidth: 1, borderColor: "rgba(255,255,255,0.1)",
+                    borderWidth: isDark ? 0 : 1, borderColor: "rgba(255,255,255,0.1)",
                     marginBottom: 16,
                     flexDirection: "row", alignItems: "center", gap: 12,
                   }}>
@@ -340,7 +340,7 @@ export default function MainGameScreen() {
                   style={{
                     width: "100%",
                     backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#ffffff",
-                    borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                    borderWidth: isDark ? 0 : 1, borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
                     borderRadius: 16, padding: 14,
                     color: theme.card.text, fontSize: 16, textAlign: "center", fontFamily: "Nunito_700Bold",
                     marginBottom: 12
@@ -359,7 +359,7 @@ export default function MainGameScreen() {
                   {isJoining ? (
                     <ActivityIndicator color="#ffffff" size="small" />
                   ) : (
-                    <Text style={{ color: "#ffffff", fontSize: 16, fontFamily: "Nunito_700Bold", fontWeight: "800" }}>Connect Partner</Text>
+                    <Text style={{ color: "#ffffff", fontSize: 16, fontFamily: "Nunito_700Bold",  }}>Connect Partner</Text>
                   )}
                 </Pressable>
 
@@ -396,14 +396,14 @@ export default function MainGameScreen() {
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <Text style={{ fontSize: 26 }}>{badge.emoji}</Text>
                       <View>
-                        <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: "900", fontFamily: "DynaPuff_700Bold" }}>Level {currentLevel}</Text>
+                        <Text style={{ color: "#ffffff", fontSize: 20,  fontFamily: "DynaPuff_700Bold" }}>Level {currentLevel}</Text>
                         <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 12 }}>{badge.label}</Text>
                       </View>
                     </View>
                   </View>
                   <View style={{ alignItems: "center", backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 32, overflow: "hidden", paddingHorizontal: 16, paddingVertical: 10 }}>
                     <Ionicons name="flame" size={22} color="#fbbf24" />
-                    <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginTop: 2 }}>{streak}</Text>
+                    <Text style={{ color: "#ffffff", fontSize: 20,  fontFamily: "DynaPuff_700Bold", marginTop: 2 }}>{streak}</Text>
                     <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>Streak</Text>
                   </View>
                 </View>
@@ -430,14 +430,13 @@ export default function MainGameScreen() {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 10,
-                borderWidth: 1,
-                borderColor: theme.card.border,
+                borderWidth: isDark ? 0 : 1, borderColor: theme.card.border,
                 paddingVertical: 12,
                 paddingHorizontal: 16,
               }}
             >
               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isDark ? "#ffffff" : theme.accent, marginRight: 10, shadowColor: isDark ? "#fff" : theme.accent, shadowOpacity: 0.8, shadowRadius: 4, shadowOffset: {width: 0, height: 0} }} />
-              <Text style={{ color: isDark ? "#ffffff" : theme.accent, fontSize: 14, fontWeight: "800", fontFamily: "Nunito_700Bold" }}>
+              <Text style={{ color: isDark ? "#ffffff" : theme.accent, fontSize: 14,  fontFamily: "Nunito_700Bold" }}>
                 {turnName}'s turn to play
               </Text>
               <View style={{ flex: 1 }} />
@@ -446,7 +445,7 @@ export default function MainGameScreen() {
           </BlurView>
 
           {/* Game mode cards - 2x2 Grid */}
-          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>
+          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12,  fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>
             CHOOSE A GAME MODE
           </Text>
 

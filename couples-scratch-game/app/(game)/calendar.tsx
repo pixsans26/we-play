@@ -10,6 +10,7 @@ import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useCycleStore } from "@/store/cycleStore";
 import { calculateCyclePredictions, generatePredictionCalendarMarks } from "@/lib/cycleCalculations";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 export default function CalendarScreen() {
   const router = useRouter();
@@ -34,12 +35,13 @@ export default function CalendarScreen() {
   }, [cycleConfig]);
 
   return (
-    <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
+      <AnimatedBackground currentPhase={predictions?.currentPhase || "Unconfigured"} isDark={isDark} />
       <View style={{ flex: 1, paddingTop: insets.top + 20 }}>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16, paddingHorizontal: 22 }}>
           <Pressable 
             onPress={() => router.back()}
-            style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: theme.glass.bg, borderWidth: 1, borderColor: theme.glass.border, alignItems: "center", justifyContent: "center", marginRight: 16 }}
+            style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: theme.glass.bg, borderWidth: isDark ? 0 : 1, borderColor: theme.glass.border, alignItems: "center", justifyContent: "center", marginRight: 16 }}
           >
             <Ionicons name="arrow-back" size={24} color={theme.card.text} />
           </Pressable>
@@ -51,13 +53,14 @@ export default function CalendarScreen() {
           
           <LinearGradient
             colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
-            style={{ borderRadius: 24, overflow: "hidden", borderWidth: 1, borderColor: theme.card.border, marginBottom: 24, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+            style={{ borderRadius: 24, overflow: "hidden", borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, marginBottom: 24, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
           >
             <Calendar
               markingType={'period'}
               markedDates={markedDates}
               monthFormat={'MMMM yyyy'}
               hideExtraDays={true}
+              enableSwipeMonths={true}
               theme={{
                 calendarBackground: "transparent",
                 textSectionTitleColor: theme.card.subtext,
@@ -76,7 +79,10 @@ export default function CalendarScreen() {
                 const isLightFlow = marking?.flowType === "light";
                 const isPeriod = isHeavyFlow || isLightFlow;
                 const isOvulation = marking?.color === "#9333ea";
-                const isFertile = marking?.color === "#d8b4fe";
+                const isFertile = marking?.color === "#d8b4fe" && !isOvulation;
+                const isMostDesired = marking?.isMostDesired;
+                const isProtectedSafe = marking?.isProtectedSafe;
+                const isSafeSex = marking?.isSafeSex;
                 const isDisabled = state === 'disabled';
 
                 let bgColor = "transparent";
@@ -91,22 +97,30 @@ export default function CalendarScreen() {
                   textColor = "#be185d";
                 }
 
+                const isDarkBg = textColor === "#ffffff" || textColor === "#fff";
+
                 return (
                   <View style={{ 
-                    height: 44, 
+                    height: 48, 
                     width: 44, 
                     alignItems: 'center', 
                     justifyContent: 'center',
                     backgroundColor: bgColor,
-                    borderRadius: 16,
+                    borderRadius: 24,
+                    overflow: 'hidden',
                   }}>
-                    {isPeriod && <Ionicons name="water" size={12} color={textColor} style={{ marginBottom: 0 }} />}
-                    {isOvulation && <Ionicons name="flower" size={14} color={textColor} style={{ marginBottom: 0 }} />}
-                    {isFertile && <Ionicons name="flower-outline" size={12} color={textColor} style={{ marginBottom: 0 }} />}
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", height: 16, gap: 2 }}>
+                      {isPeriod && <Ionicons name="water" size={12} color={textColor} />}
+                      {isMostDesired && <Ionicons name="flame" size={14} color={isDarkBg ? "#ffffff" : "#ef4444"} />}
+                      {isOvulation && <Ionicons name="flower" size={14} color={textColor} />}
+                      {isFertile && <Ionicons name="flower-outline" size={12} color={textColor} />}
+                      {isProtectedSafe && !isPeriod && <Ionicons name="shield-half" size={12} color={isDarkBg ? "#ffffff" : "#eab308"} />}
+                      {isSafeSex && !isProtectedSafe && !isPeriod && <Ionicons name="shield-checkmark" size={12} color={isDarkBg ? "#ffffff" : "#22c55e"} />}
+                    </View>
                     
                     <Text style={{ 
                       fontFamily: "Nunito_700Bold", 
-                      fontSize: (isPeriod || isOvulation || isFertile) ? 11 : 14, 
+                      fontSize: (isPeriod || isOvulation || isFertile || isMostDesired || isProtectedSafe || isSafeSex) ? 12 : 14, 
                       color: textColor 
                     }}>
                       {date.day}
@@ -123,7 +137,7 @@ export default function CalendarScreen() {
 
           <LinearGradient
             colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
-            style={{ borderRadius: 24, padding: 20, borderWidth: 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+            style={{ borderRadius: 24, padding: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
           >
             
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
@@ -156,7 +170,17 @@ export default function CalendarScreen() {
               </View>
             </View>
 
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#d8b4fe", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                <Ionicons name="flower-outline" size={18} color="#6b21a8" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: theme.card.text }}>Fertile Window</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>High chance of conception</Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
               <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(147,51,234,0.15)", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
                 <Ionicons name="flower" size={18} color="#9333ea" />
               </View>
@@ -166,11 +190,41 @@ export default function CalendarScreen() {
               </View>
             </View>
 
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#f3f4f6", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                <Ionicons name="flame" size={18} color="#ef4444" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: theme.card.text }}>Most Desired Sex</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>Peak libido around ovulation</Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#f3f4f6", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                <Ionicons name="shield-half" size={18} color="#eab308" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: theme.card.text }}>Protected Safe</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>Medium risk border days, use protection</Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#f3f4f6", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                <Ionicons name="shield-checkmark" size={18} color="#22c55e" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: theme.card.text }}>Safe Sex</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 14, color: theme.card.subtext }}>Outside of fertile windows</Text>
+              </View>
+            </View>
+
           </LinearGradient>
 
         </ScrollView>
         </FadingEdgeMask>
       </View>
-    </LinearGradient>
+    </View>
   );
 }

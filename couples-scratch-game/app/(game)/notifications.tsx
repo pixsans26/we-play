@@ -33,7 +33,7 @@ export default function NotificationsScreen() {
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Pressable 
               onPress={() => router.back()}
-              style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: theme.glass.bg, borderWidth: 1, borderColor: theme.glass.border, alignItems: "center", justifyContent: "center", marginRight: 16 }}
+              style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: theme.glass.bg, borderWidth: isDark ? 0 : 1, borderColor: theme.glass.border, alignItems: "center", justifyContent: "center", marginRight: 16 }}
             >
               <Ionicons name="arrow-back" size={24} color={theme.card.text} />
             </Pressable>
@@ -64,8 +64,7 @@ export default function NotificationsScreen() {
                   borderRadius: 24,
                   padding: 20,
                   marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: notif.isNew ? notif.iconColor : theme.card.border,
+                  borderWidth: isDark ? 0 : 1, borderColor: notif.isNew ? notif.iconColor : theme.card.border,
                   flexDirection: "row",
                   alignItems: "flex-start",
                   position: "relative"

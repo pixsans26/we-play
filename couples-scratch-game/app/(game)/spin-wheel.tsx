@@ -281,13 +281,13 @@ export default function SpinWheelScreen() {
         <View style={{ backgroundColor: "rgba(0,0,0,0.3)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 24, flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             {coupleProfile?.partnerAAvatar ? (
-              <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: currentTurn === "A" ? "#facc15" : "rgba(255,255,255,0.2)" }} />
+              <Image source={getAvatarSource(coupleProfile.partnerAAvatar)} style={{ width: 20, height: 20, borderRadius: 10, borderWidth: isDark ? 0 : 1, borderColor: currentTurn === "A" ? "#facc15" : "rgba(255,255,255,0.2)" }} />
             ) : (
-              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: currentTurn === "A" ? "#facc15" : "rgba(255,255,255,0.2)" }}>
+              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: isDark ? 0 : 1, borderColor: currentTurn === "A" ? "#facc15" : "rgba(255,255,255,0.2)" }}>
                 <Ionicons name="person" size={10} color="rgba(255,255,255,0.8)" />
               </View>
             )}
-            <Text style={{ color: "#fff", fontWeight: "bold", fontFamily: "DynaPuff_700Bold", fontSize: 13 }}>
+            <Text style={{ color: "#fff",  fontFamily: "DynaPuff_700Bold", fontSize: 13 }}>
               {coupleProfile?.partnerAName?.split(' ')[0] || "A"} <Text style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Nunito_700Bold" }}>{spinCountA}</Text>
             </Text>
           </View>
@@ -296,13 +296,13 @@ export default function SpinWheelScreen() {
 
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             {coupleProfile?.partnerBAvatar ? (
-              <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: currentTurn === "B" ? "#facc15" : "rgba(255,255,255,0.2)" }} />
+              <Image source={getAvatarSource(coupleProfile.partnerBAvatar)} style={{ width: 20, height: 20, borderRadius: 10, borderWidth: isDark ? 0 : 1, borderColor: currentTurn === "B" ? "#facc15" : "rgba(255,255,255,0.2)" }} />
             ) : (
-              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: currentTurn === "B" ? "#facc15" : "rgba(255,255,255,0.2)" }}>
+              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: isDark ? 0 : 1, borderColor: currentTurn === "B" ? "#facc15" : "rgba(255,255,255,0.2)" }}>
                 <Ionicons name="person" size={10} color="rgba(255,255,255,0.8)" />
               </View>
             )}
-            <Text style={{ color: "#fff", fontWeight: "bold", fontFamily: "DynaPuff_700Bold", fontSize: 13 }}>
+            <Text style={{ color: "#fff",  fontFamily: "DynaPuff_700Bold", fontSize: 13 }}>
               {coupleProfile?.partnerBName?.split(' ')[0] || "B"} <Text style={{ color: "rgba(255,255,255,0.7)", fontFamily: "Nunito_700Bold" }}>{spinCountB}</Text>
             </Text>
           </View>
@@ -315,7 +315,7 @@ export default function SpinWheelScreen() {
 
         {/* Who is spinning */}
         <View style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
-          <Text style={{ color: "#facc15", fontSize: 14, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" }}>
+          <Text style={{ color: "#facc15", fontSize: 14,  fontFamily: "DynaPuff_700Bold" }}>
             {turnName} is spinning!
           </Text>
         </View>
@@ -443,8 +443,8 @@ const styles = StyleSheet.create({
   contentArea: { flex: 1, alignItems: "center", justifyContent: "flex-start", paddingTop: 10, paddingBottom: 20, zIndex: 10 },
 
   titleWrapper: { alignItems: "center", marginBottom: 10, zIndex: 20, overflow: "visible" },
-  mainTitle: { fontSize: 48, color: "#fff", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#c084fc", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, letterSpacing: -1, overflow: "visible", paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24 },
-  subTitle: { fontSize: 36, color: "#fef08a", fontWeight: "900", fontFamily: "DynaPuff_700Bold", textShadowColor: "#ca8a04", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, overflow: "visible", paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24, marginTop: -40 },
+  mainTitle: { fontSize: 48, color: "#fff",  fontFamily: "DynaPuff_700Bold", textShadowColor: "#c084fc", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, letterSpacing: -1, overflow: "visible", paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24 },
+  subTitle: { fontSize: 36, color: "#fef08a",  fontFamily: "DynaPuff_700Bold", textShadowColor: "#ca8a04", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 12, overflow: "visible", paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24, marginTop: -40 },
 
   purpleContainer: { backgroundColor: "#5b21b6", borderRadius: 32, width: width * 0.9, alignItems: "center", paddingTop: 24, paddingBottom: 24, position: "relative", shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 15, elevation: 10, borderWidth: 1, borderColor: "#7c3aed" },
 
@@ -455,8 +455,8 @@ const styles = StyleSheet.create({
 
   wheelOverlay: { ...StyleSheet.absoluteFillObject, borderRadius: WHEEL_SIZE / 2, backgroundColor: "rgba(0,0,0,0.85)", zIndex: 30 },
   overlayInner: { flex: 1, alignItems: "center", justifyContent: "center", padding: 20 },
-  youWonText: { color: "#4ade80", fontSize: 28, fontWeight: "900", fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: "#166534", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 },
-  resultMainText: { color: "#fff", fontSize: 26, fontWeight: "900", fontFamily: "DynaPuff_700Bold", textAlign: "center", textShadowColor: "rgba(0,0,0,0.8)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 },
+  youWonText: { color: "#4ade80", fontSize: 28,  fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: "#166534", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 },
+  resultMainText: { color: "#fff", fontSize: 26,  fontFamily: "DynaPuff_700Bold", textAlign: "center", textShadowColor: "rgba(0,0,0,0.8)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 },
 
   containerBottom: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-evenly", marginTop: 24, paddingHorizontal: 20, zIndex: 20 },
   dotsRow: { flexDirection: "column", gap: 12 },
@@ -466,9 +466,9 @@ const styles = StyleSheet.create({
   arcadeBtnWrapper: { width: 180, height: 55 },
   arcadeBtnBase: { position: "absolute", width: "100%", height: "100%", borderRadius: 16, backgroundColor: "#a16207", top: 6 },
   arcadeBtnTop: { position: "absolute", width: "100%", height: "100%", borderRadius: 16, backgroundColor: "#facc15", alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fef08a" },
-  arcadeBtnText: { color: "#713f12", fontSize: 20, fontWeight: "900", fontFamily: "DynaPuff_700Bold" },
+  arcadeBtnText: { color: "#713f12", fontSize: 20,  fontFamily: "DynaPuff_700Bold" },
 
   cardActionsRow: { flexDirection: "row", gap: 12, width: "100%", paddingHorizontal: 10 },
   actionBtn: { flex: 1, paddingVertical: 16, borderRadius: 20, alignItems: "center" },
-  actionBtnText: { color: "#fff", fontSize: 16, fontWeight: "bold", fontFamily: "DynaPuff_700Bold" },
+  actionBtnText: { color: "#fff", fontSize: 16,  fontFamily: "DynaPuff_700Bold" },
 });

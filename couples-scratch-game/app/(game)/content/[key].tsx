@@ -303,7 +303,7 @@ export default function ContentScreen() {
               <Text style={{
                 color: "#ffffff",
                 fontSize: 26,
-                fontWeight: "900",
+                
                 fontFamily: "DynaPuff_700Bold",
                 textShadowColor: "rgba(0,0,0,0.2)",
                 textShadowOffset: { width: 0, height: 2 },
@@ -388,7 +388,7 @@ export default function ContentScreen() {
                 tagsStyles={{
                   h1: {
                     fontSize: 24,
-                    fontWeight: "900",
+                    
                     fontFamily: "Nunito_700Bold",
                     color: isDark ? "#ffffff" : "#0f172a",
                     marginBottom: 10,
@@ -396,7 +396,7 @@ export default function ContentScreen() {
                   },
                   h2: {
                     fontSize: 18,
-                    fontWeight: "800",
+                    
                     fontFamily: "Nunito_700Bold",
                     color: meta.accentColor,
                     marginBottom: 8,
@@ -405,7 +405,7 @@ export default function ContentScreen() {
                   },
                   h3: {
                     fontSize: 16,
-                    fontWeight: "700",
+                    
                     fontFamily: "Nunito_700Bold",
                     color: isDark ? "#e2e8f0" : "#1e293b",
                     marginBottom: 6,
@@ -417,7 +417,7 @@ export default function ContentScreen() {
                     color: isDark ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.85)",
                   },
                   strong: {
-                    fontWeight: "700",
+                    
                     fontFamily: "Nunito_700Bold",
                     color: isDark ? "#ffffff" : "#0f172a",
                   },
@@ -443,7 +443,7 @@ export default function ContentScreen() {
             <View style={{ alignItems: "center", marginTop: 32, gap: 6 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                 <Ionicons name="heart" size={14} color={meta.accentColor} />
-                <Text style={{ color: meta.accentColor, fontSize: 13, fontWeight: "800", fontFamily: "DynaPuff_700Bold" }}>
+                <Text style={{ color: meta.accentColor, fontSize: 13,  fontFamily: "DynaPuff_700Bold" }}>
                   {branding?.appName || "WePlay"}
                 </Text>
               </View>
