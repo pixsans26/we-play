@@ -157,8 +157,8 @@ export function generatePredictionCalendarMarks(
 
   const today = normalizeDate(new Date());
 
-  // Loop through current cycle and next 6 cycles
-  for (let i = 0; i <= 6; i++) {
+  // Loop through past cycles (for previous 3 months) up to next 6 cycles
+  for (let i = -4; i <= 6; i++) {
     // 1. Mark Period days
     const cycleStart = new Date(lastPeriodStart);
     cycleStart.setDate(lastPeriodStart.getDate() + (i * averageCycleLength));

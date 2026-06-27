@@ -5,6 +5,13 @@ import '../config/app_config.dart';
 class ApiService {
   static String? _sessionToken;
 
+  static String? getImageUrl(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('/')) return '$kApiBaseUrl$path';
+    return '$kApiBaseUrl/$path';
+  }
+
   static void setToken(String? token) {
     _sessionToken = token;
   }

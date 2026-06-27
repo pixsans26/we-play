@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { LogBox } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -219,5 +220,10 @@ export default function RootLayout() {
     );
   }
 
-  return <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 400, contentStyle: { backgroundColor: isDark ? "#150025" : "#ffffff" } }} />;
+  return (
+    <>
+      <StatusBar style={isDark ? "light" : "dark"} />
+      <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 400, contentStyle: { backgroundColor: isDark ? "#150025" : "#ffffff" } }} />
+    </>
+  );
 }

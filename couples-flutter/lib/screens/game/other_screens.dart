@@ -442,20 +442,211 @@ class _HistoryItem extends StatelessWidget {
 
 // ─── Profile Screen ──────────────────────────────────────────────────────────
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final bool isTab;
   const ProfileScreen({super.key, this.isTab = false});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  int _moments = 0;
+  int _missions = 0;
+  int _spins = 0;
+  int _draws = 0;
+  int _level = 1;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+  }
+
+  Future<void> _loadData() async {
+    final auth = context.read<AuthProvider>();
+    final cp = auth.coupleProfile;
+    if (cp == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+    try {
+      if (auth.uid != null) {
+        final freshData = await ApiService.fetchCoupleProfile(auth.uid!);
+        if (freshData != null) {
+          final updatedCp = CoupleProfile.fromJson(freshData);
+          await auth.setCoupleProfile(updatedCp);
+        }
+      }
+      
+      final currentCp = context.read<AuthProvider>().coupleProfile;
+      if (currentCp == null) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
+      
+      final uid = auth.isPartnerA ? currentCp.partnerAUid : (currentCp.partnerBUid ?? currentCp.partnerAUid);
+      final data = await ApiService.fetchProgress(uid);
+      if (data != null && mounted) {
+        _level = data['currentLevel'] ?? 1;
+      }
+      
+      final histA = await ApiService.fetchHistory(currentCp.partnerAUid);
+      final histB = currentCp.partnerBUid != null ? await ApiService.fetchHistory(currentCp.partnerBUid!) : <dynamic>[];
+      final all = [...histA, ...histB];
+      
+      int moments = 0, missions = 0, spins = 0, draws = 0;
+      for (var j in all) {
+        final t = HistoryEntry.fromJson(j);
+        if (!t.completed) continue;
+        if (t.taskType == 'image') moments++;
+        else if (t.taskType == 'text') missions++;
+        else if (t.taskType == 'spin_wheel') spins++;
+        else if (t.taskType == 'lottery') draws++;
+      }
+      if (mounted) {
+        setState(() {
+          _moments = moments;
+          _missions = missions;
+          _spins = spins;
+          _draws = draws;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Widget _buildStatCard(String title, int count, IconData icon, Color iconColor, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.07) : Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: iconColor, size: 28),
+          const SizedBox(height: 8),
+          Text(
+            count.toString(),
+            style: GoogleFonts.dynaPuff(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+            ),
+          ),
+          Text(
+            title,
+            style: GoogleFonts.nunito(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white70 : const Color(0xFF64748B),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileCard(String name, String? age, String? gender, String? avatarUrl, bool isMe, bool isDark, Color fallbackColor) {
+    final displayAge = age != null ? 'Age $age' : 'Age 27'; // Fallback to 27 if missing to match mock
+    final displayGender = gender != null && gender.isNotEmpty ? '${gender[0].toUpperCase()}${gender.substring(1)}' : 'Unknown';
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.07) : Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: fallbackColor,
+              shape: BoxShape.circle,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: avatarUrl != null && avatarUrl.isNotEmpty
+                ? Image.network(ApiService.getImageUrl(avatarUrl)!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _avatarIcon(gender))
+                : _avatarIcon(gender),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.dynaPuff(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+                Text(
+                  '$displayAge • $displayGender',
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isMe)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'YOU',
+                style: GoogleFonts.dynaPuff(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _avatarIcon(String? gender) {
+    return Icon(
+      gender?.toLowerCase() == 'female' ? Icons.face_3_rounded : Icons.face_rounded,
+      color: Colors.white,
+      size: 36,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final isDark = context.watch<ThemeProvider>().isDark;
     final cp = auth.coupleProfile;
+    
     final myName = auth.isPartnerA ? cp?.partnerAName : cp?.partnerBName;
     final myAge = auth.isPartnerA ? cp?.partnerAAge : cp?.partnerBAge;
     final myGender = auth.isPartnerA ? cp?.partnerAGender : cp?.partnerBGender;
     final myAvatar = auth.isPartnerA ? cp?.partnerAAvatar : cp?.partnerBAvatar;
-
+    
+    final partnerName = auth.isPartnerA ? cp?.partnerBName : cp?.partnerAName;
+    final partnerAge = auth.isPartnerA ? cp?.partnerBAge : cp?.partnerAAge;
+    final partnerGender = auth.isPartnerA ? cp?.partnerBGender : cp?.partnerAGender;
+    final partnerAvatar = auth.isPartnerA ? cp?.partnerBAvatar : cp?.partnerAAvatar;
+    
+    final badge = kLevelBadges[_level] ?? kLevelBadges[5]!;
+    
     final bgColors = isDark
         ? [const Color(0xFF150025), const Color(0xFF3B0764), const Color(0xFF4C1D95)]
         : [const Color(0xFFFDF2F8), const Color(0xFFFCE7F3), const Color(0xFFF5D0FE)];
@@ -463,162 +654,254 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-            gradient: LinearGradient(
-                colors: bgColors,
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter)),
+          gradient: LinearGradient(
+            colors: bgColors,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         child: SafeArea(
           bottom: false,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(24, 24, 24, isTab ? 110 : 24),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    if (!isTab) ...[
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
+          child: _loading 
+            ? const Center(child: CircularProgressIndicator(color: Color(0xFF9333EA)))
+            : SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(24, 24, 24, widget.isTab ? 110 : 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (!widget.isTab) ...[
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
                             width: 42,
                             height: 42,
                             decoration: BoxDecoration(
-                                color: isDark
-                                    ? Colors.white.withOpacity(0.12)
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(21)),
-                            child: Icon(Icons.arrow_back_ios_new,
-                                color: isDark
-                                    ? Colors.white
-                                    : const Color(0xFF0F172A),
-                                size: 20)),
-                      ),
-                      const SizedBox(width: 16),
-                    ],
-                    Text('My Profile',
+                              color: isDark ? Colors.white.withOpacity(0.12) : Colors.white,
+                              borderRadius: BorderRadius.circular(21)
+                            ),
+                            child: Icon(Icons.arrow_back_ios_new, color: isDark ? Colors.white : const Color(0xFF0F172A), size: 20)
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      Text(
+                        'Our Profile',
                         style: GoogleFonts.dynaPuff(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    'Your couple stats',
+                    style: GoogleFonts.nunito(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white70 : const Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Top Purple Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF9333EA), Color(0xFFC026D3)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(32),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF9333EA).withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 70,
+                          width: 130,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Positioned(
+                                left: 0,
+                                child: Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.transparent, width: 0),
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: myAvatar != null && myAvatar.isNotEmpty
+                                      ? Image.network(ApiService.getImageUrl(myAvatar)!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _avatarIcon(myGender))
+                                      : _avatarIcon(myGender),
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                child: Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF59E0B),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.transparent, width: 0),
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: partnerAvatar != null && partnerAvatar.isNotEmpty
+                                      ? Image.network(ApiService.getImageUrl(partnerAvatar)!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _avatarIcon(partnerGender))
+                                      : _avatarIcon(partnerGender),
+                                ),
+                              ),
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.3),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.favorite, color: Color(0xFFE879F9), size: 18),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '${myName ?? 'You'} & ${partnerName ?? 'Partner'}',
+                          style: GoogleFonts.dynaPuff(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A))),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                // Avatar
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                        colors: [Color(0xFF9333EA), Color(0xFFDB2777)]),
-                    borderRadius: BorderRadius.circular(50),
-                    boxShadow: [
-                      BoxShadow(
-                          color: const Color(0xFFDB2777).withOpacity(0.4),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8))
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${badge['emoji']} Level $_level • ${badge['label']}',
+                            style: GoogleFonts.nunito(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Stats Grid
+                  GridView.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: 1.3,
+                    children: [
+                      _buildStatCard('Moments', _moments, Icons.image_outlined, const Color(0xFF3B82F6), isDark),
+                      _buildStatCard('Missions', _missions, Icons.description_outlined, const Color(0xFF10B981), isDark),
+                      _buildStatCard('Spins', _spins, Icons.gps_fixed_rounded, const Color(0xFFF59E0B), isDark),
+                      _buildStatCard('Heart Draws', _draws, Icons.casino_outlined, const Color(0xFF9333EA), isDark),
                     ],
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: myAvatar != null && myAvatar.isNotEmpty
-                      ? Image.network(myAvatar,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _avatarIcon(myGender))
-                      : _avatarIcon(myGender),
-                ),
-                const SizedBox(height: 20),
-                Text(myName ?? 'Loading...',
-                    style: GoogleFonts.dynaPuff(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A))),
-                Text(myGender ?? 'Gender',
-                    style: GoogleFonts.nunito(
-                        fontSize: 14,
-                        color: isDark ? Colors.white38 : Colors.black38,
-                        fontWeight: FontWeight.w700)),
-                const SizedBox(height: 32),
-                _InfoCard(
-                    label: 'Age',
-                    value: myAge != null ? '$myAge yrs' : 'N/A',
-                    icon: Icons.cake,
-                    isDark: isDark),
-                const SizedBox(height: 12),
-                _InfoCard(
-                    label: 'Likes/Interests',
-                    value: (auth.isPartnerA ? cp?.whatALikes : cp?.whatBLikes) ??
-                        'None specified',
-                    icon: Icons.favorite,
-                    isDark: isDark),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: () =>
-                      Navigator.of(context).pushNamed('/edit-profile'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFDB2777),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32)),
-                    minimumSize: const Size(double.infinity, 54),
-                    elevation: 5,
+                  const SizedBox(height: 24),
+                  
+                  // Profiles
+                  _buildProfileCard(myName ?? 'You', myAge?.toString(), myGender, myAvatar, true, isDark, const Color(0xFF10B981)),
+                  _buildProfileCard(partnerName ?? 'Partner', partnerAge?.toString(), partnerGender, partnerAvatar, false, isDark, const Color(0xFFF59E0B)),
+                  
+                  // Email row
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withOpacity(0.07) : const Color(0xFFF0E5F5), // Light purple hint
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.mail_outline_rounded, color: Color(0xFF4C1D95)),
+                        const SizedBox(width: 16),
+                        Text(
+                          auth.email ?? 'Unknown Email',
+                          style: GoogleFonts.nunito(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white : const Color(0xFF4C1D95),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Text('Edit Profile Details',
+                  
+                  // Our History button
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HistoryScreen()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? Colors.white.withOpacity(0.07) : const Color(0xFFE5D5F0), // slightly darker than email row
+                      foregroundColor: isDark ? Colors.white : const Color(0xFF4A1029),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      minimumSize: const Size(double.infinity, 60),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.favorite, color: Color(0xFF4A1029)),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Our History',
+                          style: GoogleFonts.dynaPuff(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: isDark ? Colors.white : const Color(0xFF4A1029),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  Center(
+                    child: Text(
+                      'Keep scratching to level up!',
                       style: GoogleFonts.nunito(
-                          fontSize: 16, fontWeight: FontWeight.w800)),
-                ),
-              ],
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
-          ),
         ),
       ),
     );
   }
-
-  Widget _avatarIcon(String? gender) => Icon(
-        gender?.toLowerCase() == 'female' ? Icons.face_3 : Icons.face,
-        color: Colors.white,
-        size: 52,
-      );
-}
-
-class _InfoCard extends StatelessWidget {
-  final String label, value;
-  final IconData icon;
-  final bool isDark;
-
-  const _InfoCard(
-      {required this.label,
-      required this.value,
-      required this.icon,
-      required this.isDark});
-
-  @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.07) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-              color: isDark ? Colors.white10 : Colors.black.withOpacity(0.08)),
-        ),
-        child: Row(children: [
-          Icon(icon, color: const Color(0xFF9333EA), size: 22),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label,
-                      style: GoogleFonts.nunito(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700)),
-                  Text(value,
-                      style: GoogleFonts.nunito(
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700)),
-                ]),
-          ),
-        ]),
-      );
 }
 
 // ─── Settings Screen ─────────────────────────────────────────────────────────

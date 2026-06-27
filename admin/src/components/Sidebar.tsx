@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { env } from "@/lib/env";
 import {
   LayoutDashboard, FileText, Image, RotateCcw, Heart,
   Users, Settings, LogOut, HelpCircle, MessageSquare, History, FileEdit, Bell, Activity
@@ -46,6 +48,21 @@ const menuGroups = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`${env.NEXT_PUBLIC_API_URL}/api/config/public/app_branding`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.value) {
+          try {
+            const parsed = JSON.parse(data.value);
+            if (parsed.logoUrl) setLogoUrl(parsed.logoUrl);
+          } catch (e) {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <aside
@@ -54,9 +71,13 @@ export default function Sidebar() {
     >
       {/* ── Brand ─────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-8 h-24 shrink-0">
-        <div className="w-8 h-8 bg-gradient-to-tr from-[#5e51d9] to-indigo-400 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-500/30">
-          <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
-        </div>
+        {logoUrl ? (
+          <img src={logoUrl} alt="App Logo" className="w-8 h-8 object-contain" />
+        ) : (
+          <div className="w-8 h-8 bg-gradient-to-tr from-[#5e51d9] to-indigo-400 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-500/30">
+            <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
+          </div>
+        )}
         <h1 className="font-extrabold text-slate-800 text-xl tracking-tight">WePlay Admin</h1>
       </div>
 
