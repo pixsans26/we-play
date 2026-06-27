@@ -104,7 +104,7 @@ class _ScratchCardState extends State<ScratchCard> {
     if (_completed) return;
     // Map points to grid cells to compute coverage percentage
     const double cell = 12.0;
-    final cells = <int>{};
+    final cells = <String>{};
     final double halfBrush = widget.brushSize / 2;
 
     for (final stroke in _strokes) {
@@ -117,7 +117,7 @@ class _ScratchCardState extends State<ScratchCard> {
 
         for (int r = startRow; r <= endRow; r++) {
           for (int c = startCol; c <= endCol; c++) {
-            cells.add(c * 100000 + r);
+            cells.add('$c,$r');
           }
         }
       }
@@ -133,18 +133,9 @@ class _ScratchCardState extends State<ScratchCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onPanStart: (d) {
-        final box = context.findRenderObject() as RenderBox?;
-        if (box != null) {
-          _onPanStart(box.globalToLocal(d.globalPosition));
-        }
-      },
-      onPanUpdate: (d) {
-        final box = context.findRenderObject() as RenderBox?;
-        if (box != null) {
-          _onPanUpdate(box.globalToLocal(d.globalPosition));
-        }
-      },
+      behavior: HitTestBehavior.opaque,
+      onPanStart: (d) => _onPanStart(d.localPosition),
+      onPanUpdate: (d) => _onPanUpdate(d.localPosition),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: Stack(
@@ -194,12 +185,12 @@ class _ScratchPainter extends CustomPainter {
       // Draw fallback gradient overlay matching React Native Svg gradient cover
       final paint = Paint()
         ..shader = ui.Gradient.linear(
-          Offset(0, 0),
+          Offset.zero,
           Offset(size.width, size.height),
           [
-            Color(0xFFD946EF),
-            Color(0xFFA855F7),
-            Color(0xFF8B5CF6),
+            const Color(0xFFD946EF),
+            const Color(0xFFA855F7),
+            const Color(0xFF8B5CF6),
           ],
           [0.0, 0.5, 1.0],
           ui.TileMode.clamp,
@@ -231,10 +222,5 @@ class _ScratchPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ScratchPainter old) =>
-      old.strokes.length != strokes.length ||
-      old.image != image ||
-      old.brushSize != brushSize ||
-      // Also repaint if any active stroke grew in length
-      (strokes.isNotEmpty && old.strokes.isNotEmpty && old.strokes.last.length != strokes.last.length);
+  bool shouldRepaint(_ScratchPainter old) => true;
 }
