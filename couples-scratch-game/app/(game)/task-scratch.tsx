@@ -89,6 +89,7 @@ export default function TaskScratchScreen() {
   const { timeLeft, isRunning, isFinished, formattedTime, start, reset: resetTimer } = useTimer(TIMER_DURATION);
   const autoStartRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const alarmPlayedRef = useRef(false);
+  const isProcessingDoneRef = useRef(false);
 
   const pulseOpacity = useRef(new Animated.Value(1)).current;
   const pulseAnimRef = useRef<Animated.CompositeAnimation | null>(null);
@@ -214,12 +215,17 @@ export default function TaskScratchScreen() {
     Animated.timing(revealOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
     setTimerStarted(false);
     setIsCompleted(false);
+    isProcessingDoneRef.current = false;
     alarmPlayedRef.current = false;
     autoStartRef.current = setTimeout(() => { setTimerStarted(true); start(); }, 10000);
   }, [setIsScratched, playScratch, revealOpacity, start]);
 
   const handleDone = useCallback(async () => {
+    if (isProcessingDoneRef.current) return;
     if (!user || !currentTask || !coupleProfile) return;
+    
+    isProcessingDoneRef.current = true;
+    setIsCompleted(true);
     const scratcherUid = currentTurn === "A"
       ? coupleProfile.partnerAUid
       : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
