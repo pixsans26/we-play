@@ -4,15 +4,17 @@ import 'package:flutter/material.dart';
 
 class ScratchCard extends StatefulWidget {
   final Widget child;
-  final ImageProvider overlayImage;
+  final ImageProvider? overlayImage;
   final double threshold;
+  final double brushSize;
   final VoidCallback? onScratchComplete;
 
   const ScratchCard({
     super.key,
     required this.child,
-    required this.overlayImage,
-    this.threshold = 0.45,
+    this.overlayImage,
+    this.threshold = 0.35,
+    this.brushSize = 50.0,
     this.onScratchComplete,
   });
 
@@ -21,19 +23,37 @@ class ScratchCard extends StatefulWidget {
 }
 
 class _ScratchCardState extends State<ScratchCard> {
-  final List<Offset> _points = [];
+  // A list of strokes, where each stroke is a list of points (offsets)
+  final List<List<Offset>> _strokes = [];
   bool _completed = false;
   ui.Image? _image;
+  bool _imageLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadImage();
+    if (widget.overlayImage != null) {
+      _loadImage();
+    }
+  }
+
+  @override
+  void didUpdateWidget(ScratchCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.overlayImage != oldWidget.overlayImage) {
+      if (widget.overlayImage != null) {
+        _loadImage();
+      } else {
+        setState(() => _image = null);
+      }
+    }
   }
 
   Future<void> _loadImage() async {
+    if (_imageLoading) return;
+    _imageLoading = true;
     final completer = Completer<ui.Image>();
-    final stream = widget.overlayImage.resolve(const ImageConfiguration());
+    final stream = widget.overlayImage!.resolve(const ImageConfiguration());
     late ImageStreamListener listener;
     listener = ImageStreamListener((info, _) {
       if (!completer.isCompleted) completer.complete(info.image);
@@ -45,30 +65,67 @@ class _ScratchCardState extends State<ScratchCard> {
     stream.addListener(listener);
     try {
       final img = await completer.future;
-      if (mounted) setState(() => _image = img);
-    } catch (_) {}
+      if (mounted) {
+        setState(() {
+          _image = img;
+          _imageLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _imageLoading = false);
+      }
+    }
   }
 
-  void _onPan(Offset localPos) {
+  void _onPanStart(Offset localPos) {
     if (_completed) return;
-    setState(() => _points.add(localPos));
+    setState(() {
+      _strokes.add([localPos]);
+    });
     final box = context.findRenderObject() as RenderBox?;
-    if (box == null) return;
-    _checkThreshold(box.size);
+    if (box != null) {
+      _checkThreshold(box.size);
+    }
+  }
+
+  void _onPanUpdate(Offset localPos) {
+    if (_completed || _strokes.isEmpty) return;
+    setState(() {
+      _strokes.last.add(localPos);
+    });
+    final box = context.findRenderObject() as RenderBox?;
+    if (box != null) {
+      _checkThreshold(box.size);
+    }
   }
 
   void _checkThreshold(Size size) {
     if (_completed) return;
-    const cell = 20.0;
+    // Map points to grid cells to compute coverage percentage
+    const double cell = 12.0;
     final cells = <int>{};
-    for (final p in _points) {
-      final x = (p.dx / cell).floor();
-      final y = (p.dy / cell).floor();
-      cells.add(x * 10000 + y);
+    final double halfBrush = widget.brushSize / 2;
+
+    for (final stroke in _strokes) {
+      for (final p in stroke) {
+        // Mark cells in a square bounding box around the point
+        final int startCol = ((p.dx - halfBrush) / cell).floor();
+        final int endCol = ((p.dx + halfBrush) / cell).floor();
+        final int startRow = ((p.dy - halfBrush) / cell).floor();
+        final int endRow = ((p.dy + halfBrush) / cell).floor();
+
+        for (int r = startRow; r <= endRow; r++) {
+          for (int c = startCol; c <= endCol; c++) {
+            cells.add(c * 100000 + r);
+          }
+        }
+      }
     }
+
     final total = (size.width / cell).ceil() * (size.height / cell).ceil();
     if (total > 0 && cells.length / total >= widget.threshold) {
-      _completed = true;
+      setState(() => _completed = true);
       widget.onScratchComplete?.call();
     }
   }
@@ -76,19 +133,32 @@ class _ScratchCardState extends State<ScratchCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onPanStart: (d) {
+        final box = context.findRenderObject() as RenderBox?;
+        if (box != null) {
+          _onPanStart(box.globalToLocal(d.globalPosition));
+        }
+      },
       onPanUpdate: (d) {
         final box = context.findRenderObject() as RenderBox?;
-        if (box != null) _onPan(box.globalToLocal(d.globalPosition));
+        if (box != null) {
+          _onPanUpdate(box.globalToLocal(d.globalPosition));
+        }
       },
       child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
         child: Stack(
           fit: StackFit.expand,
           children: [
             widget.child,
-            if (_image != null && !_completed)
+            if (!_completed)
               RepaintBoundary(
                 child: CustomPaint(
-                  painter: _ScratchPainter(points: _points, image: _image!),
+                  painter: _ScratchPainter(
+                    strokes: _strokes,
+                    image: _image,
+                    brushSize: widget.brushSize,
+                  ),
                   isComplex: true,
                 ),
               ),
@@ -100,40 +170,71 @@ class _ScratchCardState extends State<ScratchCard> {
 }
 
 class _ScratchPainter extends CustomPainter {
-  final List<Offset> points;
-  final ui.Image image;
+  final List<List<Offset>> strokes;
+  final ui.Image? image;
+  final double brushSize;
 
-  _ScratchPainter({required this.points, required this.image});
+  _ScratchPainter({
+    required this.strokes,
+    required this.image,
+    required this.brushSize,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Create an offscreen layer to enable BlendMode.clear masking
     canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
 
-    // Draw overlay image
-    final src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
-    final dst = Rect.fromLTWH(0, 0, size.width, size.height);
-    canvas.drawImageRect(image, src, dst, Paint());
+    if (image != null) {
+      // Draw loaded overlay image
+      final src = Rect.fromLTWH(0, 0, image!.width.toDouble(), image!.height.toDouble());
+      final dst = Rect.fromLTWH(0, 0, size.width, size.height);
+      canvas.drawImageRect(image!, src, dst, Paint());
+    } else {
+      // Draw fallback gradient overlay matching React Native Svg gradient cover
+      final paint = Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(0, 0),
+          Offset(size.width, size.height),
+          [
+            Color(0xFFD946EF),
+            Color(0xFFA855F7),
+            Color(0xFF8B5CF6),
+          ],
+          [0.0, 0.5, 1.0],
+          ui.TileMode.clamp,
+        );
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+    }
 
-    // Erase scratch paths
+    // Erase paths scratched by the user
     final erasePaint = Paint()
       ..blendMode = BlendMode.clear
-      ..strokeWidth = 50
+      ..strokeWidth = brushSize
       ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke;
 
-    if (points.length > 1) {
-      final path = Path()..moveTo(points[0].dx, points[0].dy);
-      for (int i = 1; i < points.length; i++) {
-        path.lineTo(points[i].dx, points[i].dy);
+    for (final stroke in strokes) {
+      if (stroke.length > 1) {
+        final path = Path()..moveTo(stroke[0].dx, stroke[0].dy);
+        for (int i = 1; i < stroke.length; i++) {
+          path.lineTo(stroke[i].dx, stroke[i].dy);
+        }
+        canvas.drawPath(path, erasePaint);
+      } else if (stroke.length == 1) {
+        canvas.drawCircle(stroke[0], brushSize / 2, Paint()..blendMode = BlendMode.clear);
       }
-      canvas.drawPath(path, erasePaint);
-    } else if (points.length == 1) {
-      canvas.drawCircle(points[0], 25, Paint()..blendMode = BlendMode.clear);
     }
 
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(_ScratchPainter old) => old.points.length != points.length;
+  bool shouldRepaint(_ScratchPainter old) =>
+      old.strokes.length != strokes.length ||
+      old.image != image ||
+      old.brushSize != brushSize ||
+      // Also repaint if any active stroke grew in length
+      (strokes.isNotEmpty && old.strokes.isNotEmpty && old.strokes.last.length != strokes.last.length);
 }
