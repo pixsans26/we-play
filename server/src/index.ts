@@ -115,6 +115,48 @@ app.post("/api/auth/token", async (req: Request, res: Response) => {
   }
 });
 
+app.post("/api/auth/signup", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+    const [existing] = await db.select().from(appUsers).where(eq(appUsers.email, email));
+    if (existing) {
+      return res.status(400).json({ error: "User already exists with this email" });
+    }
+    const uid = "local_" + Math.random().toString(36).substring(2, 15);
+    const [inserted] = await db.insert(appUsers).values({
+      uid,
+      email,
+      name: "",
+    }).returning();
+    const token = jwt.sign({ role: "couple", uid }, JWT_SECRET, { expiresIn: "30d" });
+    res.status(201).json({ token, uid: inserted.uid, email: inserted.email });
+  } catch (err) {
+    console.error("[POST /api/auth/signup]", err);
+    res.status(500).json({ error: "Signup failed" });
+  }
+});
+
+app.post("/api/auth/login", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+    const [user] = await db.select().from(appUsers).where(eq(appUsers.email, email));
+    if (!user) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+    const token = jwt.sign({ role: "couple", uid: user.uid }, JWT_SECRET, { expiresIn: "30d" });
+    res.json({ token, uid: user.uid, email: user.email });
+  } catch (err) {
+    console.error("[POST /api/auth/login]", err);
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
 // ─── Admin Authentication ───────────────────────────────────────────────────
 app.get("/api/auth/admin/check", async (_req: Request, res: Response) => {
   try {
