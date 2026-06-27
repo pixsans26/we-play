@@ -23,9 +23,11 @@ import 'screens/game/partner_screen.dart';
 import 'screens/game/notifications_screen.dart';
 import 'screens/game/edit_profile_screen.dart';
 import 'screens/game/other_screens.dart';
+import 'services/sound_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SoundService.init();
   runApp(const WePlayApp());
 }
 

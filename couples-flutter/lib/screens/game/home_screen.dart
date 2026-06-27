@@ -188,129 +188,145 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
 
-            SafeArea(
-              child: Column(
+            // ── Scrollable content (scrolls under header) ──
+            Positioned.fill(
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(22, 130, 22, widget.onNavigateTab != null ? 110 : 100),
                 children: [
-                  // ── Header ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(22, 16, 22, 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Welcome back 💕',
-                                style: GoogleFonts.nunito(
-                                  color: isDark ? Colors.white70 : Colors.black54,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                displayName,
-                                style: GoogleFonts.dynaPuff(
-                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            if (widget.onNavigateTab != null) {
-                              widget.onNavigateTab!(3);
-                            } else {
-                              Navigator.of(context).pushNamed('/settings');
-                            }
-                          },
-                          icon: Icon(Icons.settings_outlined, color: isDark ? Colors.white : const Color(0xFF0F172A)),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            if (widget.onNavigateTab != null) {
-                              widget.onNavigateTab!(4);
-                            } else {
-                              Navigator.of(context).pushNamed('/profile');
-                            }
-                          },
-                          child: _AvatarWidget(
-                            avatarUrl: auth.isPartnerA ? cp?.partnerAAvatar : cp?.partnerBAvatar,
-                            gender: auth.isPartnerA ? cp?.partnerAGender : cp?.partnerBGender,
-                            isDark: isDark,
-                          ),
-                        ),
-                      ],
+                  // Invite banner (if pending)
+                  if (cp?.status == 'pending' && auth.isPartnerA) ...[
+                    _InviteBanner(
+                      inviteCode: cp?.inviteCode ?? '',
+                      inviteCtrl: _inviteCtrl,
+                      joining: _joining,
+                      joinError: _joinError,
+                      onJoin: _joinPartner,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // ── Level & Streak card ──
+                  _LevelCard(
+                    badgeEmoji: badge['emoji']!,
+                    badgeLabel: badge['label']!,
+                    level: _currentLevel,
+                    streak: game.streak,
+                    progressInLevel: progressInLevel,
+                    bgAnim: _bgAnim,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 14),
+
+                  // ── Whose turn ──
+                  _TurnBanner(turnName: turnName, isDark: isDark),
+                  const SizedBox(height: 16),
+
+                  // ── Section label ──
+                  Text(
+                    'CHOOSE A GAME MODE',
+                    style: GoogleFonts.dynaPuff(
+                      color: isDark ? Colors.white70 : Colors.black54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
                     ),
                   ),
+                  const SizedBox(height: 12),
 
-                  // ── Scrollable content ──
-                  Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.fromLTRB(22, 0, 22, widget.onNavigateTab != null ? 110 : 100),
-                      children: [
-                        // Invite banner (if pending)
-                        if (cp?.status == 'pending' && auth.isPartnerA) ...[
-                          _InviteBanner(
-                            inviteCode: cp?.inviteCode ?? '',
-                            inviteCtrl: _inviteCtrl,
-                            joining: _joining,
-                            joinError: _joinError,
-                            onJoin: _joinPartner,
-                            isDark: isDark,
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-
-                        // ── Level & Streak card ──
-                        _LevelCard(
-                          badgeEmoji: badge['emoji']!,
-                          badgeLabel: badge['label']!,
-                          level: _currentLevel,
-                          streak: game.streak,
-                          progressInLevel: progressInLevel,
-                          bgAnim: _bgAnim,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 14),
-
-                        // ── Whose turn ──
-                        _TurnBanner(turnName: turnName, isDark: isDark),
-                        const SizedBox(height: 16),
-
-                        // ── Section label ──
-                        Text(
-                          'CHOOSE A GAME MODE',
-                          style: GoogleFonts.dynaPuff(
-                            color: isDark ? Colors.white70 : Colors.black54,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // ── 2×2 Game Grid ──
-                        GridView.count(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [
-                            _GameCard(image: 'assets/images/hidden-moments.png', onTap: () => _handleGamePress('image', '/image-scratch')),
-                            _GameCard(image: 'assets/images/love-missions.png', onTap: () => _handleGamePress('text', '/task-scratch')),
-                            _GameCard(image: 'assets/images/fate-wheel.png', onTap: () => _handleGamePress('', '/spin-wheel')),
-                            _GameCard(image: 'assets/images/heart-draw.png', onTap: () => _handleGamePress('', '/lottery')),
-                          ],
-                        ),
-                      ],
-                    ),
+                  // ── 2×2 Game Grid ──
+                  GridView.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _GameCard(image: 'assets/images/hidden-moments.png', onTap: () => _handleGamePress('image', '/image-scratch')),
+                      _GameCard(image: 'assets/images/love-missions.png', onTap: () => _handleGamePress('text', '/task-scratch')),
+                      _GameCard(image: 'assets/images/fate-wheel.png', onTap: () => _handleGamePress('', '/spin-wheel')),
+                      _GameCard(image: 'assets/images/heart-draw.png', onTap: () => _handleGamePress('', '/lottery')),
+                    ],
                   ),
                 ],
+              ),
+            ),
+
+            // ── Floating Blurred Header (Always on Top) ──
+            Positioned(
+              top: 0, left: 0, right: 0,
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xCC150025) : const Color(0xCCFDF2F8),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                        ),
+                      ),
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(22, 8, 22, 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Welcome back 💕',
+                                    style: GoogleFonts.nunito(
+                                      color: isDark ? Colors.white70 : Colors.black54,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    displayName,
+                                    style: GoogleFonts.dynaPuff(
+                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                if (widget.onNavigateTab != null) {
+                                  widget.onNavigateTab!(3);
+                                } else {
+                                  Navigator.of(context).pushNamed('/settings');
+                                }
+                              },
+                              icon: Icon(Icons.settings_outlined, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                if (widget.onNavigateTab != null) {
+                                  widget.onNavigateTab!(4);
+                                } else {
+                                  Navigator.of(context).pushNamed('/profile');
+                                }
+                              },
+                              child: _AvatarWidget(
+                                avatarUrl: auth.isPartnerA ? cp?.partnerAAvatar : cp?.partnerBAvatar,
+                                gender: auth.isPartnerA ? cp?.partnerAGender : cp?.partnerBGender,
+                                isDark: isDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
 

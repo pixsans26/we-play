@@ -29,6 +29,11 @@ class ApiService {
     return http.patch(uri, headers: _headers, body: body != null ? jsonEncode(body) : null);
   }
 
+  static Future<http.Response> delete(String path) async {
+    final uri = Uri.parse('$kApiBaseUrl$path');
+    return http.delete(uri, headers: _headers);
+  }
+
   static Future<Map<String, dynamic>?> fetchTasks(String type) async {
     try {
       final res = await get('/api/tasks/$type');
