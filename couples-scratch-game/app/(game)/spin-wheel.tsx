@@ -78,19 +78,35 @@ export default function SpinWheelScreen() {
 
   const [spinCountA, setSpinCountA] = React.useState(0);
   const [spinCountB, setSpinCountB] = React.useState(0);
+  const [spunTaskCounts, setSpunTaskCounts] = React.useState<Record<string, number>>({});
 
   const rawTasks = useGameStore((s) => s.spinTasks);
 
   const spinTasks = React.useMemo(() => {
     if (!rawTasks || rawTasks.length === 0) return [];
-    if (rawTasks.length === 9) return rawTasks;
-    if (rawTasks.length > 9) return rawTasks.slice(0, 9);
-    const padded = [...rawTasks];
+
+    let minCount = Infinity;
+    for (const t of rawTasks) {
+      const c = spunTaskCounts[t.label] || 0;
+      if (c < minCount) minCount = c;
+    }
+
+    let available = rawTasks.filter(t => (spunTaskCounts[t.label] || 0) === minCount);
+
+    const shuffled = [...available];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    if (shuffled.length === 9) return shuffled;
+    if (shuffled.length > 9) return shuffled.slice(0, 9);
+    const padded = [...shuffled];
     while (padded.length < 9) {
-      padded.push(rawTasks[padded.length % rawTasks.length]);
+      padded.push(shuffled[padded.length % shuffled.length]);
     }
     return padded;
-  }, [rawTasks]);
+  }, [rawTasks, spunTaskCounts]);
 
   const NUM_SLICES = Math.max(1, spinTasks.length);
   const ANGLE_PER_SLICE = 360 / NUM_SLICES;
@@ -138,8 +154,14 @@ export default function SpinWheelScreen() {
         setSpinCountB(spinsB);
         
         const activeUid = currentTurn === "A" ? coupleProfile.partnerAUid : partnerBUidFallback;
-        const spins = history.filter((h) => h.taskType === "spin_wheel" && h.userUid === activeUid && h.completed).length;
-        setSpinCount(spins);
+        const spins = history.filter((h) => h.taskType === "spin_wheel" && h.userUid === activeUid && h.completed);
+        setSpinCount(spins.length);
+        
+        const counts: Record<string, number> = {};
+        for (const s of spins) {
+          counts[s.taskId] = (counts[s.taskId] || 0) + 1;
+        }
+        setSpunTaskCounts(counts);
         
         // Calculate today's spins for the active user
         const today = new Date();

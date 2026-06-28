@@ -25,7 +25,7 @@ export interface UseScratchHistoryReturn {
     currentLevel: number
   ) => Promise<Task | ImageTask | null>;
   logScratch: (params: LogScratchParams) => Promise<void>;
-  resetHistory: (userUid: string, entryId?: number) => Promise<void>;
+  resetHistory: (userUid: string, entryId?: number, taskType?: string) => Promise<void>;
   getSeenIds: (userUid: string, taskType: "text" | "image" | "lottery" | "spin_wheel") => Promise<string[]>;
   getHistory: (userUid: string) => Promise<HistoryEntry[]>;
   getAllHistory: (partnerAUid: string, partnerBUid: string | null) => Promise<HistoryEntry[]>;
@@ -79,10 +79,11 @@ export function useScratchHistory(): UseScratchHistoryReturn {
     }
   }, []);
 
-  const resetHistory = useCallback(async (userUid: string, entryId?: number): Promise<void> => {
+  const resetHistory = useCallback(async (userUid: string, entryId?: number, taskType?: string): Promise<void> => {
     try {
       let url = `${API_URL}/api/history/reset?uid=${userUid}`;
       if (entryId) url += `&entryId=${entryId}`;
+      if (taskType) url += `&taskType=${taskType}`;
       await apiFetch(url, { method: "DELETE" });
     } catch (e) {
       console.warn("Failed to reset history", e);

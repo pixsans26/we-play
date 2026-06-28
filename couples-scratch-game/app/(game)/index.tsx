@@ -453,10 +453,21 @@ export default function MainGameScreen() {
             {/* Hidden Moments */}
             <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
-                onPress={() => handleGamePress("image", "/(game)/image-scratch")}
+                onPress={() => {
+                  if (currentLevel <= 5) {
+                    Alert.alert("Locked 🔒", "Complete Level 5 to unlock Hidden Moments.");
+                  } else {
+                    handleGamePress("image", "/(game)/image-scratch");
+                  }
+                }}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
-                <Image source={require("../../assets/images/hidden-moments.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
+                <Image source={require("../../assets/images/hidden-moments.png")} style={{ width: "100%", height: "100%", position: "absolute", opacity: currentLevel <= 5 ? 0.5 : 1 }} />
+                {currentLevel <= 5 && (
+                  <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.3)", alignItems: "center", justifyContent: "center" }}>
+                    <Ionicons name="lock-closed" size={40} color="#ffffff" />
+                  </View>
+                )}
               </Pressable>
             </View>
 

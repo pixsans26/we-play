@@ -254,6 +254,9 @@ export default function LotteryScreen() {
           skipped: false,
           performerUid: performerUid,
         });
+        
+        await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${rollerUid}/increment-completed`, { method: "PATCH" }).catch(err => console.error("Failed to increment progress", err));
+
         setSeenCombos(prev => new Set(prev).add(currentComboId));
         if (selectedLevel === 1) setLvl1Count(prev => prev + 1);
         if (selectedLevel === 2) setLvl2Count(prev => prev + 1);

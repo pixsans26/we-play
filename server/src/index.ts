@@ -1131,7 +1131,7 @@ app.post("/api/history", authenticateToken, async (req: Request, res: Response) 
 
 app.delete("/api/history/reset", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { uid, entryId } = req.query;
+    const { uid, entryId, taskType } = req.query;
     if (!uid) {
       res.status(400).json({ error: "Missing uid" });
       return;
@@ -1140,6 +1140,10 @@ app.delete("/api/history/reset", authenticateToken, async (req: Request, res: Re
     if (entryId) {
       await db.delete(taskHistory)
         .where(and(eq(taskHistory.userUid, String(uid)), eq(taskHistory.id, Number(entryId))));
+      res.json({ success: true, deletedCount: 1 });
+    } else if (taskType) {
+      await db.delete(taskHistory)
+        .where(and(eq(taskHistory.userUid, String(uid)), eq(taskHistory.taskType, String(taskType))));
       res.json({ success: true, deletedCount: 1 });
     } else {
       await db.delete(taskHistory)
