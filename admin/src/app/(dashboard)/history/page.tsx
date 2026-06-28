@@ -9,7 +9,9 @@ import { Loader2, Search, History, Clock, CheckCircle2, XCircle } from "lucide-r
 interface TaskHistory {
   id: string;
   userUid: string;
+  userName: string | null;
   performerUid: string | null;
+  performerName: string | null;
   taskId: string;
   taskType: string;
   category: string | null;
@@ -97,7 +99,6 @@ export default function HistoryPage() {
                   <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">User (Scratcher)</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Task Info</th>
                   <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Time Taken</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -108,11 +109,11 @@ export default function HistoryPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-medium text-slate-800 text-sm truncate max-w-[150px]" title={record.userUid}>
-                        {record.userUid}
+                        {record.userName || record.userUid}
                       </div>
                       {record.performerUid && record.performerUid !== record.userUid && (
                         <div className="text-xs text-slate-400 mt-0.5 truncate max-w-[150px]" title={record.performerUid}>
-                          Performer: {record.performerUid}
+                          Performer: {record.performerName || record.performerUid}
                         </div>
                       )}
                     </td>
@@ -140,16 +141,6 @@ export default function HistoryPage() {
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
                           <XCircle className="w-3.5 h-3.5" /> Pending
                         </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 flex items-center gap-1.5">
-                      {record.timeTaken !== null ? (
-                        <>
-                          <Clock className="w-4 h-4 text-slate-400" />
-                          {record.timeTaken}s
-                        </>
-                      ) : (
-                        <span className="text-slate-400">-</span>
                       )}
                     </td>
                   </tr>
@@ -184,7 +175,7 @@ export default function HistoryPage() {
             </div>
             <div className="p-6 space-y-6">
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</p>
                   {selectedRecord.completed ? (
@@ -196,13 +187,6 @@ export default function HistoryPage() {
                       <XCircle className="w-4 h-4" /> Pending
                     </span>
                   )}
-                </div>
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Time Taken</p>
-                  <p className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-slate-400" />
-                    {selectedRecord.timeTaken !== null ? `${selectedRecord.timeTaken}s` : '-'}
-                  </p>
                 </div>
               </div>
 
@@ -238,12 +222,12 @@ export default function HistoryPage() {
                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
                   <div>
                     <span className="text-[11px] font-semibold text-slate-400 uppercase">Initiator (Scratcher)</span>
-                    <p className="text-sm font-bold text-slate-800 mt-0.5 break-all">{selectedRecord.userUid}</p>
+                    <p className="text-sm font-bold text-slate-800 mt-0.5 break-all">{selectedRecord.userName || selectedRecord.userUid}</p>
                   </div>
                   {selectedRecord.performerUid && selectedRecord.performerUid !== selectedRecord.userUid && (
                     <div className="pt-2 border-t border-slate-200">
                       <span className="text-[11px] font-semibold text-slate-400 uppercase">Performer</span>
-                      <p className="text-sm font-bold text-slate-800 mt-0.5 break-all">{selectedRecord.performerUid}</p>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5 break-all">{selectedRecord.performerName || selectedRecord.performerUid}</p>
                     </div>
                   )}
                 </div>

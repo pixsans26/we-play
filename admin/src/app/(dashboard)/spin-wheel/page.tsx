@@ -26,6 +26,8 @@ export default function SpinWheelPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(false);
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>("");
   const [search, setSearch] = useState("");
   const [filterLevel, setFilterLevel] = useState("");
   const [page, setPage] = useState(1);
@@ -56,14 +58,30 @@ export default function SpinWheelPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const response = await fetch(API, { method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        body: JSON.stringify(form),
+      const fd = new FormData();
+      if (form.id) fd.append("id", String(form.id));
+      fd.append("label", form.label);
+      fd.append("color", form.color);
+      fd.append("level", String(form.level));
+      fd.append("active", String(form.active));
+      
+      if (iconFile) {
+        fd.append("icon", iconFile);
+      } else {
+        fd.append("emoji", form.emoji);
+      }
+
+      const response = await fetch(API, { 
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: fd,
       });
       if (!response.ok) throw new Error("Failed to save");
       toast.success(editing ? "Spin item updated successfully!" : "Spin item added successfully!");
       setShowForm(false);
       setForm(emptyForm);
+      setPreview("");
+      setIconFile(null);
       setEditing(false);
       load();
     } catch (err) {
@@ -86,6 +104,12 @@ export default function SpinWheelPage() {
 
   const handleEdit = (item: SpinWheelItem) => {
     setForm(item);
+    if (item.emoji.startsWith("/uploads/") || item.emoji.startsWith("http")) {
+      setPreview(item.emoji.startsWith("http") ? item.emoji : `${env.NEXT_PUBLIC_API_URL}${item.emoji}`);
+    } else {
+      setPreview("");
+    }
+    setIconFile(null);
     setEditing(true);
     setShowForm(true);
   };
@@ -105,7 +129,7 @@ export default function SpinWheelPage() {
            </div>
          </div>
         
-        <button onClick={() => { setForm(emptyForm); setEditing(false); setShowForm(true); }}
+        <button onClick={() => { setForm(emptyForm); setPreview(""); setIconFile(null); setEditing(false); setShowForm(true); }}
           className="flex items-center gap-2 bg-[#5e51d9] hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-indigo-500/20 transition-all">
           <Plus className="w-4 h-4" /> Add Item
         </button>
@@ -144,9 +168,27 @@ export default function SpinWheelPage() {
             <form onSubmit={handleSave} className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-5">
                 <div>
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Emoji</label>
-                  <input required value={form.emoji} onChange={e => setForm(f => ({ ...f, emoji: e.target.value }))} placeholder="🎯"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-lg text-center focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all" />
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Icon / Emoji</label>
+                  <label className={`flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${preview ? "border-indigo-300 bg-indigo-50/30" : "border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/50"}`}>
+                    {preview ? (
+                      <img src={preview} alt="" className="h-16 w-16 object-cover rounded-xl" />
+                    ) : form.emoji && !form.emoji.startsWith("/uploads/") && !form.emoji.startsWith("http") ? (
+                      <span className="text-3xl">{form.emoji}</span>
+                    ) : (
+                      <div className="text-center">
+                        <span className="text-xl">🎯</span>
+                        <p className="text-[10px] text-slate-400 mt-1">Upload Icon</p>
+                      </div>
+                    )}
+                    <input type="file" accept="image/*" className="hidden" onChange={e => {
+                      const f = e.target.files?.[0] || null;
+                      setIconFile(f);
+                      if (f) setPreview(URL.createObjectURL(f));
+                    }} />
+                  </label>
+                  <div className="mt-2 text-center text-xs text-slate-400">
+                     Or type emoji: <input className="w-12 text-center border rounded mx-1 text-base text-slate-700 bg-white" value={!form.emoji.startsWith("/") && !form.emoji.startsWith("http") ? form.emoji : ""} onChange={e => { setForm(f => ({...f, emoji: e.target.value})); setPreview(""); setIconFile(null); }} />
+                  </div>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Color (Hex)</label>
@@ -204,7 +246,7 @@ export default function SpinWheelPage() {
             onEdit={handleEdit}
             emptyMessage="No spin wheel items found."
             columns={[
-              { key: "emoji", label: "Icon", render: (t) => <span className="text-2xl">{t.emoji}</span> },
+              { key: "emoji", label: "Icon", render: (t) => t.emoji.startsWith("/") || t.emoji.startsWith("http") ? <img src={t.emoji.startsWith("http") ? t.emoji : `${env.NEXT_PUBLIC_API_URL}${t.emoji}`} className="w-8 h-8 object-cover rounded-md" /> : <span className="text-2xl">{t.emoji}</span> },
               { key: "label", label: "Action", render: (t) => <span className="font-bold text-slate-800">{t.label}</span> },
               { key: "color", label: "Color", render: (t) => (
                 <div className="flex items-center gap-2">

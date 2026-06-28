@@ -4,9 +4,10 @@ import { env } from "@/lib/env";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import DataTable from "@/components/DataTable";
-import { Settings, Loader2, AlertTriangle, Trash2 } from "lucide-react";
+import { Settings, Loader2, AlertTriangle, Trash2, X } from "lucide-react";
 import { useConfirm } from "@/components/ConfirmProvider";
 import toast from "react-hot-toast";
+import ModalPortal from "@/components/ModalPortal";
 
 interface AdminProfile {
   id: number; name: string; email: string;
@@ -20,6 +21,9 @@ export default function ProfilePage() {
   const [profiles, setProfiles] = useState<AdminProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({ name: "", email: "", currentPassword: "", newPassword: "" });
+  const [savingProfile, setSavingProfile] = useState(false);
   const { data: session } = useSession();
   const token = session?.user ? (session.user as any).backendToken : "";
 
@@ -37,6 +41,45 @@ export default function ProfilePage() {
   };
 
   useEffect(() => { if (token) load(); }, [token]);
+
+  const handleEditClick = (user: AdminProfile) => {
+    if ((session?.user as any)?.email !== user.email) {
+      toast.error("You can only edit your own profile.");
+      return;
+    }
+    setEditForm({ name: user.name, email: user.email, currentPassword: "", newPassword: "" });
+    setShowEditModal(true);
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editForm.newPassword && !editForm.currentPassword) {
+      toast.error("Current password is required to set a new password.");
+      return;
+    }
+    setSavingProfile(true);
+    try {
+      const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/auth/admin/profile`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(editForm)
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to update profile");
+      }
+      toast.success("Profile updated successfully!");
+      setShowEditModal(false);
+      load();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const handleClearData = async () => {
     const ok = await confirm({
@@ -103,7 +146,7 @@ export default function ProfilePage() {
           <DataTable
             data={profiles}
             onDelete={async () => { toast.error("Cannot delete admins from dashboard yet."); }}
-            onEdit={(user) => { toast.success("Viewing admin: " + user.name); }}
+            onEdit={handleEditClick}
             emptyMessage="No admin profiles found."
             columns={[
               { key: "name", label: "Admin Name", render: (t) => (
@@ -150,6 +193,61 @@ export default function ProfilePage() {
           {clearing ? "Clearing Data..." : "Clear All Users Data"}
         </button>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <ModalPortal>
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+              <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+                <h2 className="text-xl font-bold text-slate-800">Edit Profile</h2>
+                <button onClick={() => setShowEditModal(false)} className="p-2 rounded-xl hover:bg-slate-200 text-slate-500 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleSaveProfile} className="p-6 space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Name</label>
+                  <input required value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-400" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Email</label>
+                  <input required type="email" value={editForm.email} onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-400" />
+                </div>
+                
+                <div className="pt-4 border-t border-slate-100">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Change Password (Optional)</p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Current Password</label>
+                      <input type="password" value={editForm.currentPassword} onChange={e => setEditForm(f => ({ ...f, currentPassword: e.target.value }))}
+                        placeholder="Required if changing password"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-400" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">New Password</label>
+                      <input type="password" value={editForm.newPassword} onChange={e => setEditForm(f => ({ ...f, newPassword: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end gap-3">
+                  <button type="button" onClick={() => setShowEditModal(false)} className="px-5 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={savingProfile} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm active:scale-95 disabled:opacity-70">
+                    {savingProfile && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
     </div>
   );
 }

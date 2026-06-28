@@ -97,6 +97,7 @@ export default function SpinWheelScreen() {
 
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState<any | null>(null);
+  const [canSpinToday, setCanSpinToday] = useState(true);
 
   const rotation = useRef(new Animated.Value(0)).current;
   const spinBtnAnim = useRef(new Animated.Value(1)).current;
@@ -139,6 +140,18 @@ export default function SpinWheelScreen() {
         const activeUid = currentTurn === "A" ? coupleProfile.partnerAUid : partnerBUidFallback;
         const spins = history.filter((h) => h.taskType === "spin_wheel" && h.userUid === activeUid && h.completed).length;
         setSpinCount(spins);
+        
+        // Calculate today's spins for the active user
+        const today = new Date();
+        const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+        
+        const spinsToday = history.filter((h) => {
+          if (h.taskType !== "spin_wheel" || !h.completed || h.userUid !== activeUid) return false;
+          const hDate = new Date(h.scratchedAt || new Date()).getTime();
+          return hDate >= startOfToday;
+        });
+
+        setCanSpinToday(spinsToday.length < 2);
       }
     };
     syncCount();
@@ -149,7 +162,7 @@ export default function SpinWheelScreen() {
     : coupleProfile?.partnerBName ?? "Partner B";
 
   const handleSpin = () => {
-    if (isSpinning) return;
+    if (isSpinning || !canSpinToday) return;
     setIsSpinning(true);
     setResult(null);
     overlayOpacity.setValue(0);
@@ -408,11 +421,13 @@ export default function SpinWheelScreen() {
                 </View>
                 
                 <Animated.View style={{ transform: [{ scale: spinBtnAnim }] }}>
-                  <Pressable onPress={handleSpin} disabled={isSpinning} style={styles.arcadeBtnWrapper}>
-                    <View style={[styles.arcadeBtnBase, isSpinning && { backgroundColor: "#854d0e" }]} />
-                    <View style={[styles.arcadeBtnTop, isSpinning && { backgroundColor: "#a16207", borderColor: "#ca8a04", top: 4 }]}>
+                  <Pressable onPress={handleSpin} disabled={isSpinning || !canSpinToday} style={styles.arcadeBtnWrapper}>
+                    <View style={[styles.arcadeBtnBase, (isSpinning || !canSpinToday) && { backgroundColor: "#854d0e" }]} />
+                    <View style={[styles.arcadeBtnTop, (isSpinning || !canSpinToday) && { backgroundColor: "#a16207", borderColor: "#ca8a04", top: 4 }]}>
                       {isSpinning ? (
                         <Text style={styles.arcadeBtnText}>• • •</Text>
+                      ) : !canSpinToday ? (
+                        <Text style={[styles.arcadeBtnText, { fontSize: 13, textAlign: 'center' }]}>LIMIT REACHED</Text>
                       ) : (
                         <Text style={styles.arcadeBtnText}>SPIN</Text>
                       )}

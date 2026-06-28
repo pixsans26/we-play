@@ -506,22 +506,32 @@ app.get("/api/tasks/spin", authenticateToken, async (_req: Request, res: Respons
   }
 });
 
-app.post("/api/tasks/spin", authenticateToken, async (req: Request, res: Response) => {
+app.post("/api/tasks/spin", authenticateToken, upload.single("icon"), async (req: Request, res: Response) => {
   try {
-    const { id, label, emoji, color, level, active } = req.body;
+    const { id, label, color, level, active } = req.body;
     if (!label) return res.status(400).json({ error: "Missing label" });
 
+    let emoji = req.body.emoji || "🎯";
+    if (req.file) {
+      emoji = `/uploads/${req.file.filename}`;
+    }
+
     if (id) {
+      const [existing] = await db.select().from(spinWheelItems).where(eq(spinWheelItems.id, Number(id)));
+      if (req.file && existing?.emoji?.startsWith("/uploads/")) {
+        const oldFilePath = path.join(uploadDir, path.basename(existing.emoji));
+        if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath);
+      }
       const [updated] = await db
         .update(spinWheelItems)
-        .set({ label, emoji, color, level: Number(level || 1), active: Boolean(active) })
+        .set({ label, emoji, color, level: Number(level || 1), active: active === 'true' || active === true })
         .where(eq(spinWheelItems.id, Number(id)))
         .returning();
       res.json(updated);
     } else {
       const [inserted] = await db
         .insert(spinWheelItems)
-        .values({ label, emoji, color, level: Number(level || 1), active: Boolean(active) })
+        .values({ label, emoji, color, level: Number(level || 1), active: active === 'true' || active === true })
         .returning();
       res.status(201).json(inserted);
     }
@@ -1035,8 +1045,29 @@ import { inArray } from "drizzle-orm";
 // Admin GET all global history
 app.get("/api/admin/history", authenticateToken, async (_req: Request, res: Response) => {
   try {
-    const history = await db.select().from(taskHistory).orderBy(taskHistory.scratchedAt);
-    res.json(history);
+    const initiator = alias(appUsers, "initiator");
+    const performer = alias(appUsers, "performer");
+    
+    const historyData = await db
+      .select({
+        id: taskHistory.id,
+        userUid: taskHistory.userUid,
+        userName: initiator.name,
+        performerUid: taskHistory.performerUid,
+        performerName: performer.name,
+        taskId: taskHistory.taskId,
+        taskType: taskHistory.taskType,
+        category: taskHistory.category,
+        scratchedAt: taskHistory.scratchedAt,
+        completed: taskHistory.completed,
+        timeTaken: taskHistory.timeTaken,
+      })
+      .from(taskHistory)
+      .leftJoin(initiator, eq(taskHistory.userUid, initiator.uid))
+      .leftJoin(performer, eq(taskHistory.performerUid, performer.uid))
+      .orderBy(taskHistory.scratchedAt);
+
+    res.json(historyData);
   } catch (err) {
     console.error("[GET /api/admin/history]", err);
     res.status(500).json({ error: "Failed to fetch global history" });
