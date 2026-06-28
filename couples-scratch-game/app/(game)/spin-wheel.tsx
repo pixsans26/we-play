@@ -9,6 +9,7 @@ import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
+import { env } from "@/lib/env";
 import { useSound } from "@/hooks/useSound";
 import { getAvatarSource } from "@/lib/apiClient";
 
@@ -418,6 +419,11 @@ export default function SpinWheelScreen() {
             <Animated.View pointerEvents="none" style={[styles.wheelOverlay, { opacity: overlayOpacity }]}>
               <View style={styles.overlayInner}>
                 <Text style={styles.youWonText}>YOU WON!</Text>
+                {result?.emoji && result.emoji.startsWith("/uploads/") ? (
+                  <Image source={{ uri: env.EXPO_PUBLIC_API_URL + result.emoji }} style={{ width: 80, height: 80, marginBottom: 8 }} resizeMode="contain" />
+                ) : (
+                  <Text style={{ fontSize: 64, marginBottom: 8 }}>{result?.emoji}</Text>
+                )}
                 <Text style={styles.resultMainText}>{result?.label}</Text>
               </View>
             </Animated.View>

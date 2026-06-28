@@ -170,6 +170,10 @@ export default function ProfileScreen() {
             <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 24,  fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }}>Our Profile</Text>
             <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_700Bold" }}>Your couple stats</Text>
           </View>
+          <View style={{ flex: 1 }} />
+          <Pressable onPress={() => router.push("/(game)/edit-profile")} style={{ padding: 12, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", borderRadius: 20 }}>
+             <Ionicons name="pencil" size={20} color={isDark ? "#ffffff" : "#0f172a"} />
+          </Pressable>
         </View>
       </View>
 

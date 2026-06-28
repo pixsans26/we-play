@@ -10,6 +10,7 @@ import { BlurView } from "@/components/CustomBlurView";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
+import { LevelUpModal } from "@/components/LevelUpModal";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { useSound } from "@/hooks/useSound";
 
@@ -29,6 +30,9 @@ export default function LotteryScreen() {
   const [selectedLevel, setSelectedLevel] = useState(1);
   const [lvl1Count, setLvl1Count] = useState(0);
   const [lvl2Count, setLvl2Count] = useState(0);
+
+  const [levelUpVisible, setLevelUpVisible] = useState(false);
+  const [newLevelState, setNewLevelState] = useState(1);
 
   const [isRolling, setIsRolling] = useState(false);
   const [results, setResults] = useState<string[] | null>(null);
@@ -255,7 +259,29 @@ export default function LotteryScreen() {
           performerUid: performerUid,
         });
         
-        await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${rollerUid}/increment-completed`, { method: "PATCH" }).catch(err => console.error("Failed to increment progress", err));
+        if (rollerUid) {
+          const fetchLevel = async () => {
+            try {
+              const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${rollerUid}`);
+              if (res.ok) { const d = await res.json(); return d.currentLevel || 1; }
+            } catch { return 1; }
+            return 1;
+          };
+
+          try {
+            const oldLevel = await fetchLevel();
+            const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${rollerUid}/increment-completed`, { method: "PATCH" });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.currentLevel > oldLevel) {
+                setNewLevelState(data.currentLevel);
+                setLevelUpVisible(true);
+              }
+            }
+          } catch (err) {
+            console.error("Failed to increment progress", err);
+          }
+        }
 
         setSeenCombos(prev => new Set(prev).add(currentComboId));
         if (selectedLevel === 1) setLvl1Count(prev => prev + 1);
@@ -474,6 +500,7 @@ export default function LotteryScreen() {
         </View>
       </View>
 
+      <LevelUpModal visible={levelUpVisible} level={newLevelState} isDark={isDark} onClose={() => setLevelUpVisible(false)} />
     </LinearGradient>
   );
 }

@@ -15,6 +15,7 @@ import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useNotificationStore } from "@/store/notificationStore";
 import { UserProgress, LEVEL_BADGES } from "@/types";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
+import { CustomAlertModal } from "@/components/CustomAlertModal";
 
 export default function MainGameScreen() {
   const router = useRouter();
@@ -39,6 +40,10 @@ export default function MainGameScreen() {
   const setCoupleProfile = useAuthStore((s) => s.setCoupleProfile);
   const setIsPartnerA = useAuthStore((s) => s.setIsPartnerA);
   const sessionToken = useAuthStore((s) => s.sessionToken);
+  
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ title: "", message: "", icon: "lock-closed" as any });
+  const isLevel5Unlocked = currentLevel >= 5;
 
   const isLinked = coupleProfile?.status !== "pending" && !!coupleProfile?.partnerBUid;
 
@@ -454,16 +459,21 @@ export default function MainGameScreen() {
             <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
                 onPress={() => {
-                  if (currentLevel <= 5) {
-                    Alert.alert("Locked 🔒", "Complete Level 5 to unlock Hidden Moments.");
+                  if (!isLevel5Unlocked) {
+                    setAlertConfig({
+                      title: "Locked 🔒",
+                      message: "Reach Level 5 to unlock Hidden Moments.",
+                      icon: "lock-closed"
+                    });
+                    setAlertVisible(true);
                   } else {
                     handleGamePress("image", "/(game)/image-scratch");
                   }
                 }}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
-                <Image source={require("../../assets/images/hidden-moments.png")} style={{ width: "100%", height: "100%", position: "absolute", opacity: currentLevel <= 5 ? 0.5 : 1 }} />
-                {currentLevel <= 5 && (
+                <Image source={require("../../assets/images/hidden-moments.png")} style={{ width: "100%", height: "100%", position: "absolute", opacity: isLevel5Unlocked ? 1 : 0.5 }} />
+                {!isLevel5Unlocked && (
                   <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.3)", alignItems: "center", justifyContent: "center" }}>
                     <Ionicons name="lock-closed" size={40} color="#ffffff" />
                   </View>
@@ -505,6 +515,15 @@ export default function MainGameScreen() {
 
         </ScrollView>
       </FadingEdgeMask>
+
+      <CustomAlertModal
+        visible={alertVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        icon={alertConfig.icon}
+        isDark={isDark}
+        onClose={() => setAlertVisible(false)}
+      />
     </LinearGradient>
   );
 }

@@ -11,6 +11,7 @@ import { useCycleStore } from "@/store/cycleStore";
 import { calculateCyclePredictions, generatePredictionCalendarMarks } from "@/lib/cycleCalculations";
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function CalendarScreen() {
   const router = useRouter();
@@ -139,9 +140,9 @@ export default function CalendarScreen() {
         </View>
 
         <FadingEdgeMask style={{ flex: 1 }}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 40, paddingHorizontal: 22 }}>
+          <Animated.ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 40, paddingHorizontal: 22 }}>
           
-          <View style={{ marginBottom: 24 }}>
+          <Animated.View entering={FadeInDown.duration(600).delay(100)} style={{ marginBottom: 24 }}>
             <FlatList
               horizontal
               pagingEnabled
@@ -185,16 +186,19 @@ export default function CalendarScreen() {
                 );
               }}
             />
-          </View>
+          </Animated.View>
 
-          <Text style={{ fontFamily: "DynaPuff_700Bold", fontSize: 18, color: theme.card.text, marginBottom: 16 }}>
+          <Animated.Text entering={FadeInDown.duration(600).delay(200)} style={{ fontFamily: "DynaPuff_700Bold", fontSize: 18, color: theme.card.text, marginBottom: 16 }}>
             Color Guide
-          </Text>
+          </Animated.Text>
 
-          <LinearGradient
-            colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
-            style={{ borderRadius: 24, padding: 16, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+          <Animated.View
+            entering={FadeInDown.duration(600).delay(300)}
           >
+            <LinearGradient
+              colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
+              style={{ borderRadius: 24, padding: 16, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+            >
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
               
               <View style={{ width: '48%', flexDirection: "row", alignItems: "flex-start", marginBottom: 16 }}>
@@ -279,8 +283,9 @@ export default function CalendarScreen() {
 
             </View>
           </LinearGradient>
+          </Animated.View>
 
-        </ScrollView>
+          </Animated.ScrollView>
         </FadingEdgeMask>
       </View>
     </View>

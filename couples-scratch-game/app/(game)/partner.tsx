@@ -645,6 +645,62 @@ export default function PartnerScreen() {
                 </LinearGradient>
               </BlurView>
 
+              {/* Advanced Predictions Widget */}
+              <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 30 }}>
+                <LinearGradient
+                  colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#f8fafc", "#ffffff"]}
+                  style={{ padding: 20, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(14,165,233,0.15)" : "#e0f2fe", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+                      <GradientIcon name="analytics" size={18} />
+                    </View>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 18, color: isDark ? theme.card.text : "#0f172a" }}>Cycle Insights</Text>
+                  </View>
+
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+                    <View style={{ width: "48%", marginBottom: 12 }}>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 12, color: theme.card.subtext, marginBottom: 2 }}>Days to Next Period</Text>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 15, color: isDark ? theme.card.text : "#0f172a" }}>
+                        {activePredictions.daysUntilNextPeriod} Days
+                      </Text>
+                    </View>
+                    <View style={{ width: "48%", marginBottom: 12 }}>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 12, color: theme.card.subtext, marginBottom: 2 }}>Next Period Date</Text>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 15, color: isDark ? theme.card.text : "#0f172a" }}>
+                        {activePredictions.nextPeriodDate ? new Date(activePredictions.nextPeriodDate).toLocaleDateString() : "TBD"}
+                      </Text>
+                    </View>
+
+                    <View style={{ width: "48%", marginBottom: 12 }}>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 12, color: theme.card.subtext, marginBottom: 2 }}>Fertile Window</Text>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 13, color: isDark ? theme.card.text : "#0f172a" }}>
+                        {activePredictions.fertileWindowStart ? `${new Date(activePredictions.fertileWindowStart).toLocaleDateString()} - ${new Date(activePredictions.fertileWindowEnd).toLocaleDateString()}` : "TBD"}
+                      </Text>
+                    </View>
+                    <View style={{ width: "48%", marginBottom: 12 }}>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 12, color: theme.card.subtext, marginBottom: 2 }}>Ovulation Date</Text>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 15, color: isDark ? theme.card.text : "#0f172a" }}>
+                        {activePredictions.nextOvulationDate ? new Date(activePredictions.nextOvulationDate).toLocaleDateString() : "TBD"}
+                      </Text>
+                    </View>
+
+                    <View style={{ width: "48%", marginBottom: 12 }}>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 12, color: theme.card.subtext, marginBottom: 2 }}>Pregnancy Risk</Text>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 15, color: activePredictions.pregnancyRisk === "High" ? "#ef4444" : activePredictions.pregnancyRisk === "Medium" ? "#f59e0b" : "#22c55e" }}>
+                        {activePredictions.pregnancyRisk}
+                      </Text>
+                    </View>
+                    <View style={{ width: "48%", marginBottom: 12 }}>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 12, color: theme.card.subtext, marginBottom: 2 }}>Safe for Intimacy</Text>
+                      <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 15, color: isDark ? theme.card.text : "#0f172a" }}>
+                        {activePredictions.safeSex ? "Yes" : "No"}
+                      </Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+              </BlurView>
+
             </Pressable>
           </ScrollView>
         </FadingEdgeMask>

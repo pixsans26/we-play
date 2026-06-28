@@ -18,6 +18,7 @@ import { useTimer } from "@/hooks/useTimer";
 import { useSound } from "@/hooks/useSound";
 import { ScratchCard } from "@/components/ScratchCard/ScratchCard";
 import HeartConfetti from "@/components/Confetti/HeartConfetti";
+import { LevelUpModal } from "@/components/LevelUpModal";
 import { ImageTask, Task } from "@/types";
 import { safeDbWrite } from "@/lib/safeDbWrite";
 import Svg, { Path, LinearGradient as SvgLinearGradient, Stop, G, Defs } from "react-native-svg";
@@ -87,6 +88,8 @@ export default function TaskScratchScreen() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [previousTask, setPreviousTask] = useState<(Task & { emoji: string; title: string; description: string }) | null>(null);
   const [showPrevious, setShowPrevious] = useState(false);
+  const [levelUpVisible, setLevelUpVisible] = useState(false);
+  const [newLevelState, setNewLevelState] = useState(1);
 
   const TIMER_DURATION = 40;
   const { timeLeft, isRunning, isFinished, formattedTime, start, reset: resetTimer } = useTimer(TIMER_DURATION);
@@ -269,13 +272,21 @@ export default function TaskScratchScreen() {
       "Scratch event could not be saved."
     );
     try {
-      await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${scratcherUid}/increment-completed`, { method: "PATCH" });
+      const oldLevel = await loadCurrentLevel();
+      const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${scratcherUid}/increment-completed`, { method: "PATCH" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.currentLevel > oldLevel) {
+          setNewLevelState(data.currentLevel);
+          setLevelUpVisible(true);
+        }
+      }
     } catch { }
     await loadScratchCounts();
     switchTurn();
     updateStreak();
     await loadNextTask();
-  }, [user, coupleProfile, currentTurn, currentTask, loadNextTask, switchTurn, updateStreak, loadScratchCounts, logScratch]);
+  }, [user, coupleProfile, currentTurn, currentTask, loadNextTask, switchTurn, updateStreak, loadScratchCounts, logScratch, loadCurrentLevel]);
 
   const handleGoBack = useCallback(() => { resetGameStore(); router.back(); }, [resetGameStore, router]);
 
@@ -304,6 +315,7 @@ export default function TaskScratchScreen() {
             <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.8)", fontFamily: "Nunito_700Bold", textAlign: "center" }}>More cards will be available soon.</Text>
           </View>
         </View>
+        <LevelUpModal visible={levelUpVisible} level={newLevelState} isDark={isDark} onClose={() => setLevelUpVisible(false)} />
       </LinearGradient>
     );
   }
@@ -364,6 +376,7 @@ export default function TaskScratchScreen() {
             </LinearGradient>
           </Pressable>
         </View>
+        <LevelUpModal visible={levelUpVisible} level={newLevelState} isDark={isDark} onClose={() => setLevelUpVisible(false)} />
       </LinearGradient>
     );
   }
@@ -485,10 +498,10 @@ export default function TaskScratchScreen() {
             <View style={S.cardWrapper}>
               {/* Turn pill — absolute on top edge of the wrapper (no overflow hidden here) */}
               <View style={S.turnPillAbsolute}>
-                <View style={{ borderRadius: 999, overflow: "hidden", }}>
+                <View style={{ borderRadius: 999, overflow: "hidden", borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)" }}>
                   <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={[S.turnPill, {
                     backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
-                    borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)",
+                    borderWidth: 0,
                   }]}>
                     <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>
                       {turnName}'s Turn
@@ -536,10 +549,10 @@ export default function TaskScratchScreen() {
             <View style={S.cardWrapper}>
               {/* Turn pill — absolute on top edge of the wrapper */}
               <View style={S.turnPillAbsolute}>
-                <View style={{ borderRadius: 999, overflow: "hidden" }}>
+                <View style={{ borderRadius: 999, overflow: "hidden", borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)" }}>
                   <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={[S.turnPill, {
                     backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
-                    borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)",
+                    borderWidth: 0,
                   }]}>
                     {!timerStarted ? (
                       <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>

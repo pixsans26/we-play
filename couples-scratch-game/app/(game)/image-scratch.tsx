@@ -472,10 +472,10 @@ export default function ImageScratchScreen() {
             <View style={S.cardWrapper}>
               {/* Turn pill — absolute on top edge of the wrapper (no overflow hidden here) */}
               <View style={S.turnPillAbsolute}>
-                <View style={{ borderRadius: 999, overflow: "hidden", }}>
+                <View style={{ borderRadius: 999, overflow: "hidden", borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)" }}>
                   <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={[S.turnPill, {
                     backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
-                    borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)",
+                    borderWidth: 0,
                   }]}>
                     <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>
                       {turnName}'s Turn
@@ -515,10 +515,10 @@ export default function ImageScratchScreen() {
             <View style={S.cardWrapper}>
               {/* Turn pill — absolute on top edge of the wrapper */}
               <View style={S.turnPillAbsolute}>
-                <View style={{ borderRadius: 999, overflow: "hidden" }}>
+                <View style={{ borderRadius: 999, overflow: "hidden", borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)" }}>
                   <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={[S.turnPill, {
                     backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
-                    borderColor: isDark ? "transparent" : "rgba(147,51,234,0.3)",
+                    borderWidth: 0,
                   }]}>
                     {!timerStarted ? (
                       <Text style={[S.turnPillText, { color: isDark ? "#ffffff" : "#6b21a8" }]}>
@@ -553,7 +553,6 @@ export default function ImageScratchScreen() {
                   style={[StyleSheet.absoluteFill, { backgroundColor: "#2e1065", borderRadius: 20 }]}
                   resizeMode="contain"
                 />
-
               </Animated.View>
             </View>
           ) : null}

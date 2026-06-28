@@ -38,7 +38,7 @@ export function useScratchHistory(): UseScratchHistoryReturn {
         const res = await apiFetch(`${API_URL}/api/history?partnerAUid=${userUid}`);
         if (!res.ok) return [];
         const data = await res.json();
-        return data.filter((d: any) => d.taskType === taskType && !d.skipped).map((d: any) => d.taskId);
+        return data.filter((d: any) => d.taskType === taskType).map((d: any) => d.taskId);
       } catch {
         return [];
       }
