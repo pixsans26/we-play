@@ -38,6 +38,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View, Text } from "react-native";
 import packageJson from "../package.json";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { NotificationManager } from "@/components/NotificationManager";
+
 
 const LOCAL_APP_VERSION = packageJson.version || "1.0.0";
 
@@ -223,6 +225,7 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style={isDark ? "light" : "dark"} />
+      <NotificationManager />
       <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 400, contentStyle: { backgroundColor: isDark ? "#150025" : "#ffffff" } }} />
     </>
   );

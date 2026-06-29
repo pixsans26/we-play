@@ -11,6 +11,7 @@ import { BlurView } from "@/components/CustomBlurView";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
+import { useNotificationStore } from "@/store/notificationStore";
 import { LevelUpModal } from "@/components/LevelUpModal";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { useSound } from "@/hooks/useSound";
@@ -19,6 +20,7 @@ const { width } = Dimensions.get("window");
 
 export default function LotteryScreen() {
   const router = useRouter();
+  const addNotification = useNotificationStore((s) => s.addNotification);
   const isDark = useThemeStore((s) => s.isDark);
   const theme = getTheme(isDark);
   const currentTurn = useGameStore((s) => s.currentTurn);

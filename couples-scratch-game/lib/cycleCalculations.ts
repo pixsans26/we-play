@@ -291,3 +291,18 @@ export function generatePredictionCalendarMarks(
 
   return marked;
 }
+
+export function getRecommendedGameForPhase(phase: "Menstrual" | "Follicular" | "Ovulation" | "Luteal"): string {
+  switch (phase) {
+    case "Menstrual":
+      return "Hidden Moments (Low energy, intimate connection)";
+    case "Follicular":
+      return "Fate Wheel (Spontaneous and playful)";
+    case "Ovulation":
+      return "Couples Lottery (High excitement, passionate)";
+    case "Luteal":
+      return "Task Scratch (Meaningful acts of service)";
+    default:
+      return "Task Scratch";
+  }
+}

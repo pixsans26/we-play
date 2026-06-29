@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
+import { useNotificationStore } from "@/store/notificationStore";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
@@ -57,6 +58,7 @@ const AnimatedHeartIcon = () => {
 
 export default function TaskScratchScreen() {
   const router = useRouter();
+  const addNotification = useNotificationStore((s) => s.addNotification);
 
   const user = useAuthStore((s) => s.user);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
