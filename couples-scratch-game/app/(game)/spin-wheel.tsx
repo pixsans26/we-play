@@ -308,7 +308,7 @@ export default function SpinWheelScreen() {
       )}
 
       {/* Header */}
-      <Reanimated.View entering={FadeInDown.delay(100).duration(500)} style={styles.header}>
+      <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden" }}>
             <Ionicons name="close" size={24} color="#ffffff" />
@@ -346,27 +346,27 @@ export default function SpinWheelScreen() {
         </View>
         
         <View style={{ width: 44 }} />
-      </Reanimated.View>
+      </View>
 
       <View style={styles.contentArea}>
 
         {/* Who is spinning */}
-        <Reanimated.View entering={FadeInDown.delay(500).duration(500)} style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
+        <View style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
           <Text style={{ color: "#facc15", fontSize: 14,  fontFamily: "DynaPuff_700Bold" }}>
             {turnName} is spinning!
           </Text>
-        </Reanimated.View>
+        </View>
 
         {/* The "spin the wheel" Sparkle Title */}
-        <Reanimated.View entering={FadeInDown.delay(900).duration(500)} style={styles.titleWrapper}>
+        <View style={styles.titleWrapper}>
           <Text style={styles.mainTitle}>Spin</Text>
           <Text style={styles.subTitle}>the wheel</Text>
           <Ionicons name="sparkles" size={16} color="#fef08a" style={{ position: "absolute", top: -5, left: -15 }} />
           <Ionicons name="sparkles" size={12} color="#fef08a" style={{ position: "absolute", bottom: 0, right: -15 }} />
-        </Reanimated.View>
+        </View>
 
         {/* The Purple 3D Container */}
-        <Reanimated.View entering={FadeInDown.delay(1300).duration(500)}>
+        <View>
           <Animated.View style={[styles.purpleContainer, { backgroundColor: cardBgColor }]}>
 
           {/* Top Pointer */}
@@ -474,7 +474,7 @@ export default function SpinWheelScreen() {
           </View>
 
         </Animated.View>
-      </Reanimated.View>
+        </View>
 
     </View>
     </LinearGradient>
