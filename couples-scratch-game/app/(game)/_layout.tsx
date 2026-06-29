@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Platform, ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, Image } from "react-native";
-import { Stack, useRouter, usePathname } from "expo-router";
+import { Stack, useRouter, usePathname, Redirect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 
@@ -151,26 +151,20 @@ export default function GameLayout() {
     return () => clearInterval(interval);
   }, [user, setCoupleProfile]);
 
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (!user) {
-      router.replace("/(auth)/signup");
-      return;
-    }
-
-    if (!coupleProfile || !coupleProfile.partnerAName) {
-      router.replace("/(onboarding)/profile-setup");
-      return;
-    }
-  }, [isLoading, user, coupleProfile]);
-
-  if (isLoading || !user || !coupleProfile || !coupleProfile.partnerAName) {
+  if (isLoading) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#150025" }}>
         <ActivityIndicator size="large" color={theme.accent} />
       </View>
     );
+  }
+
+  if (!user) {
+    return <Redirect href="/(auth)/signup" />;
+  }
+
+  if (!coupleProfile || !coupleProfile.partnerAName) {
+    return <Redirect href="/(onboarding)/profile-setup" />;
   }
 
   if (isLinked && !isDataLoaded && !dataError) {
@@ -232,7 +226,10 @@ export default function GameLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 300, contentStyle: { backgroundColor: isDark ? "#150025" : "#ffffff" } }} />
+      <Stack screenOptions={{ headerShown: false, animation: "fade", animationDuration: 300, contentStyle: { backgroundColor: isDark ? "#150025" : "#ffffff" } }}>
+        <Stack.Screen name="spin-wheel" options={{ animation: "none" }} />
+        <Stack.Screen name="lottery" options={{ animation: "none" }} />
+      </Stack>
       {!shouldHideTabs && (
         <View
           style={[
