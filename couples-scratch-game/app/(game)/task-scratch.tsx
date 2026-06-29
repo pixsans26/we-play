@@ -323,32 +323,7 @@ export default function TaskScratchScreen() {
     );
   }
 
-  if (isLoading || !currentTask) {
-    return (
-      <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
-        <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 52, paddingBottom: 28 }}>
-          {/* Header Row Skeleton */}
-          <View style={[S.headerRow, { justifyContent: 'space-between', marginBottom: 24 }]}>
-            <Skeleton width={44} height={44} borderRadius={22} />
-            <Skeleton width={180} height={28} borderRadius={14} />
-            <Skeleton width={44} height={44} borderRadius={22} />
-          </View>
 
-          {/* Score Card Skeleton */}
-          <Skeleton width="100%" height={110} borderRadius={24} style={{ marginBottom: 20 }} />
-
-          {/* Main Card Skeleton */}
-          <Skeleton width="100%" height={400} borderRadius={24} style={{ marginBottom: 24, flex: 1 }} />
-
-          {/* Buttons Skeleton */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
-            <Skeleton width="48%" height={56} borderRadius={28} />
-            <Skeleton width="48%" height={56} borderRadius={28} />
-          </View>
-        </View>
-      </LinearGradient>
-    );
-  }
 
   // ── Previous task read-only ──
   if (showPrevious && previousTask) {
@@ -421,7 +396,7 @@ export default function TaskScratchScreen() {
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 52, paddingBottom: 28 }}>
 
         {/* ════ 1. HEADER ROW ════ */}
-        <Reanimated.View entering={FadeInDown.delay(100).duration(500)} style={S.headerRow}>
+        <View style={S.headerRow}>
           {/* History button — navigates to history page */}
           <Pressable
             onPress={() => router.push("/(game)/history")}
@@ -437,10 +412,10 @@ export default function TaskScratchScreen() {
           <Pressable onPress={handleGoBack} style={S.headerCircleBtn}>
             <Ionicons name="close" size={22} color="rgba(255,255,255,0.95)" />
           </Pressable>
-        </Reanimated.View>
+        </View>
 
         {/* ════ 2. SCORE CARD ════ */}
-        <Reanimated.View entering={FadeInDown.delay(500).duration(500)} style={{ borderRadius: 24, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(255,255,255,0.6)", shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+        <View style={{ borderRadius: 24, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(255,255,255,0.6)", shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
           <View style={{ borderRadius: 23, overflow: "hidden" }}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 12 }}>
               <LinearGradient colors={isDark ? ["rgba(255,255,255,0.1)", "rgba(255,255,255,0.02)"] : ["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.4)"]} style={StyleSheet.absoluteFill} />
@@ -490,11 +465,15 @@ export default function TaskScratchScreen() {
               </Text>
             </BlurView>
           </View>
-        </Reanimated.View>
+        </View>
 
 
         {/* ════ 4. SCRATCH CARD ════ */}
-        <Reanimated.View entering={FadeInDown.delay(900).duration(500)} style={S.cardArea}>
+        <View style={S.cardArea}>
+          {(isLoading || !currentTask) ? (
+            <Skeleton width="100%" height={400} borderRadius={24} style={{ marginBottom: 24, flex: 1 }} />
+          ) : (
+            <>
 
           {/* ── BEFORE SCRATCH ── */}
           {!isScratched && textTask ? (
@@ -602,10 +581,19 @@ export default function TaskScratchScreen() {
               </Animated.View>
             </View>
           ) : null}
-        </Reanimated.View>
+            </>
+          )}
+        </View>
 
         {/* ════ 5. BOTTOM ACTION BUTTONS ════ */}
-        <Reanimated.View entering={FadeInDown.delay(1300).duration(500)} style={S.buttonsArea}>
+        <View style={S.buttonsArea}>
+          {(isLoading || !currentTask) ? (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, width: '100%' }}>
+              <Skeleton width="48%" height={56} borderRadius={28} />
+              <Skeleton width="48%" height={56} borderRadius={28} />
+            </View>
+          ) : (
+            <>
 
           {/* ── Complete — 3D shadow (lighter purple) ── */}
           <View style={{ opacity: canComplete ? 1 : 0.35 }}>
@@ -667,7 +655,9 @@ export default function TaskScratchScreen() {
             </View>
 
           </View>
-        </Reanimated.View>
+            </>
+          )}
+        </View>
 
       </View>
     </LinearGradient>
