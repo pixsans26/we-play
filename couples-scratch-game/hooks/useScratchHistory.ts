@@ -35,10 +35,12 @@ export function useScratchHistory(): UseScratchHistoryReturn {
   const getSeenIds = useCallback(
     async (userUid: string, taskType: "text" | "image" | "lottery" | "spin_wheel"): Promise<string[]> => {
       try {
-        const res = await apiFetch(`${API_URL}/api/history?partnerAUid=${userUid}`);
+        const res = await apiFetch(`${API_URL}/api/history?partnerAUid=${userUid}&_t=${Date.now()}`);
         if (!res.ok) return [];
         const data = await res.json();
-        return data.filter((d: any) => d.taskType === taskType).map((d: any) => d.taskId);
+        return data
+          .filter((d: any) => d.taskType === taskType && (d.completed === true || d.completed === 1 || String(d.completed) === "true" || String(d.completed) === "1" || d.timeTaken === -1))
+          .map((d: any) => d.taskId);
       } catch {
         return [];
       }
@@ -92,7 +94,7 @@ export function useScratchHistory(): UseScratchHistoryReturn {
 
   const getHistory = useCallback(async (userUid: string): Promise<HistoryEntry[]> => {
     try {
-      const res = await apiFetch(`${API_URL}/api/history?partnerAUid=${userUid}`);
+      const res = await apiFetch(`${API_URL}/api/history?partnerAUid=${userUid}&_t=${Date.now()}`);
       if (!res.ok) return [];
       const data = await res.json();
       return data.reverse();
@@ -104,7 +106,7 @@ export function useScratchHistory(): UseScratchHistoryReturn {
   const getAllHistory = useCallback(
     async (partnerAUid: string, partnerBUid: string | null): Promise<HistoryEntry[]> => {
       try {
-        let url = `${API_URL}/api/history?partnerAUid=${partnerAUid}`;
+        let url = `${API_URL}/api/history?partnerAUid=${partnerAUid}&_t=${Date.now()}`;
         if (partnerBUid) url += `&partnerBUid=${partnerBUid}`;
         const res = await apiFetch(url);
         if (!res.ok) return [];

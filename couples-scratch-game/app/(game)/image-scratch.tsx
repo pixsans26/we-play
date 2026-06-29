@@ -19,8 +19,10 @@ import { useTimer } from "@/hooks/useTimer";
 import { useSound } from "@/hooks/useSound";
 import { ScratchCard } from "@/components/ScratchCard/ScratchCard";
 import HeartConfetti from "@/components/Confetti/HeartConfetti";
-import { ImageTask } from "@/types";
+import { ImageTask, LEVEL_BADGES } from "@/types";
 import { safeDbWrite } from "@/lib/safeDbWrite";
+import { LevelUpModal } from "@/components/LevelUpModal";
+import { CustomAlertModal } from "@/components/CustomAlertModal";
 import Svg, { Path, LinearGradient as SvgLinearGradient, Stop, G, Defs } from "react-native-svg";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -75,8 +77,8 @@ export default function ImageScratchScreen() {
   const isAndroidDark = Platform.OS === 'android' && isDark;
   const theme = getTheme(isDark);
 
-  const { getNextTask, logScratch, getAllHistory } = useScratchHistory();
-  const { playScratch, playAlarm } = useSound();
+  const { getNextTask, logScratch, getAllHistory, getSeenIds } = useScratchHistory();
+  const { playScratch, playAlarm, playLevelUp } = useSound();
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,6 +90,12 @@ export default function ImageScratchScreen() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [previousTask, setPreviousTask] = useState<ImageTask | null>(null);
   const [showPrevious, setShowPrevious] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [levelUpVisible, setLevelUpVisible] = useState(false);
+  const [newLevelState, setNewLevelState] = useState(1);
+  const [displayLevel, setDisplayLevel] = useState(1);
+  const [levelCompleteVisible, setLevelCompleteVisible] = useState(false);
+  const [completedLevelNum, setCompletedLevelNum] = useState(1);
 
   const TIMER_DURATION = 40;
   const { timeLeft, isRunning, isFinished, formattedTime, start, reset: resetTimer } = useTimer(TIMER_DURATION);
@@ -111,11 +119,6 @@ export default function ImageScratchScreen() {
 
   const isLinked = coupleProfile?.status !== "pending" && !!coupleProfile?.partnerBUid;
 
-  useFocusEffect(useCallback(() => {
-    if (isLinked) {
-      fetchData().catch(() => { });
-    }
-  }, [isLinked, fetchData]));
 
   const loadScratchCounts = useCallback(async () => {
     if (!coupleProfile) return;
@@ -128,10 +131,11 @@ export default function ImageScratchScreen() {
     } catch { }
   }, [coupleProfile, getAllHistory]);
 
-  const loadCurrentLevel = useCallback(async (): Promise<number> => {
+  const loadCurrentLevel = useCallback(async (forcedTurn?: "A" | "B") => {
     if (!user || !coupleProfile) return 1;
     try {
-      const uid = currentTurn === "A"
+      const activeTurn = forcedTurn || currentTurn;
+      const uid = activeTurn === "A"
         ? coupleProfile.partnerAUid
         : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
       const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${uid}`);
@@ -140,7 +144,7 @@ export default function ImageScratchScreen() {
     return 1;
   }, [user, coupleProfile, currentTurn]);
 
-  const loadNextTask = useCallback(async () => {
+  const loadNextTask = useCallback(async (forcedTurn?: "A" | "B") => {
     if (!user || !coupleProfile) return;
     try {
       if (currentTask) setPreviousTask(currentTask as ImageTask);
@@ -150,8 +154,10 @@ export default function ImageScratchScreen() {
       revealOpacity.setValue(0);
       resetTimer();
 
-      const level = await loadCurrentLevel();
-      const uid = currentTurn === "A"
+      const level = await loadCurrentLevel(forcedTurn);
+      setDisplayLevel(level);
+      const activeTurn = forcedTurn || currentTurn;
+      const uid = activeTurn === "A"
         ? coupleProfile.partnerAUid
         : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
       const task = await getNextTask(uid, "image", level);
@@ -170,9 +176,26 @@ export default function ImageScratchScreen() {
     } catch { setIsLoading(false); }
   }, [user, coupleProfile, currentTurn, getNextTask, loadCurrentLevel, setCurrentTask, setIsScratched, setPerformingPartnerName, getPerformingPartnerName, revealOpacity, currentTask]);
 
+  useFocusEffect(useCallback(() => {
+    let isMounted = true;
+    setIsFetching(true);
+    fetchData()
+      .then(() => {
+        if (isMounted) {
+          loadNextTask();
+        }
+      })
+      .catch(() => { })
+      .finally(() => {
+        if (isMounted) {
+          setIsFetching(false);
+        }
+      });
+    return () => { isMounted = false; };
+  }, [isLinked, fetchData, loadNextTask]));
+
   useEffect(() => {
     loadScratchCounts();
-    loadNextTask();
     Animated.loop(Animated.sequence([
       Animated.timing(bgAnim, { toValue: 1, duration: 4000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
       Animated.timing(bgAnim, { toValue: 0, duration: 4000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
@@ -218,9 +241,27 @@ export default function ImageScratchScreen() {
 
   const handleSkip = useCallback(async () => {
     if (!user || !currentTask || !coupleProfile) return;
+    const scratcherUid = currentTurn === "A"
+      ? coupleProfile.partnerAUid
+      : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
+    const performerUid = currentTurn === "A"
+      ? (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`)
+      : coupleProfile.partnerAUid;
+    
+    // Log as skipped by setting timeTaken: -1
+    await logScratch({
+      userUid: scratcherUid,
+      taskId: currentTask.id,
+      taskType: "image",
+      completed: false,
+      skipped: true,
+      performerUid: performerUid ?? undefined,
+      timeTaken: -1
+    });
+
     await loadScratchCounts();
     await loadNextTask();
-  }, [user, currentTask, coupleProfile, loadNextTask]);
+  }, [user, currentTask, coupleProfile, currentTurn, logScratch, loadNextTask]);
 
   const handleScratchComplete = useCallback(async () => {
     setIsScratched(true);
@@ -258,6 +299,8 @@ export default function ImageScratchScreen() {
 
     isProcessingDoneRef.current = true;
     setIsCompleted(true);
+    playLevelUp(); // Play sound effect on Complete
+
     const scratcherUid = currentTurn === "A"
       ? coupleProfile.partnerAUid
       : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
@@ -270,13 +313,36 @@ export default function ImageScratchScreen() {
       "Scratch event could not be saved."
     );
     try {
-      await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${scratcherUid}/increment-completed`, { method: "PATCH" });
+      const oldLevel = await loadCurrentLevel();
+      const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${scratcherUid}/increment-completed`, { method: "PATCH" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.currentLevel > oldLevel) {
+          setNewLevelState(data.currentLevel);
+          setLevelUpVisible(true);
+        }
+      }
     } catch { }
+
+    // Check if this level's tasks are all completed
+    try {
+      const store = useGameStore.getState();
+      const levelTasks = store.imageTasks.filter(t => t.level === currentTask.level);
+      const seenIds = await getSeenIds(scratcherUid, "image");
+      const updatedSeenIds = seenIds.includes(currentTask.id) ? seenIds : [...seenIds, currentTask.id];
+      const allLevelCompleted = levelTasks.every(t => updatedSeenIds.includes(t.id));
+      if (allLevelCompleted) {
+        setCompletedLevelNum(currentTask.level);
+        setLevelCompleteVisible(true);
+      }
+    } catch { }
+
     await loadScratchCounts();
     switchTurn();
     updateStreak();
-    await loadNextTask();
-  }, [user, coupleProfile, currentTurn, currentTask, loadNextTask, switchTurn, updateStreak, loadScratchCounts, logScratch]);
+    const nextTurn = currentTurn === "A" ? "B" : "A";
+    await loadNextTask(nextTurn);
+  }, [user, coupleProfile, currentTurn, currentTask, loadNextTask, switchTurn, updateStreak, loadScratchCounts, logScratch, loadCurrentLevel]);
 
   const handleGoBack = useCallback(() => { resetGameStore(); router.back(); }, [resetGameStore, router]);
 
@@ -286,6 +352,16 @@ export default function ImageScratchScreen() {
   const bgColors = isDark
     ? (["#3b0764", "#6b21a8", "#be185d"] as any)
     : (["#e879f9", "#f472b6", "#fb7185"] as any);
+
+  // ── Loading ──
+  if (isFetching) {
+    return (
+      <LinearGradient colors={bgColors} locations={[0, 0.5, 1]} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#ffffff" />
+        <Text style={{ marginTop: 12, color: "#ffffff", fontFamily: "Nunito_700Bold", fontSize: 16 }}>Syncing with server...</Text>
+      </LinearGradient>
+    );
+  }
 
   if (!isLoading && !currentTask) {
     return (
@@ -304,6 +380,8 @@ export default function ImageScratchScreen() {
             <Text style={{ fontSize: 16, color: "rgba(255,255,255,0.8)", fontFamily: "Nunito_700Bold", textAlign: "center" }}>More cards will be available soon.</Text>
           </View>
         </View>
+        <LevelUpModal visible={levelUpVisible} level={newLevelState} isDark={isDark} onClose={() => setLevelUpVisible(false)} />
+        <CustomAlertModal visible={levelCompleteVisible} title={`Level ${completedLevelNum} Completed! 🎉`} message={`You've successfully completed all tasks in Level ${completedLevelNum}. Get ready for Level ${completedLevelNum + 1}!`} icon="trophy" isDark={isDark} onClose={() => setLevelCompleteVisible(false)} />
       </LinearGradient>
     );
   }
@@ -377,8 +455,15 @@ export default function ImageScratchScreen() {
             <Ionicons name="time-outline" size={22} color="rgba(255,255,255,0.95)" />
           </Pressable>
 
-          {/* Title */}
-          <Text style={S.headerTitle}>Hidden Moments</Text>
+          {/* Title and Level Status */}
+          <View style={{ alignItems: "center" }}>
+            <Text style={S.headerTitle}>Hidden Moments</Text>
+            {imageTask && (
+              <Text style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontFamily: "Nunito_700Bold", marginTop: 2 }}>
+                Task Level {imageTask.level} {LEVEL_BADGES[imageTask.level]?.emoji || ""}
+              </Text>
+            )}
+          </View>
 
           {/* Close / Go Back button — plain circle, no shadow */}
           <Pressable onPress={handleGoBack} style={S.headerCircleBtn}>
@@ -615,6 +700,8 @@ export default function ImageScratchScreen() {
         </View>
 
       </View>
+      <LevelUpModal visible={levelUpVisible} level={newLevelState} isDark={isDark} onClose={() => setLevelUpVisible(false)} />
+      <CustomAlertModal visible={levelCompleteVisible} title={`Level ${completedLevelNum} Completed! 🎉`} message={`You've successfully completed all tasks in Level ${completedLevelNum}. Get ready for Level ${completedLevelNum + 1}!`} icon="trophy" isDark={isDark} onClose={() => setLevelCompleteVisible(false)} />
     </LinearGradient>
   );
 }
