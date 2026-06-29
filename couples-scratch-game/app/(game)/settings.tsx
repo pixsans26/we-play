@@ -10,6 +10,7 @@ import { BlurView as ExpoBlurView } from "expo-blur";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { useRouter } from "expo-router";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
 import { Asset } from "expo-asset";
 import { Image } from "react-native";
@@ -37,10 +38,12 @@ interface SettingRowProps {
   theme: ReturnType<typeof getTheme>;
   danger?: boolean;
   isDark?: boolean;
+  index?: number;
 }
 
-function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, danger, isDark }: SettingRowProps) {
+function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, danger, isDark, index = 0 }: SettingRowProps) {
   return (
+    <Reanimated.View entering={FadeInDown.delay(100 + index * 100).duration(400)}>
     <Pressable onPress={onPress} style={({ pressed }) => ({ opacity: pressed && onPress ? 0.75 : 1, marginBottom: 8 })}>
       <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden" }}>
         <LinearGradient
@@ -68,6 +71,7 @@ function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, d
         </LinearGradient>
       </BlurView>
     </Pressable>
+    </Reanimated.View>
   );
 }
 
@@ -234,7 +238,8 @@ export default function SettingsScreen() {
       </Animated.View>
 
       {/* Blurred Header with Fade at Bottom */}
-      <View
+      <Reanimated.View
+        entering={FadeInDown.delay(100).duration(500)}
         style={{
           position: "absolute",
           top: 0,
@@ -282,9 +287,10 @@ export default function SettingsScreen() {
             <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 13, marginTop: 1, fontFamily: "Nunito_700Bold" }}>Customize your experience</Text>
           </View>
         </View>
-      </View>
+      </Reanimated.View>
 
       <FadingEdgeMask style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingHorizontal: 22, paddingTop: 140, paddingBottom: 120 }}
@@ -296,7 +302,7 @@ export default function SettingsScreen() {
             ACCOUNT
           </Text>
           <View style={{ gap: 10, marginBottom: 28 }}>
-            <SettingRow
+            <SettingRow index={1}
               isDark={isDark}
               icon="mail-outline"
               iconColor={theme.accent}
@@ -304,8 +310,8 @@ export default function SettingsScreen() {
               sublabel="Signed in account"
               theme={theme}
             />
-            <SettingRow icon="person-circle-outline" iconColor="#a855f7" label="Edit Profile" onPress={() => router.push("/(game)/edit-profile")} theme={theme} isDark={isDark} right={<Ionicons name="chevron-forward" size={16} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />} />
-            <SettingRow
+            <SettingRow index={2} icon="person-circle-outline" iconColor="#a855f7" label="Edit Profile" onPress={() => router.push("/(game)/edit-profile")} theme={theme} isDark={isDark} right={<Ionicons name="chevron-forward" size={16} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />} />
+            <SettingRow index={3}
               isDark={isDark}
               icon="notifications-outline"
               iconColor="#10b981"
@@ -315,7 +321,7 @@ export default function SettingsScreen() {
               onPress={() => router.push("/(game)/notifications")}
               right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
             />
-            <SettingRow
+            <SettingRow index={4}
               isDark={isDark}
               icon="refresh-circle-outline"
               iconColor="#f59e0b"
@@ -326,7 +332,7 @@ export default function SettingsScreen() {
               right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
             />
             {coupleProfile && coupleProfile.status !== "pending" && (
-              <SettingRow
+              <SettingRow index={5}
                 isDark={isDark}
                 icon="cut-outline"
                 iconColor="#ef4444"
@@ -345,7 +351,7 @@ export default function SettingsScreen() {
             PREFERENCES
           </Text>
           <View style={{ gap: 10, marginBottom: 28 }}>
-            <SettingRow
+            <SettingRow index={6}
               isDark={isDark}
               icon={isDark ? "moon" : "sunny-outline"}
               iconColor={isDark ? "#a855f7" : "#f59e0b"}
@@ -357,7 +363,7 @@ export default function SettingsScreen() {
                   trackColor={{ false: "#d1d5db", true: "#a855f7" }} thumbColor="#ffffff" />
               }
             />
-            <SettingRow
+            <SettingRow index={7}
               isDark={isDark}
               icon={soundEnabled ? "volume-high" : "volume-mute"}
               iconColor={soundEnabled ? "#10b981" : "#059669"}
@@ -369,7 +375,7 @@ export default function SettingsScreen() {
                   trackColor={{ false: "#d1d5db", true: "#10b981" }} thumbColor="#ffffff" />
               }
             />
-            <SettingRow
+            <SettingRow index={8}
               isDark={isDark}
               icon="finger-print-outline"
               iconColor="#3b82f6"
@@ -391,7 +397,7 @@ export default function SettingsScreen() {
             ABOUT & SUPPORT
           </Text>
           <View style={{ gap: 10, marginBottom: 28 }}>
-            <SettingRow
+            <SettingRow index={9}
               isDark={isDark}
               icon="help-circle-outline"
               iconColor="#3b82f6"
@@ -401,7 +407,7 @@ export default function SettingsScreen() {
               onPress={() => router.push("/(game)/content/faq")}
               right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
             />
-            <SettingRow
+            <SettingRow index={10}
               isDark={isDark}
               icon="chatbubbles-outline"
               iconColor="#10b981"
@@ -411,7 +417,7 @@ export default function SettingsScreen() {
               onPress={() => router.push("/(game)/content/support")}
               right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
             />
-            <SettingRow
+            <SettingRow index={11}
               isDark={isDark}
               icon="shield-checkmark-outline"
               iconColor="#a855f7"
@@ -421,7 +427,7 @@ export default function SettingsScreen() {
               onPress={() => router.push("/(game)/content/privacy")}
               right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
             />
-            <SettingRow
+            <SettingRow index={12}
               isDark={isDark}
               icon="information-circle-outline"
               iconColor="#f59e0b"
@@ -431,7 +437,7 @@ export default function SettingsScreen() {
               onPress={() => router.push("/(game)/content/help")}
               right={<Ionicons name="chevron-forward" size={18} color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"} />}
             />
-            <SettingRow
+            <SettingRow index={13}
               isDark={isDark}
               icon="reader-outline"
               iconColor="#ef4444"
@@ -459,7 +465,9 @@ export default function SettingsScreen() {
               </Pressable>
             </BlurView>
           </View>
+          <View style={{ height: 20 }} />
         </ScrollView>
+        </View>
       </FadingEdgeMask>
     </LinearGradient>
   );

@@ -5,6 +5,7 @@ import { View, Text, Pressable, StyleSheet, Animated, Easing, Alert, Dimensions 
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 import { BlurView } from "@/components/CustomBlurView";
 
 import { useThemeStore, getTheme } from "@/store/themeStore";
@@ -318,7 +319,7 @@ export default function LotteryScreen() {
       </Animated.View>
 
       {/* Top Nav */}
-      <View style={styles.topNav}>
+      <Reanimated.View entering={FadeInDown.delay(100).duration(500)} style={styles.topNav}>
         <Pressable onPress={() => router.back()} style={styles.navButton}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden" }}>
             <Ionicons name="arrow-back" size={24} color={isDark ? "#fff" : "#4c0519"} />
@@ -329,10 +330,10 @@ export default function LotteryScreen() {
             <Ionicons name="refresh" size={22} color={isDark ? "#fff" : "#4c0519"} />
           </BlurView>
         </Pressable>
-      </View>
+      </Reanimated.View>
 
       {/* 4 KPI Cards for Stats */}
-      <View style={styles.kpiRow}>
+      <Reanimated.View entering={FadeInDown.delay(500).duration(500)} style={styles.kpiRow}>
         <View style={[styles.kpiCard, { backgroundColor: isDark ? "#0f172a" : "#ffffff", borderColor: isDark ? "#334155" : "#cbd5e1" }]}>
           <Text style={[styles.kpiLabel, { color: isDark ? "#94a3b8" : "#64748b" }]}>{coupleProfile?.partnerAName ?? "A"} Rolls</Text>
           <Text style={[styles.kpiValue, { color: isDark ? "#fb7185" : "#e11d48" }]}>{statsA.rolls}</Text>
@@ -349,9 +350,9 @@ export default function LotteryScreen() {
           <Text style={[styles.kpiLabel, { color: isDark ? "#94a3b8" : "#64748b" }]}>{coupleProfile?.partnerBName ?? "B"} Perf.</Text>
           <Text style={[styles.kpiValue, { color: isDark ? "#fb7185" : "#e11d48" }]}>{statsB.performs}</Text>
         </View>
-      </View>
+      </Reanimated.View>
 
-      <View style={styles.machineWrapper}>
+      <Reanimated.View entering={FadeInDown.delay(900).duration(500)} style={styles.machineWrapper}>
 
         {/* Arcade Cabinet Casing */}
         <View style={[styles.cabinetOuter, { backgroundColor: isDark ? "#4c0519" : "#fecdd3" }]}>
@@ -498,7 +499,7 @@ export default function LotteryScreen() {
 
           </LinearGradient>
         </View>
-      </View>
+      </Reanimated.View>
 
       <LevelUpModal visible={levelUpVisible} level={newLevelState} isDark={isDark} onClose={() => setLevelUpVisible(false)} />
     </LinearGradient>

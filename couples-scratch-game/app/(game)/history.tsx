@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 
 import { useAuthStore } from "@/store/authStore";
 import { useHistoryStore } from "@/store/historyStore";
@@ -170,13 +171,14 @@ export default function HistoryScreen() {
   // Render helpers
   // -------------------------------------------------------------------------
 
-  const renderHistoryItem = ({ item }: { item: HistoryEntry }) => {
+  const renderHistoryItem = ({ item, index }: { item: HistoryEntry; index: number }) => {
     const label = getTaskLabel(item);
     const dateStr = formatDateTime(item.scratchedAt);
     const scratcherName = resolvePartnerName(item.userUid, coupleProfile);
     const performerName = resolvePartnerName(item.performerUid, coupleProfile);
 
     return (
+      <Reanimated.View entering={FadeInDown.delay(100 + Math.min(index, 15) * 100).duration(400)}>
       <Pressable onPress={() => setSelectedEntry(item)} style={{ marginBottom: 12 }}>
         <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden" }}>
           <LinearGradient
@@ -274,6 +276,7 @@ export default function HistoryScreen() {
           </LinearGradient>
         </BlurView>
       </Pressable>
+      </Reanimated.View>
     );
   };
 
@@ -626,7 +629,8 @@ export default function HistoryScreen() {
       style={{ flex: 1 }}
     >
       {/* Fixed Blurred Header & Filter Tabs with Fade at Bottom */}
-      <View
+      <Reanimated.View
+        entering={FadeInDown.delay(100).duration(500)}
         style={{
           position: "absolute",
           top: 0,
@@ -721,7 +725,7 @@ export default function HistoryScreen() {
             })}
           </ScrollView>
         </View>
-      </View>
+      </Reanimated.View>
 
       <View style={{ flex: 1, paddingBottom: 40 }}>
         {/* Combined history list */}

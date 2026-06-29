@@ -3,8 +3,9 @@ import { View, Text, Pressable, StyleSheet, Dimensions, Animated, Easing, Modal,
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import Svg, { Path, G, Text as SvgText, Circle, Polygon, Defs, LinearGradient as SvgLinearGradient, RadialGradient as SvgRadialGradient, Stop, Filter, FeGaussianBlur, FeMerge, FeMergeNode } from "react-native-svg";
+import Svg, { Path, G, Circle, Text as SvgText, Defs, RadialGradient as SvgRadialGradient, Stop, Polygon, Filter, FeGaussianBlur, FeMerge, FeMergeNode, LinearGradient as SvgLinearGradient } from "react-native-svg";
 import { BlurView } from "@/components/CustomBlurView";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
@@ -307,7 +308,7 @@ export default function SpinWheelScreen() {
       )}
 
       {/* Header */}
-      <View style={styles.header}>
+      <Reanimated.View entering={FadeInDown.delay(100).duration(500)} style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 32, overflow: "hidden" }}>
             <Ionicons name="close" size={24} color="#ffffff" />
@@ -345,27 +346,28 @@ export default function SpinWheelScreen() {
         </View>
         
         <View style={{ width: 44 }} />
-      </View>
+      </Reanimated.View>
 
       <View style={styles.contentArea}>
 
         {/* Who is spinning */}
-        <View style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
+        <Reanimated.View entering={FadeInDown.delay(500).duration(500)} style={{ backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginBottom: 12 }}>
           <Text style={{ color: "#facc15", fontSize: 14,  fontFamily: "DynaPuff_700Bold" }}>
             {turnName} is spinning!
           </Text>
-        </View>
+        </Reanimated.View>
 
         {/* The "spin the wheel" Sparkle Title */}
-        <View style={styles.titleWrapper}>
+        <Reanimated.View entering={FadeInDown.delay(900).duration(500)} style={styles.titleWrapper}>
           <Text style={styles.mainTitle}>Spin</Text>
           <Text style={styles.subTitle}>the wheel</Text>
           <Ionicons name="sparkles" size={16} color="#fef08a" style={{ position: "absolute", top: -5, left: -15 }} />
           <Ionicons name="sparkles" size={12} color="#fef08a" style={{ position: "absolute", bottom: 0, right: -15 }} />
-        </View>
+        </Reanimated.View>
 
         {/* The Purple 3D Container */}
-        <Animated.View style={[styles.purpleContainer, { backgroundColor: cardBgColor }]}>
+        <Reanimated.View entering={FadeInDown.delay(1300).duration(500)}>
+          <Animated.View style={[styles.purpleContainer, { backgroundColor: cardBgColor }]}>
 
           {/* Top Pointer */}
           <View style={styles.pointerContainer}>
@@ -472,8 +474,9 @@ export default function SpinWheelScreen() {
           </View>
 
         </Animated.View>
+      </Reanimated.View>
 
-      </View>
+    </View>
     </LinearGradient>
   );
 }

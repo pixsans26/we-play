@@ -188,12 +188,12 @@ export default function CalendarScreen() {
             />
           </Animated.View>
 
-          <Animated.Text entering={FadeInDown.duration(600).delay(200)} style={{ fontFamily: "DynaPuff_700Bold", fontSize: 18, color: theme.card.text, marginBottom: 16 }}>
+          <Animated.Text entering={FadeInDown.duration(600).delay(500)} style={{ fontFamily: "DynaPuff_700Bold", fontSize: 18, color: theme.card.text, marginBottom: 16 }}>
             Color Guide
           </Animated.Text>
 
           <Animated.View
-            entering={FadeInDown.duration(600).delay(300)}
+            entering={FadeInDown.duration(600).delay(900)}
           >
             <LinearGradient
               colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}

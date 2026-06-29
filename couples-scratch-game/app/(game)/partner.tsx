@@ -17,6 +17,7 @@ import * as Clipboard from 'expo-clipboard';
 import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { GradientIcon } from "@/components/GradientIcon";
 import { GradientText } from "@/components/GradientText";
@@ -439,7 +440,8 @@ export default function PartnerScreen() {
       <AnimatedBackground currentPhase={activePredictions.currentPhase} isDark={isDark} />
 
       {/* Fixed Blurred Header with Fade at Bottom */}
-      <View
+      <Reanimated.View
+        entering={FadeInDown.delay(100).duration(500)}
         style={{
           position: "absolute",
           top: 0,
@@ -504,7 +506,7 @@ export default function PartnerScreen() {
             </View>
           </Pressable>
         </View>
-      </View>
+      </Reanimated.View>
 
       <View style={{ flex: 1 }}>
         {/* Content */}
@@ -512,7 +514,7 @@ export default function PartnerScreen() {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: insets.top + 80, paddingBottom: 120, paddingHorizontal: 22 }}>
 
             {/* Top Period Hero Section */}
-            <View style={{ alignItems: "center", marginBottom: 40 }}>
+            <Reanimated.View entering={FadeInDown.delay(100).duration(400)} style={{ alignItems: "center", marginBottom: 40 }}>
               <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
                 <Ionicons name="water" size={20} color="#ef4444" style={{ marginRight: 8 }} />
                 <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 20, color: theme.card.text }}>
@@ -542,12 +544,12 @@ export default function PartnerScreen() {
                   </LinearGradient>
                 </Pressable>
               </View>
-            </View>
+            </Reanimated.View>
 
             <Pressable onPress={() => router.push("/calendar")}>
 
               {/* Insight Cards Row 1 */}
-              <View style={{ flexDirection: "row", gap: 16, marginBottom: 16 }}>
+              <Reanimated.View entering={FadeInDown.delay(200).duration(400)} style={{ flexDirection: "row", gap: 16, marginBottom: 16 }}>
 
                 {/* Ovulation Day Card */}
                 <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
@@ -587,9 +589,10 @@ export default function PartnerScreen() {
                   </LinearGradient>
                 </BlurView>
 
-              </View>
+              </Reanimated.View>
 
               {/* Fertility Window Card */}
+              <Reanimated.View entering={FadeInDown.delay(300).duration(400)}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 16 }}>
                 <LinearGradient
                   colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]}
@@ -609,10 +612,12 @@ export default function PartnerScreen() {
                   </View>
                 </LinearGradient>
               </BlurView>
+              </Reanimated.View>
 
 
 
               {/* Moods and Desires Widget */}
+              <Reanimated.View entering={FadeInDown.delay(400).duration(400)}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 16 }}>
                 <LinearGradient
                   colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
@@ -700,6 +705,7 @@ export default function PartnerScreen() {
                   </View>
                 </LinearGradient>
               </BlurView>
+              </Reanimated.View>
 
             </Pressable>
           </ScrollView>

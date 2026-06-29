@@ -5,6 +5,7 @@ import { View, Text, Pressable, ScrollView, Animated, Easing, Image, TouchableOp
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
 
@@ -185,7 +186,7 @@ export default function ProfileScreen() {
         >
 
           {/* Couple hero */}
-          <View style={{ marginBottom: 20 }}>
+          <Reanimated.View entering={FadeInDown.delay(100).duration(400)} style={{ marginBottom: 20 }}>
             <LinearGradient
               colors={theme.accentGradient as any}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
@@ -221,10 +222,10 @@ export default function ProfileScreen() {
                 </Text>
               </View>
             </LinearGradient>
-          </View>
+          </Reanimated.View>
 
           {/* Stats cards */}
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
+          <Reanimated.View entering={FadeInDown.delay(200).duration(400)} style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
             <View style={{ width: "48%", borderRadius: 32, overflow: "hidden" }}>
               <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ flex: 1, borderRadius: 24, overflow: "hidden" }}>
                 <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#eff6ff", "#ffffff"]} style={{ flex: 1, padding: 16, alignItems: "center", borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#3b82f6", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
@@ -261,11 +262,11 @@ export default function ProfileScreen() {
                 </LinearGradient>
               </BlurView>
             </View>
-          </View>
+          </Reanimated.View>
 
           {/* Partner Cards (YOU shown first) */}
           {isPartnerA ? (
-            <>
+            <Reanimated.View entering={FadeInDown.delay(300).duration(400)}>
               {/* Partner A card (YOU) */}
               <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
@@ -320,9 +321,9 @@ export default function ProfileScreen() {
                   </View>
                 </View>
               </LinearGradient>
-            </>
+            </Reanimated.View>
           ) : (
-            <>
+            <Reanimated.View entering={FadeInDown.delay(300).duration(400)}>
               {/* Partner B card (YOU) */}
               <LinearGradient colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#faf5ff", "#ffffff"]} style={{ borderRadius: 24, padding: 20, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: theme.card.border, shadowColor: isDark ? "transparent" : "#a855f7", shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
@@ -377,21 +378,21 @@ export default function ProfileScreen() {
                   </View>
                 </View>
               </LinearGradient>
-            </>
+            </Reanimated.View>
           )}
 
           {/* Account */}
-          <View style={{ borderRadius: 32, overflow: "hidden", marginBottom: 20 }}>
+          <Reanimated.View entering={FadeInDown.delay(500).duration(400)} style={{ borderRadius: 32, overflow: "hidden", marginBottom: 20 }}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 32, overflow: "hidden", padding: 18 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                 <Ionicons name="mail-outline" size={18} color={isDark ? "#ffffff" : "#4c0519"} />
                 <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 14, fontWeight: "600" }}>{user?.email ?? "No email"}</Text>
               </View>
             </BlurView>
-          </View>
+          </Reanimated.View>
 
           {/* History */}
-          <View style={{ borderRadius: 999, overflow: "hidden" }}>
+          <Reanimated.View entering={FadeInDown.delay(600).duration(400)} style={{ borderRadius: 999, overflow: "hidden" }}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 999, overflow: "hidden" }}>
               <Pressable
                 onPress={() => router.push("/(game)/history")}
@@ -409,7 +410,7 @@ export default function ProfileScreen() {
                 <Text style={{ color: isDark ? "#ffffff" : "#4c0519", fontSize: 16,  fontFamily: "DynaPuff_700Bold", textShadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>Our History</Text>
               </Pressable>
             </BlurView>
-          </View>
+          </Reanimated.View>
 
           {/* Footer info */}
           <View style={{ alignItems: "center", marginTop: 24, marginBottom: 24 }}>

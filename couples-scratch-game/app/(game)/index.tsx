@@ -8,6 +8,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
 import * as Clipboard from 'expo-clipboard';
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 
 import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
@@ -196,7 +197,8 @@ export default function MainGameScreen() {
       </Animated.View>
 
       {/* Blurred Header with Fade at Bottom */}
-      <View
+      <Reanimated.View
+        entering={FadeInDown.delay(100).duration(400)}
         style={{
           position: "absolute",
           top: 0,
@@ -266,7 +268,7 @@ export default function MainGameScreen() {
             </Pressable>
           </View>
         </View>
-      </View>
+      </Reanimated.View>
 
       <FadingEdgeMask style={{ flex: 1 }}>
         <ScrollView
@@ -277,7 +279,7 @@ export default function MainGameScreen() {
 
           {/* Invite Partner Banner (if status is pending) */}
           {coupleProfile?.status === "pending" && isPartnerA && (
-            <View style={{
+            <Reanimated.View entering={FadeInDown.delay(200).duration(400)} style={{
               borderRadius: 32, overflow: "hidden", marginBottom: 20,
               borderWidth: isDark ? 0 : 1.5, borderColor: theme.accent,
             }}>
@@ -369,11 +371,11 @@ export default function MainGameScreen() {
                 </Pressable>
 
               </BlurView>
-            </View>
+            </Reanimated.View>
           )}
 
           {/* Level + Streak hero card */}
-          <View style={{ marginBottom: 20 }}>
+          <Reanimated.View entering={FadeInDown.delay(300).duration(400)} style={{ marginBottom: 20 }}>
             <View style={{ borderRadius: 32, overflow: "hidden", position: "relative", backgroundColor: isDark ? theme.accentSecondary : theme.accent }}>
               {/* Animated Background */}
               <Animated.View style={{
@@ -425,10 +427,11 @@ export default function MainGameScreen() {
                 </View>
               </View>
             </View>
-          </View>
+          </Reanimated.View>
 
           {/* Whose turn */}
-          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 20 }}>
+          <Reanimated.View entering={FadeInDown.delay(400).duration(400)}>
+            <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ borderRadius: 24, overflow: "hidden", marginBottom: 20 }}>
             <LinearGradient
               colors={isDark ? [theme.card.bg as string, theme.card.bg as string] : ["#fdf2f8", "#ffffff"]}
               style={{
@@ -447,16 +450,17 @@ export default function MainGameScreen() {
               <View style={{ flex: 1 }} />
               <Ionicons name="heart" size={16} color={isDark ? "#ffffff" : theme.accent} />
             </LinearGradient>
-          </BlurView>
+            </BlurView>
+          </Reanimated.View>
 
           {/* Game mode cards - 2x2 Grid */}
-          <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12,  fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>
+          <Reanimated.Text entering={FadeInDown.delay(500).duration(400)} style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12,  fontFamily: "DynaPuff_700Bold", marginBottom: 12, textShadowColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>
             CHOOSE A GAME MODE
-          </Text>
+          </Reanimated.Text>
 
           <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
             {/* Hidden Moments */}
-            <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
+            <Reanimated.View entering={FadeInDown.delay(600).duration(400)} style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
                 onPress={() => {
                   if (!isLevel5Unlocked) {
@@ -479,37 +483,37 @@ export default function MainGameScreen() {
                   </View>
                 )}
               </Pressable>
-            </View>
+            </Reanimated.View>
 
             {/* Love Missions */}
-            <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
+            <Reanimated.View entering={FadeInDown.delay(700).duration(400)} style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
                 onPress={() => handleGamePress("text", "/(game)/task-scratch")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
                 <Image source={require("../../assets/images/love-missions.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
               </Pressable>
-            </View>
+            </Reanimated.View>
 
             {/* Fate Wheel */}
-            <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
+            <Reanimated.View entering={FadeInDown.delay(800).duration(400)} style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
                 onPress={() => handleGamePress("", "/(game)/spin-wheel")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
                 <Image source={require("../../assets/images/fate-wheel.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
               </Pressable>
-            </View>
+            </Reanimated.View>
 
             {/* Heart Draw */}
-            <View style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
+            <Reanimated.View entering={FadeInDown.delay(900).duration(400)} style={{ width: "48%", marginBottom: 14, aspectRatio: 1, borderRadius: 32, overflow: "hidden" }}>
               <Pressable
                 onPress={() => handleGamePress("", "/(game)/lottery")}
                 style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1, flex: 1, borderRadius: 32, overflow: "hidden" })}
               >
                 <Image source={require("../../assets/images/heart-draw.png")} style={{ width: "100%", height: "100%", position: "absolute" }} />
               </Pressable>
-            </View>
+            </Reanimated.View>
           </View>
 
 

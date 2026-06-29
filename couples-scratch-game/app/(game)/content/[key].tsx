@@ -343,11 +343,9 @@ export default function ContentScreen() {
             </View>
           ) : (
             <View style={{
-              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.7)",
+              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#ffffff",
               borderRadius: 28,
               padding: 24,
-              borderWidth: 1,
-              borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: isDark ? 0.3 : 0.08,

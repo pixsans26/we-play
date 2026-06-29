@@ -6,6 +6,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 import { Asset } from "expo-asset";
 import { Ionicons } from "@expo/vector-icons";
 import { env } from "@/lib/env";
@@ -156,15 +157,15 @@ export default function EditProfileScreen() {
   return (
     <LinearGradient colors={theme.background as any} locations={[0, 0.5, 1]} style={{ flex: 1, paddingTop: 56 }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 24, marginBottom: 20 }}>
+        <Reanimated.View entering={FadeInDown.delay(100).duration(500)} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 24, marginBottom: 20 }}>
           <Pressable onPress={() => router.back()} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="close" size={24} color={isDark ? "#ffffff" : "#0f172a"} />
           </Pressable>
           <Text style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 20,  fontFamily: "DynaPuff_700Bold" }}>Edit Profile</Text>
           <View style={{ width: 40 }} />
-        </View>
+        </Reanimated.View>
 
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+        <Reanimated.ScrollView entering={FadeInDown.delay(500).duration(500)} contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
           {/* Partner A */}
           <View style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.6)", borderRadius: 24, padding: 20, marginBottom: 20 }}>
             <Text style={{ color: isDark ? "rgba(255,255,255,0.8)" : "rgba(15,23,42,0.8)", fontSize: 12,  marginBottom: 16, fontFamily: "Nunito_700Bold" }}>
@@ -360,7 +361,7 @@ export default function EditProfileScreen() {
               </Text>
             </LinearGradient>
           </Pressable>
-        </ScrollView>
+        </Reanimated.ScrollView>
       </KeyboardAvoidingView>
 
       {/* Avatar Picker Modal */}

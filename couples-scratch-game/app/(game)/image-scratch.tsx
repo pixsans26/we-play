@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
+import Reanimated, { FadeInDown } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "@/components/CustomBlurView";
 import { useAuthStore } from "@/store/authStore";
@@ -392,7 +393,7 @@ export default function ImageScratchScreen() {
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 52, paddingBottom: 28 }}>
 
         {/* ════ 1. HEADER ROW ════ */}
-        <View style={S.headerRow}>
+        <Reanimated.View entering={FadeInDown.delay(100).duration(500)} style={S.headerRow}>
           {/* History button — navigates to history page */}
           <Pressable
             onPress={() => router.push("/(game)/history")}
@@ -408,10 +409,10 @@ export default function ImageScratchScreen() {
           <Pressable onPress={handleGoBack} style={S.headerCircleBtn}>
             <Ionicons name="close" size={22} color="rgba(255,255,255,0.95)" />
           </Pressable>
-        </View>
+        </Reanimated.View>
 
         {/* ════ 2. SCORE CARD ════ */}
-        <View style={{ borderRadius: 24, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(255,255,255,0.6)", shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
+        <Reanimated.View entering={FadeInDown.delay(500).duration(500)} style={{ borderRadius: 24, marginBottom: 12, borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : "rgba(255,255,255,0.6)", shadowColor: isDark ? "transparent" : theme.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: isDark ? 0 : 2 }}>
           <View style={{ borderRadius: 23, overflow: "hidden" }}>
             <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 12 }}>
               <LinearGradient colors={isDark ? ["rgba(255,255,255,0.1)", "rgba(255,255,255,0.02)"] : ["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.4)"]} style={StyleSheet.absoluteFill} />
@@ -461,11 +462,11 @@ export default function ImageScratchScreen() {
               </Text>
             </BlurView>
           </View>
-        </View>
+        </Reanimated.View>
 
 
         {/* ════ 4. SCRATCH CARD ════ */}
-        <View style={S.cardArea}>
+        <Reanimated.View entering={FadeInDown.delay(900).duration(500)} style={S.cardArea}>
 
           {/* ── BEFORE SCRATCH ── */}
           {!isScratched && imageTask ? (
@@ -556,10 +557,10 @@ export default function ImageScratchScreen() {
               </Animated.View>
             </View>
           ) : null}
-        </View>
+        </Reanimated.View>
 
         {/* ════ 5. BOTTOM ACTION BUTTONS ════ */}
-        <View style={S.buttonsArea}>
+        <Reanimated.View entering={FadeInDown.delay(1300).duration(500)} style={S.buttonsArea}>
 
           {/* ── Complete — 3D shadow (lighter purple) ── */}
           <View style={{ opacity: canComplete ? 1 : 0.35 }}>
@@ -621,7 +622,7 @@ export default function ImageScratchScreen() {
             </View>
 
           </View>
-        </View>
+        </Reanimated.View>
 
       </View>
     </LinearGradient>
