@@ -342,16 +342,22 @@ export default function ContentScreen() {
               </Text>
             </View>
           ) : (
-            <View style={{
-              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#ffffff",
-              borderRadius: 28,
-              padding: 24,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: isDark ? 0.3 : 0.08,
-              shadowRadius: 12,
-              elevation: 4,
-            }}>
+            <BlurView
+              intensity={isDark ? 40 : 60}
+              tint={isDark ? "dark" : "light"}
+              style={{
+                borderRadius: 28,
+                overflow: "hidden",
+                padding: 24,
+                borderWidth: isDark ? 0 : 1,
+                borderColor: theme.card.border,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: isDark ? 0.3 : 0.08,
+                shadowRadius: 12,
+                elevation: 4,
+              }}
+            >
               {key === "about" && branding?.logoUrl && (
                 <View style={{ alignItems: "center", marginBottom: 24 }}>
                   <Image source={{ uri: branding.logoUrl }} style={{ width: 100, height: 100, borderRadius: 20 }} resizeMode="contain" />
@@ -364,7 +370,16 @@ export default function ContentScreen() {
                 </View>
               )}
               {key === "support" && branding?.supportEmail && (
-                <View style={{ marginBottom: 24, backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)", padding: 16, borderRadius: 16, flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <View style={{
+                  marginBottom: 24,
+                  borderWidth: 1,
+                  borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
+                  padding: 16,
+                  borderRadius: 16,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12
+                }}>
                   <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: meta.accentColor + "20", alignItems: "center", justifyContent: "center" }}>
                     <Ionicons name="mail" size={24} color={meta.accentColor} />
                   </View>
@@ -433,7 +448,7 @@ export default function ContentScreen() {
                   },
                 }}
               />
-            </View>
+            </BlurView>
           )}
 
           {/* Footer stamp */}

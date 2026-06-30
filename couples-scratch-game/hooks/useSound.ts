@@ -1,18 +1,21 @@
-import { useAudioPlayer } from "expo-audio";
+import { createAudioPlayer } from "expo-audio";
+import { useSettingsStore } from "@/store/settingsStore";
 
-/**
- * Hook providing sound effect playback functions for the game.
- * Uses expo-audio for robust cross-platform audio playback.
- */
+// Initialize players once at module scope to avoid re-creation on every render
+const scratchSound = createAudioPlayer(require("@/assets/sounds/scratch.wav"));
+const alarmSound = createAudioPlayer(require("@/assets/sounds/alarm.wav"));
+const levelUpSound = createAudioPlayer(require("@/assets/sounds/level-up.wav"));
+const spinSound = createAudioPlayer(require("@/assets/sounds/spin.wav"));
+const winSound = createAudioPlayer(require("@/assets/sounds/win.wav"));
+const resultSound = createAudioPlayer(require("@/assets/sounds/result.wav"));
+const popupSound = createAudioPlayer(require("@/assets/sounds/popup.wav"));
 
 export function useSound() {
-  const scratchSound = useAudioPlayer(require("@/assets/sounds/scratch.wav"));
-  const alarmSound = useAudioPlayer(require("@/assets/sounds/alarm.wav"));
-  const levelUpSound = useAudioPlayer(require("@/assets/sounds/level-up.wav"));
+  const soundEnabled = useSettingsStore((s) => s.soundEnabled);
 
   const playScratch = () => {
     try {
-      if (scratchSound) {
+      if (soundEnabled && scratchSound) {
         scratchSound.seekTo(0);
         scratchSound.play();
       }
@@ -21,7 +24,7 @@ export function useSound() {
 
   const playAlarm = () => {
     try {
-      if (alarmSound) {
+      if (soundEnabled && alarmSound) {
         alarmSound.seekTo(0);
         alarmSound.play();
       }
@@ -30,12 +33,49 @@ export function useSound() {
 
   const playLevelUp = () => {
     try {
-      if (levelUpSound) {
+      if (soundEnabled && levelUpSound) {
         levelUpSound.seekTo(0);
         levelUpSound.play();
       }
     } catch {}
   };
 
-  return { playScratch, playAlarm, playLevelUp };
+  const playSpin = () => {
+    try {
+      if (soundEnabled && spinSound) {
+        spinSound.seekTo(0);
+        spinSound.play();
+      }
+    } catch {}
+  };
+
+  const playWin = () => {
+    try {
+      if (soundEnabled && winSound) {
+        winSound.seekTo(0);
+        winSound.play();
+      }
+    } catch {}
+  };
+
+  const playResult = () => {
+    try {
+      if (soundEnabled && resultSound) {
+        resultSound.seekTo(0);
+        resultSound.play();
+      }
+    } catch {}
+  };
+
+  const playPopup = () => {
+    try {
+      if (soundEnabled && popupSound) {
+        popupSound.seekTo(0);
+        popupSound.play();
+      }
+    } catch {}
+  };
+
+  return { playScratch, playAlarm, playLevelUp, playSpin, playWin, playResult, playPopup };
 }
+

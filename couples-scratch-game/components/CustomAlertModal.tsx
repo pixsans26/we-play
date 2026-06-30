@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSound } from '@/hooks/useSound';
 
 interface CustomAlertModalProps {
   visible: boolean;
@@ -14,6 +15,18 @@ interface CustomAlertModalProps {
 }
 
 export function CustomAlertModal({ visible, title, message, icon = "lock-closed", isDark, onClose }: CustomAlertModalProps) {
+  const { playPopup, playWin } = useSound();
+
+  useEffect(() => {
+    if (visible) {
+      if (icon === "trophy" || title.toLowerCase().includes("completed") || title.toLowerCase().includes("congratulations")) {
+        playWin();
+      } else {
+        playPopup();
+      }
+    }
+  }, [visible, icon, title]);
+
   if (!visible) return null;
 
   return (

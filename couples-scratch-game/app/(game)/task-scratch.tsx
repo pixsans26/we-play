@@ -249,7 +249,7 @@ export default function TaskScratchScreen() {
     const performerUid = currentTurn === "A"
       ? (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`)
       : coupleProfile.partnerAUid;
-    
+
     // Log as skipped by setting timeTaken: -1
     await logScratch({
       userUid: scratcherUid,

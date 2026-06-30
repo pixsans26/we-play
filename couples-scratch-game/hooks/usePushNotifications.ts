@@ -2,25 +2,18 @@ import { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
 
-const isExpoGo = Constants.appOwnership === 'expo';
-let Notifications: any = null;
-
-if (!isExpoGo) {
-  try {
-    Notifications = require('expo-notifications');
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-        shouldShowBanner: true,
-        shouldShowList: true,
-      }),
-    });
-  } catch (e) {
-    console.warn('Failed to load expo-notifications', e);
-  }
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
 }
 
 export function usePushNotifications() {
@@ -30,10 +23,7 @@ export function usePushNotifications() {
   const responseListener = useRef<any>(null);
 
   useEffect(() => {
-    if (isExpoGo || !Notifications) {
-      console.log('Push notifications (remote) are not supported in Expo Go. Use a development build.');
-      return;
-    }
+    if (Platform.OS === 'web') return;
 
     registerForPushNotificationsAsync()
       .then(token => setExpoPushToken(token ?? ''))
@@ -61,31 +51,41 @@ export function usePushNotifications() {
 }
 
 export async function scheduleLocalNotification(title: string, body: string, secondsFromNow: number = 60) {
-  if (isExpoGo || !Notifications) return;
+  if (Platform.OS === 'web') return;
   
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title,
-      body,
-      sound: true,
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: secondsFromNow,
-    },
-  });
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: secondsFromNow,
+      },
+    });
+  } catch (err) {
+    console.warn("Failed to schedule local notification:", err);
+  }
 }
 
 async function registerForPushNotificationsAsync() {
   let token;
 
+  if (Platform.OS === 'web') return;
+
   if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
+    try {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    } catch (e) {
+      console.warn("Failed to set notification channel:", e);
+    }
   }
 
   if (Device.isDevice) {

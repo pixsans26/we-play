@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LEVEL_BADGES } from '@/types';
+import { useSound } from '@/hooks/useSound';
 
 interface LevelUpModalProps {
   visible: boolean;
@@ -13,6 +14,13 @@ interface LevelUpModalProps {
 
 export function LevelUpModal({ visible, level, isDark, onClose }: LevelUpModalProps) {
   const badge = LEVEL_BADGES[level] || { emoji: "🏆", label: "Level Up!" };
+  const { playLevelUp } = useSound();
+
+  useEffect(() => {
+    if (visible) {
+      playLevelUp();
+    }
+  }, [visible]);
   
   if (!visible) return null;
 

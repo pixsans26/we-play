@@ -76,7 +76,7 @@ export default function SpinWheelScreen() {
   const setSpinCount = useGameStore((s) => s.setSpinCount);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const { logScratch, getAllHistory } = useScratchHistory();
-  const { playLevelUp } = useSound();
+  const { playSpin, playResult } = useSound();
 
   const [spinCountA, setSpinCountA] = React.useState(0);
   const [spinCountB, setSpinCountB] = React.useState(0);
@@ -196,6 +196,8 @@ export default function SpinWheelScreen() {
       Animated.timing(spinBtnAnim, { toValue: 1, duration: 100, useNativeDriver: true })
     ]).start();
 
+    playSpin();
+
     const extraRotations = 360 * 5;
     const randomSliceIndex = Math.floor(Math.random() * NUM_SLICES);
 
@@ -217,7 +219,7 @@ export default function SpinWheelScreen() {
     setIsSpinning(false);
     const task = spinTasks[index];
     setResult(task);
-    playLevelUp();
+    playResult();
 
     Animated.timing(overlayOpacity, {
       toValue: 1,
