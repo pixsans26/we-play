@@ -149,7 +149,8 @@ export default function TaskScratchScreen() {
   const loadNextTask = useCallback(async (forcedTurn?: "A" | "B") => {
     if (!user || !coupleProfile) return;
     try {
-      if (currentTask) setPreviousTask(currentTask as Task & { emoji: string; title: string; description: string });
+      const activeTask = useGameStore.getState().currentTask;
+      if (activeTask) setPreviousTask(activeTask as Task & { emoji: string; title: string; description: string });
       setIsLoading(true);
       setIsScratched(false);
       setShowConfetti(false);
@@ -176,15 +177,25 @@ export default function TaskScratchScreen() {
       }
       setIsLoading(false);
     } catch { setIsLoading(false); }
-  }, [user, coupleProfile, currentTurn, getNextTask, loadCurrentLevel, setCurrentTask, setIsScratched, setPerformingPartnerName, getPerformingPartnerName, revealOpacity, currentTask]);
+  }, [user, coupleProfile, currentTurn, getNextTask, loadCurrentLevel, setCurrentTask, setIsScratched, setPerformingPartnerName, getPerformingPartnerName, revealOpacity]);
+
+  const loadNextTaskRef = useRef(loadNextTask);
+  useEffect(() => {
+    loadNextTaskRef.current = loadNextTask;
+  }, [loadNextTask]);
+
+  const fetchDataRef = useRef(fetchData);
+  useEffect(() => {
+    fetchDataRef.current = fetchData;
+  }, [fetchData]);
 
   useFocusEffect(useCallback(() => {
     let isMounted = true;
     setIsFetching(true);
-    fetchData()
+    fetchDataRef.current()
       .then(() => {
         if (isMounted) {
-          loadNextTask();
+          loadNextTaskRef.current();
         }
       })
       .catch(() => { })
@@ -194,7 +205,7 @@ export default function TaskScratchScreen() {
         }
       });
     return () => { isMounted = false; };
-  }, [isLinked, fetchData, loadNextTask]));
+  }, []));
 
   useEffect(() => {
     loadScratchCounts();
