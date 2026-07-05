@@ -35,7 +35,7 @@ export default function ImageTasksPage() {
   const [search, setSearch] = useState("");
   const [filterLevel, setFilterLevel] = useState("");
   const [page, setPage] = useState(1);
-  const ITEMS_PER_PAGE = 6; // 6 cards per page
+  const ITEMS_PER_PAGE = 8; // 8 cards per page
 
   const load = async () => {
     if (!token) return;

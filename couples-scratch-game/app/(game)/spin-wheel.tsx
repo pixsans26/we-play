@@ -12,7 +12,8 @@ import { useAuthStore } from "@/store/authStore";
 import { useGameStore } from "@/store/gameStore";
 import { env } from "@/lib/env";
 import { useSound } from "@/hooks/useSound";
-import { getAvatarSource } from "@/lib/apiClient";
+import { getAvatarSource, apiFetch } from "@/lib/apiClient";
+import { LevelUpModal } from "@/components/LevelUpModal";
 
 const { width, height } = Dimensions.get("window");
 const WHEEL_SIZE = width * 0.82;
@@ -80,7 +81,10 @@ export default function SpinWheelScreen() {
 
   const [spinCountA, setSpinCountA] = React.useState(0);
   const [spinCountB, setSpinCountB] = React.useState(0);
-  const [spunTaskCounts, setSpunTaskCounts] = React.useState<Record<string, number>>({});
+  const [spunTaskCounts, setSpunTaskCounts] = useState<Record<string, number>>({});
+  
+  const [levelUpVisible, setLevelUpVisible] = useState(false);
+  const [newLevelState, setNewLevelState] = useState(1);
 
   const rawTasks = useGameStore((s) => s.spinTasks);
 
@@ -228,12 +232,12 @@ export default function SpinWheelScreen() {
     }).start();
   };
 
-  const handleDone = () => {
+  const handleDone = async () => {
     if (result && coupleProfile) {
       const rollerUid = currentTurn === "A" ? coupleProfile.partnerAUid : (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`);
       const performerUid = currentTurn === "A" ? (coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`) : coupleProfile.partnerAUid;
       if (rollerUid && performerUid) {
-        logScratch({
+        await logScratch({
           userUid: rollerUid,
           taskId: result.label,
           taskType: "spin_wheel",
@@ -241,6 +245,31 @@ export default function SpinWheelScreen() {
           skipped: false,
           performerUid: performerUid,
         });
+
+        if (rollerUid) {
+          const fetchLevel = async () => {
+            try {
+              const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${rollerUid}`);
+              if (res.ok) { const d = await res.json(); return d.currentLevel || 1; }
+            } catch { return 1; }
+            return 1;
+          };
+
+          try {
+            const oldLevel = await fetchLevel();
+            const res = await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/progress/${rollerUid}/increment-completed`, { method: "PATCH" });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.currentLevel > oldLevel) {
+                setNewLevelState(data.currentLevel);
+                setLevelUpVisible(true);
+                return; // Return here so we don't switch screen immediately if level up happens
+              }
+            }
+          } catch (err) {
+            console.error("Failed to increment progress", err);
+          }
+        }
       }
     }
     incrementSpinCount();
@@ -479,6 +508,20 @@ export default function SpinWheelScreen() {
         </View>
 
     </View>
+
+      <LevelUpModal
+        visible={levelUpVisible}
+        level={newLevelState}
+        isDark={isDark}
+        onClose={() => {
+          setLevelUpVisible(false);
+          incrementSpinCount();
+          setResult(null);
+          overlayOpacity.setValue(0);
+          switchTurn();
+          router.replace("/");
+        }}
+      />
     </LinearGradient>
   );
 }
