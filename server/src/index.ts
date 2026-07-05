@@ -1771,6 +1771,15 @@ app.get("/api/cycle/:identifier", authenticateToken, async (req: Request, res: R
       history = await db.select().from(cycleHistory).where(eq(cycleHistory.femaleUid, femaleUid)).orderBy(sql`${cycleHistory.createdAt} ASC`);
     }
 
+    const dedupedHistoryMap = new Map();
+    for (const h of history) {
+      if (!h.periodStart) continue;
+      const d = new Date(h.periodStart);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      dedupedHistoryMap.set(key, h);
+    }
+    history = Array.from(dedupedHistoryMap.values());
+
     if (!existing) {
       // Return default values
       return res.json({
@@ -1847,13 +1856,20 @@ app.put("/api/cycle/:identifier", authenticateToken, async (req: Request, res: R
 
     if (existing) {
       if (existing.lastPeriodStart && lastPeriodStart && existing.lastPeriodStart !== lastPeriodStart) {
-        await db.insert(cycleHistory).values({
-          coupleId,
-          femaleUid,
-          periodStart: existing.lastPeriodStart,
-          periodEnd: existing.lastPeriodEnd,
-          cycleLength: existing.averageCycleLength,
-        });
+        const existingDate = new Date(existing.lastPeriodStart);
+        const newDate = new Date(lastPeriodStart);
+        const diffTime = Math.abs(newDate.getTime() - existingDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 15) {
+          await db.insert(cycleHistory).values({
+            coupleId,
+            femaleUid,
+            periodStart: existing.lastPeriodStart,
+            periodEnd: existing.lastPeriodEnd,
+            cycleLength: existing.averageCycleLength,
+          });
+        }
       }
 
       const [updated] = await db.update(cycleTracking)
@@ -1876,6 +1892,16 @@ app.put("/api/cycle/:identifier", authenticateToken, async (req: Request, res: R
       } else if (femaleUid) {
         history = await db.select().from(cycleHistory).where(eq(cycleHistory.femaleUid, femaleUid)).orderBy(sql`${cycleHistory.createdAt} ASC`);
       }
+      
+      const dedupedHistoryMap = new Map();
+      for (const h of history) {
+        if (!h.periodStart) continue;
+        const d = new Date(h.periodStart);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        dedupedHistoryMap.set(key, h);
+      }
+      history = Array.from(dedupedHistoryMap.values());
+      
       res.json({ config: updated, history });
     } else {
       const [inserted] = await db.insert(cycleTracking)
