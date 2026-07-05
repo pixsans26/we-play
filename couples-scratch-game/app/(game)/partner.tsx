@@ -200,6 +200,31 @@ export default function PartnerScreen() {
 
   const getMarkedDates = () => {
     const marked: any = {};
+    
+    // Add history periods first
+    if (cycleConfig?.history) {
+      cycleConfig.history.forEach((h: any) => {
+        if (h.periodStart) {
+          if (!h.periodEnd) {
+            marked[h.periodStart] = { startingDay: true, endingDay: true, color: theme.card.subtext, textColor: "#fff" };
+          } else {
+            let curr = new Date(h.periodStart);
+            const end = new Date(h.periodEnd);
+            while (curr <= end) {
+              const dStr = curr.toISOString().split("T")[0];
+              marked[dStr] = {
+                startingDay: dStr === h.periodStart,
+                endingDay: dStr === h.periodEnd,
+                color: theme.card.subtext,
+                textColor: "#fff"
+              };
+              curr.setDate(curr.getDate() + 1);
+            }
+          }
+        }
+      });
+    }
+
     if (lastPeriodStart && !lastPeriodEnd) {
       marked[lastPeriodStart] = { startingDay: true, endingDay: true, color: theme.accent, textColor: "#fff" };
     } else if (lastPeriodStart && lastPeriodEnd) {

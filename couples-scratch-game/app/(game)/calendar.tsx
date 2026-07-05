@@ -31,7 +31,8 @@ export default function CalendarScreen() {
     return generatePredictionCalendarMarks(
       cycleConfig?.lastPeriodStart || null,
       cycleConfig?.averageCycleLength || 28,
-      cycleConfig?.averagePeriodLength || 5
+      cycleConfig?.averagePeriodLength || 5,
+      cycleConfig?.history || []
     );
   }, [cycleConfig]);
 

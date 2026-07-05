@@ -281,7 +281,6 @@ export default function LotteryScreen() {
               if (data.currentLevel > oldLevel) {
                 setNewLevelState(data.currentLevel);
                 setLevelUpVisible(true);
-                return;
               }
             }
           } catch (err) {
@@ -298,7 +297,6 @@ export default function LotteryScreen() {
     setResults(null);
     setCurrentComboId(null);
     switchTurn();
-    router.replace("/");
   };
 
   const getColStyle = (animValue: Animated.Value) => {
@@ -513,10 +511,6 @@ export default function LotteryScreen() {
         isDark={isDark}
         onClose={() => {
           setLevelUpVisible(false);
-          setResults(null);
-          setCurrentComboId(null);
-          switchTurn();
-          router.replace("/");
         }}
       />
     </LinearGradient>

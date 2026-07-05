@@ -1764,19 +1764,32 @@ app.get("/api/cycle/:identifier", authenticateToken, async (req: Request, res: R
       existing = row;
     }
 
+    let history: any[] = [];
+    if (coupleId) {
+      history = await db.select().from(cycleHistory).where(eq(cycleHistory.coupleId, coupleId)).orderBy(sql`${cycleHistory.createdAt} ASC`);
+    } else if (femaleUid) {
+      history = await db.select().from(cycleHistory).where(eq(cycleHistory.femaleUid, femaleUid)).orderBy(sql`${cycleHistory.createdAt} ASC`);
+    }
+
     if (!existing) {
       // Return default values
       return res.json({
-        coupleId,
-        femaleUid,
-        averageCycleLength: 28,
-        averagePeriodLength: 5,
-        lastPeriodStart: null,
-        lastPeriodEnd: null,
-        isLocked: false,
+        config: {
+          coupleId,
+          femaleUid,
+          averageCycleLength: 28,
+          averagePeriodLength: 5,
+          lastPeriodStart: null,
+          lastPeriodEnd: null,
+          isLocked: false,
+        },
+        history
       });
     }
-    res.json(existing);
+    res.json({
+      config: existing,
+      history
+    });
   } catch (err) {
     console.error("[GET /api/cycle]", err);
     res.status(500).json({ error: "Failed to fetch cycle data" });
@@ -1856,7 +1869,14 @@ app.put("/api/cycle/:identifier", authenticateToken, async (req: Request, res: R
         })
         .where(eq(cycleTracking.id, existing.id))
         .returning();
-      res.json(updated);
+        
+      let history: any[] = [];
+      if (coupleId) {
+        history = await db.select().from(cycleHistory).where(eq(cycleHistory.coupleId, coupleId)).orderBy(sql`${cycleHistory.createdAt} ASC`);
+      } else if (femaleUid) {
+        history = await db.select().from(cycleHistory).where(eq(cycleHistory.femaleUid, femaleUid)).orderBy(sql`${cycleHistory.createdAt} ASC`);
+      }
+      res.json({ config: updated, history });
     } else {
       const [inserted] = await db.insert(cycleTracking)
         .values({
@@ -1869,11 +1889,51 @@ app.put("/api/cycle/:identifier", authenticateToken, async (req: Request, res: R
           isLocked: isLocked ?? false,
         })
         .returning();
-      res.status(201).json(inserted);
+      res.status(201).json({ config: inserted, history: [] });
     }
   } catch (err) {
     console.error("[PUT /api/cycle]", err);
     res.status(500).json({ error: "Failed to update cycle data" });
+  }
+});
+
+app.post("/api/cycle/:identifier/history", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const identifier = String(req.params.identifier);
+    let coupleId: number | null = null;
+    let femaleUid: string | null = null;
+
+    if (/^\d+$/.test(identifier)) {
+      coupleId = Number(identifier);
+    } else {
+      femaleUid = identifier;
+      const [coupleRow] = await db.select().from(couple).where(
+        sql`${couple.partnerAUid} = ${femaleUid} OR ${couple.partnerBUid} = ${femaleUid}`
+      );
+      if (coupleRow) {
+        coupleId = coupleRow.id;
+      }
+    }
+
+    const { periodStart, periodEnd, cycleLength } = req.body;
+    if (!periodStart) {
+      return res.status(400).json({ error: "periodStart is required" });
+    }
+
+    // Upsert logic: if a record exists in cycleHistory for the exact same month/year, update it.
+    // Wait, let's keep it simple: just insert. The client should know what they are doing.
+    const [inserted] = await db.insert(cycleHistory).values({
+      coupleId,
+      femaleUid,
+      periodStart,
+      periodEnd: periodEnd || null,
+      cycleLength: cycleLength || 28,
+    }).returning();
+
+    res.status(201).json(inserted);
+  } catch (err) {
+    console.error("[POST /api/cycle/history]", err);
+    res.status(500).json({ error: "Failed to add cycle history" });
   }
 });
 

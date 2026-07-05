@@ -141,7 +141,8 @@ export function calculateCyclePredictions(
 export function generatePredictionCalendarMarks(
   lastPeriodStartStr: string | null,
   averageCycleLength: number = 28,
-  averagePeriodLength: number = 5
+  averagePeriodLength: number = 5,
+  history: Array<{ periodStart: string; periodEnd: string | null; cycleLength: number }> = []
 ): any {
   const marked: any = {};
   if (!lastPeriodStartStr) return marked;
@@ -152,46 +153,36 @@ export function generatePredictionCalendarMarks(
     return local.toISOString().split("T")[0];
   };
 
-  const lastPeriodStart = new Date(lastPeriodStartStr);
-  if (isNaN(lastPeriodStart.getTime())) return marked;
-
   const today = normalizeDate(new Date());
 
-  // Loop through past cycles (for previous 3 months) up to next 6 cycles
-  for (let i = -4; i <= 6; i++) {
-    // 1. Mark Period days
-    const cycleStart = new Date(lastPeriodStart);
-    cycleStart.setDate(lastPeriodStart.getDate() + (i * averageCycleLength));
+  const processCycle = (cStartStr: string, cLength: number, pEndStr: string | null) => {
+    const cycleStart = new Date(cStartStr);
+    if (isNaN(cycleStart.getTime())) return;
     
-    // Only mark cycles that are in the future or the current one
-    // We don't want to skip the current cycle, even if it's partly past
-    
-    const periodEnd = new Date(cycleStart);
-    periodEnd.setDate(cycleStart.getDate() + averagePeriodLength - 1);
+    const periodEnd = pEndStr ? new Date(pEndStr) : new Date(cycleStart);
+    if (!pEndStr) {
+      periodEnd.setDate(cycleStart.getDate() + averagePeriodLength - 1);
+    }
 
     let curr = new Date(cycleStart);
     let dayOfPeriod = 1;
     while (curr <= periodEnd) {
       const key = dateToKey(curr);
-      
-      // Heavy flow (days 1-2), Light flow (days 3+)
       const isHeavyFlow = dayOfPeriod <= 2;
 
       marked[key] = {
-        color: isHeavyFlow ? "#be185d" : "#fbcfe8", // Dark pink vs Light pink
+        color: isHeavyFlow ? "#be185d" : "#fbcfe8",
         textColor: isHeavyFlow ? "#ffffff" : "#be185d",
         startingDay: key === dateToKey(cycleStart),
         endingDay: key === dateToKey(periodEnd),
         flowType: isHeavyFlow ? "heavy" : "light"
       };
-      
       curr.setDate(curr.getDate() + 1);
       dayOfPeriod++;
     }
 
-    // 2. Mark Fertile Window & Ovulation
     const lutealPhaseLength = 14;
-    const estimatedOvulationDay = averageCycleLength - lutealPhaseLength;
+    const estimatedOvulationDay = cLength - lutealPhaseLength;
     
     const ovulationDate = new Date(cycleStart);
     ovulationDate.setDate(cycleStart.getDate() + estimatedOvulationDay - 1);
@@ -214,10 +205,9 @@ export function generatePredictionCalendarMarks(
       const daysToOvulation = Math.floor((ovulationDate.getTime() - fCurr.getTime()) / (1000 * 60 * 60 * 24));
       const isMostDesired = daysToOvulation >= 0 && daysToOvulation <= 2;
 
-      // Don't overwrite period marks with fertile marks (just in case of extremely short cycles)
       if (!marked[key]) {
         marked[key] = {
-          color: isOvulation ? "#9333ea" : "#d8b4fe", // Dark purple for ovulation, light purple for fertile
+          color: isOvulation ? "#9333ea" : "#d8b4fe",
           textColor: isOvulation ? "#fff" : "#6b21a8",
           startingDay: key === dateToKey(fertileStart),
           endingDay: key === dateToKey(fertileEnd),
@@ -229,7 +219,6 @@ export function generatePredictionCalendarMarks(
       fCurr.setDate(fCurr.getDate() + 1);
     }
 
-    // 3. Mark Protected Safe (3 days before fertile, 3 days after fertile)
     const protectedStart = new Date(fertileStart);
     protectedStart.setDate(fertileStart.getDate() - 3);
     const protectedEndPre = new Date(fertileStart);
@@ -256,25 +245,48 @@ export function generatePredictionCalendarMarks(
     markProtected(protectedStart, protectedEndPre);
     markProtected(protectedStartPost, protectedEndPost);
 
-    // 4. Mark Safe Sex (all other days in the cycle)
-    // A cycle is from cycleStart to nextCycleStart - 1
     const nextCycleStart = new Date(cycleStart);
-    nextCycleStart.setDate(cycleStart.getDate() + averageCycleLength);
+    nextCycleStart.setDate(cycleStart.getDate() + cLength);
     
     let cCurr = new Date(cycleStart);
     while (cCurr < nextCycleStart) {
       const key = dateToKey(cCurr);
-      // If a day has no color/flowType and is not protected and not fertile, it's a completely regular safe day
       if (!marked[key]) {
         marked[key] = { isSafeSex: true };
       } else if (!marked[key].color && !marked[key].isProtectedSafe && !marked[key].isMostDesired) {
-        // Just in case it was initialized for today
         marked[key].isSafeSex = true;
       } else if (marked[key].flowType) {
-        // During period, pregnancy risk is very low, so it can be considered safe sex
         marked[key].isSafeSex = true;
       }
       cCurr.setDate(cCurr.getDate() + 1);
+    }
+  };
+
+  // Process History
+  for (const h of history) {
+    if (h.periodStart !== lastPeriodStartStr) { // avoid duplicating current if it's already there somehow
+      processCycle(h.periodStart, h.cycleLength || averageCycleLength, h.periodEnd);
+    }
+  }
+
+  // Process current and future
+  const lastPeriodStart = new Date(lastPeriodStartStr);
+  if (!isNaN(lastPeriodStart.getTime())) {
+    processCycle(lastPeriodStartStr, averageCycleLength, null);
+    
+    for (let i = 1; i <= 6; i++) {
+      const futureStart = new Date(lastPeriodStart);
+      futureStart.setDate(lastPeriodStart.getDate() + (i * averageCycleLength));
+      processCycle(dateToKey(futureStart), averageCycleLength, null);
+    }
+    
+    // If no history, predict back 4 months
+    if (history.length === 0) {
+      for (let i = -4; i <= -1; i++) {
+        const pastStart = new Date(lastPeriodStart);
+        pastStart.setDate(lastPeriodStart.getDate() + (i * averageCycleLength));
+        processCycle(dateToKey(pastStart), averageCycleLength, null);
+      }
     }
   }
 

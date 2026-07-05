@@ -10,6 +10,7 @@ interface CycleTracking {
   lastPeriodStart: string | null;
   lastPeriodEnd: string | null;
   isLocked: boolean;
+  history: Array<{ periodStart: string; periodEnd: string | null; cycleLength: number }>;
 }
 
 interface CycleStore {
@@ -46,7 +47,7 @@ export const useCycleStore = create<CycleStore>((set, get) => ({
         throw new Error("Failed to fetch cycle configuration");
       }
       const data = await res.json();
-      set({ cycleConfig: data, isLoading: false });
+      set({ cycleConfig: { ...data.config, history: data.history || [] }, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
     }
@@ -69,7 +70,7 @@ export const useCycleStore = create<CycleStore>((set, get) => ({
       });
       if (!res.ok) throw new Error("Failed to update cycle configuration");
       const data = await res.json();
-      set({ cycleConfig: data, isLoading: false });
+      set({ cycleConfig: { ...data.config, history: data.history || [] }, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
     }
