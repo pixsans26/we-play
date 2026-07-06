@@ -2059,7 +2059,11 @@ app.post("/api/notifications/send", authenticateToken, async (req: Request, res:
     if (!title || !body) return res.status(400).json({ error: "Missing title or body" });
 
     const allProgress = await db.select({ pushToken: userProgress.pushToken }).from(userProgress);
-    const tokens = allProgress.map(p => p.pushToken).filter(t => t && t.startsWith("ExponentPushToken"));
+    // Accept all valid Expo push tokens — ExponentPushToken[...] format
+    // In a release build, these tokens route to your standalone app (WePlay), not Expo Go
+    const tokens = allProgress
+      .map(p => p.pushToken)
+      .filter((t): t is string => !!t && t.startsWith("ExponentPushToken"));
     const uniqueTokens = Array.from(new Set(tokens));
 
     if (uniqueTokens.length === 0) {
@@ -2071,14 +2075,17 @@ app.post("/api/notifications/send", authenticateToken, async (req: Request, res:
       sound: 'default',
       title,
       body,
+      channelId: 'default',  // Android: routes to the 'WePlay' notification channel
+      priority: 'high',
     }));
 
-    const chunks = [];
+    const chunks: typeof messages[] = [];
     for (let i = 0; i < messages.length; i += 100) {
       chunks.push(messages.slice(i, i + 100));
     }
 
     let successCount = 0;
+    const errors: any[] = [];
     for (const chunk of chunks) {
       const expoRes = await fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',
@@ -2089,10 +2096,16 @@ app.post("/api/notifications/send", authenticateToken, async (req: Request, res:
         },
         body: JSON.stringify(chunk),
       });
-      if (expoRes.ok) successCount += chunk.length;
+      const expoBody = await expoRes.json();
+      if (expoRes.ok) {
+        // Count only successful deliveries
+        const data: any[] = Array.isArray(expoBody.data) ? expoBody.data : [];
+        successCount += data.filter((r: any) => r.status === 'ok').length;
+        errors.push(...data.filter((r: any) => r.status !== 'ok'));
+      }
     }
 
-    res.json({ success: true, count: successCount });
+    res.json({ success: true, count: successCount, errors });
   } catch (err) {
     console.error("[POST /api/notifications/send]", err);
     res.status(500).json({ error: "Failed to send notifications" });
