@@ -10,7 +10,7 @@
     "jsEngine": "hermes",
     "scheme": "couples-scratch-game",
     "notification": {
-      "icon": "./assets/icon.png",
+      "icon": "./assets/notification-icon.png",
       "color": "#ff2d6b"
     },
     "splash": {
