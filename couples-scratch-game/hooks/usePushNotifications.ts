@@ -4,7 +4,12 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 
-if (Platform.OS !== 'web') {
+// Expo Go dropped remote push notification support in SDK 53.
+// isExpoGo = true when running inside Expo Go (appOwnership === 'expo').
+// In dev builds and release builds, appOwnership is null — full support.
+const isExpoGo = Constants.appOwnership === 'expo';
+
+if (Platform.OS !== 'web' && !isExpoGo) {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -23,7 +28,7 @@ export function usePushNotifications() {
   const responseListener = useRef<any>(null);
 
   useEffect(() => {
-    if (Platform.OS === 'web') return;
+    if (Platform.OS === 'web' || isExpoGo) return;
 
     registerForPushNotificationsAsync()
       .then(token => setExpoPushToken(token ?? ''))
@@ -51,7 +56,7 @@ export function usePushNotifications() {
 }
 
 export async function scheduleLocalNotification(title: string, body: string, secondsFromNow: number = 60) {
-  if (Platform.OS === 'web') return;
+  if (Platform.OS === 'web' || isExpoGo) return;
   
   try {
     await Notifications.scheduleNotificationAsync({
@@ -73,15 +78,15 @@ export async function scheduleLocalNotification(title: string, body: string, sec
 async function registerForPushNotificationsAsync() {
   let token;
 
-  if (Platform.OS === 'web') return;
+  if (Platform.OS === 'web' || isExpoGo) return;
 
   if (Platform.OS === 'android') {
     try {
       await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
+        name: 'WePlay',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
+        lightColor: '#ff2d6b',
       });
     } catch (e) {
       console.warn("Failed to set notification channel:", e);
