@@ -2,15 +2,20 @@ import { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
-import * as Notifications from 'expo-notifications';
 
 // Expo Go dropped remote push notification support in SDK 53.
+// We must NOT import expo-notifications at module level in Expo Go —
+// the import itself crashes because the module runs side-effects on load.
 // isExpoGo = true when running inside Expo Go (appOwnership === 'expo').
 // In dev builds and release builds, appOwnership is null — full support.
 const isExpoGo = Constants.appOwnership === 'expo';
 
-if (Platform.OS !== 'web' && !isExpoGo) {
-  Notifications.setNotificationHandler({
+// Lazily load expo-notifications only in real builds (dev build / release).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let N: typeof import('expo-notifications') | null = null;
+if (!isExpoGo && Platform.OS !== 'web') {
+  N = require('expo-notifications');
+  N!.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
       shouldPlaySound: true,
@@ -28,17 +33,17 @@ export function usePushNotifications() {
   const responseListener = useRef<any>(null);
 
   useEffect(() => {
-    if (Platform.OS === 'web' || isExpoGo) return;
+    if (Platform.OS === 'web' || isExpoGo || !N) return;
 
     registerForPushNotificationsAsync()
       .then(token => setExpoPushToken(token ?? ''))
       .catch((error: any) => setExpoPushToken(`${error}`));
 
-    notificationListener.current = Notifications.addNotificationReceivedListener((notification: any) => {
-      setNotification(notification);
+    notificationListener.current = N.addNotificationReceivedListener((notif: any) => {
+      setNotification(notif);
     });
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response: any) => {
+    responseListener.current = N.addNotificationResponseReceivedListener((response: any) => {
       console.log(response);
     });
 
@@ -56,17 +61,17 @@ export function usePushNotifications() {
 }
 
 export async function scheduleLocalNotification(title: string, body: string, secondsFromNow: number = 60) {
-  if (Platform.OS === 'web' || isExpoGo) return;
-  
+  if (Platform.OS === 'web' || isExpoGo || !N) return;
+
   try {
-    await Notifications.scheduleNotificationAsync({
+    await N.scheduleNotificationAsync({
       content: {
         title,
         body,
         sound: true,
       },
       trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        type: N.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: secondsFromNow,
       },
     });
@@ -78,13 +83,13 @@ export async function scheduleLocalNotification(title: string, body: string, sec
 async function registerForPushNotificationsAsync() {
   let token;
 
-  if (Platform.OS === 'web' || isExpoGo) return;
+  if (Platform.OS === 'web' || isExpoGo || !N) return;
 
   if (Platform.OS === 'android') {
     try {
-      await Notifications.setNotificationChannelAsync('default', {
+      await N.setNotificationChannelAsync('default', {
         name: 'WePlay',
-        importance: Notifications.AndroidImportance.MAX,
+        importance: N.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#ff2d6b',
       });
@@ -94,27 +99,27 @@ async function registerForPushNotificationsAsync() {
   }
 
   if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } = await N.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
+      const { status } = await N.requestPermissionsAsync();
       finalStatus = status;
     }
     if (finalStatus !== 'granted') {
       console.log('Failed to get push token for push notification!');
       return;
     }
-    
+
     const projectId =
       Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-      
+
     if (!projectId) {
       console.log('Project ID not found in app.json. Add it in extra.eas.projectId');
     }
 
     try {
       const pushTokenString = (
-        await Notifications.getExpoPushTokenAsync({
+        await N.getExpoPushTokenAsync({
           projectId,
         })
       ).data;
