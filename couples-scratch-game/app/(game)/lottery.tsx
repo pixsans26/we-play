@@ -27,7 +27,7 @@ export default function LotteryScreen() {
   const switchTurn = useGameStore((s) => s.switchTurn);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const { getAllHistory, logScratch } = useScratchHistory();
-  const { playLotterySpin, playResult } = useSound();
+  const { playResult } = useSound();
 
   const store = useGameStore((s) => s);
   const [selectedLevel, setSelectedLevel] = useState(1);
@@ -147,7 +147,6 @@ export default function LotteryScreen() {
       Animated.timing(spinBtnAnim, { toValue: 1, duration: 100, useNativeDriver: true })
     ]).start();
 
-    playLotterySpin();
 
     const lotteryData = store.lotteryData;
     if (!lotteryData || lotteryData.col1.length === 0) {

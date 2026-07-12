@@ -80,7 +80,7 @@ export default function TaskScratchScreen() {
   const theme = getTheme(isDark);
 
   const { getNextTask, logScratch, getAllHistory, getSeenIds } = useScratchHistory();
-  const { playScratch, playAlarm, playScratchResult } = useSound();
+  const { playAlarm } = useSound();
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -279,7 +279,7 @@ export default function TaskScratchScreen() {
   const handleScratchComplete = useCallback(async () => {
     setIsScratched(true);
     setShowConfetti(true);
-    playScratch();
+
     Animated.timing(revealOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
     setTimerStarted(false);
     setIsCompleted(false);
@@ -304,7 +304,7 @@ export default function TaskScratchScreen() {
         performerUid: performerUid ?? undefined
       }).catch(console.error);
     }
-  }, [setIsScratched, playScratch, revealOpacity, start, user, currentTask, coupleProfile, currentTurn, logScratch]);
+  }, [setIsScratched, revealOpacity, start, user, currentTask, coupleProfile, currentTurn, logScratch]);
 
   const handleDone = useCallback(async () => {
     if (isProcessingDoneRef.current) return;
@@ -312,7 +312,7 @@ export default function TaskScratchScreen() {
 
     isProcessingDoneRef.current = true;
     setIsCompleted(true);
-    playScratchResult(); // Play completion sound immediately on button press
+
 
     const scratcherUid = currentTurn === "A"
       ? coupleProfile.partnerAUid
