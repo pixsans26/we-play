@@ -78,7 +78,7 @@ export default function ImageScratchScreen() {
   const theme = getTheme(isDark);
 
   const { getNextTask, logScratch, getAllHistory, getSeenIds } = useScratchHistory();
-  const { playScratch, playAlarm, playLevelUp } = useSound();
+  const { playScratch, playAlarm, playScratchResult } = useSound();
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -310,7 +310,7 @@ export default function ImageScratchScreen() {
 
     isProcessingDoneRef.current = true;
     setIsCompleted(true);
-    playLevelUp(); // Play sound effect on Complete
+    playScratchResult(); // Play completion sound immediately on button press
 
     const scratcherUid = currentTurn === "A"
       ? coupleProfile.partnerAUid
