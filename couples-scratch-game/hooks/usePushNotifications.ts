@@ -110,23 +110,16 @@ async function registerForPushNotificationsAsync() {
       return;
     }
 
-    const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-
-    if (!projectId) {
-      console.log('Project ID not found in app.json. Add it in extra.eas.projectId');
-    }
-
     try {
-      const pushTokenString = (
-        await N.getExpoPushTokenAsync({
-          projectId,
-        })
-      ).data;
-      console.log(pushTokenString);
+      // Use getDevicePushTokenAsync to get the raw FCM token — works in real APK builds.
+      // getExpoPushTokenAsync returns an ExponentPushToken which only routes through
+      // Expo's proxy and can land in Expo Go instead of the real APK.
+      const deviceToken = await N.getDevicePushTokenAsync();
+      const pushTokenString = deviceToken.data as string;
+      console.log('[Push] FCM device token:', pushTokenString);
       return pushTokenString;
     } catch (e: unknown) {
-      console.error(e);
+      console.error('[Push] Failed to get FCM device token:', e);
     }
   } else {
     console.log('Must use physical device for Push Notifications');
@@ -134,3 +127,4 @@ async function registerForPushNotificationsAsync() {
 
   return token;
 }
+

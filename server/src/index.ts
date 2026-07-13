@@ -2059,49 +2059,71 @@ app.post("/api/notifications/send", authenticateToken, async (req: Request, res:
     if (!title || !body) return res.status(400).json({ error: "Missing title or body" });
 
     const allProgress = await db.select({ pushToken: userProgress.pushToken }).from(userProgress);
-    // Accept all valid Expo push tokens — ExponentPushToken[...] format
-    // In a release build, these tokens route to your standalone app (WePlay), not Expo Go
+
+    // FCM device tokens are long alphanumeric strings (NOT ExponentPushToken[...]).
+    // Filter out any old Expo proxy tokens — they cannot be used with FCM directly.
     const tokens = allProgress
       .map(p => p.pushToken)
-      .filter((t): t is string => !!t && t.startsWith("ExponentPushToken"));
+      .filter((t): t is string => !!t && !t.startsWith("ExponentPushToken"));
     const uniqueTokens = Array.from(new Set(tokens));
 
     if (uniqueTokens.length === 0) {
-      return res.status(400).json({ error: "No users with registered push tokens found" });
+      return res.status(400).json({ error: "No users with registered FCM push tokens found. Old Expo tokens cannot be used — users must re-login with the new APK to register their FCM token." });
     }
 
-    const messages = uniqueTokens.map(token => ({
-      to: token,
-      sound: 'default',
-      title,
-      body,
-      channelId: 'default',  // Android: routes to the 'WePlay' notification channel
-      priority: 'high',
-    }));
-
-    const chunks: typeof messages[] = [];
-    for (let i = 0; i < messages.length; i += 100) {
-      chunks.push(messages.slice(i, i + 100));
+    const fcmServerKey = process.env.FIREBASE_SERVER_KEY;
+    if (!fcmServerKey) {
+      return res.status(500).json({ error: "FIREBASE_SERVER_KEY is not configured on the server. Add it to .env" });
     }
 
     let successCount = 0;
     const errors: any[] = [];
-    for (const chunk of chunks) {
-      const expoRes = await fetch('https://exp.host/--/api/v2/push/send', {
+
+    // FCM allows up to 500 tokens per multicast request (legacy API: 1000)
+    // Using the legacy HTTP API with registration_ids for batch sending
+    const chunkSize = 500;
+    for (let i = 0; i < uniqueTokens.length; i += chunkSize) {
+      const chunk = uniqueTokens.slice(i, i + chunkSize);
+
+      const fcmRes = await fetch('https://fcm.googleapis.com/fcm/send', {
         method: 'POST',
         headers: {
-          'Accept': 'application/json',
-          'Accept-encoding': 'gzip, deflate',
           'Content-Type': 'application/json',
+          'Authorization': `key=${fcmServerKey}`,
         },
-        body: JSON.stringify(chunk),
+        body: JSON.stringify({
+          registration_ids: chunk,
+          notification: {
+            title,
+            body,
+            sound: 'default',
+            channel_id: 'default',  // Android notification channel
+          },
+          android: {
+            priority: 'high',
+            notification: {
+              channel_id: 'default',
+              sound: 'default',
+            },
+          },
+          apns: {
+            payload: {
+              aps: {
+                sound: 'default',
+              },
+            },
+          },
+        }),
       });
-      const expoBody = await expoRes.json();
-      if (expoRes.ok) {
-        // Count only successful deliveries
-        const data: any[] = Array.isArray(expoBody.data) ? expoBody.data : [];
-        successCount += data.filter((r: any) => r.status === 'ok').length;
-        errors.push(...data.filter((r: any) => r.status !== 'ok'));
+
+      const fcmBody: any = await fcmRes.json();
+      if (fcmRes.ok) {
+        successCount += fcmBody.success ?? 0;
+        if (fcmBody.failure > 0 && fcmBody.results) {
+          errors.push(...(fcmBody.results as any[]).filter((r: any) => r.error));
+        }
+      } else {
+        errors.push({ status: fcmRes.status, body: fcmBody });
       }
     }
 
@@ -2111,6 +2133,7 @@ app.post("/api/notifications/send", authenticateToken, async (req: Request, res:
     res.status(500).json({ error: "Failed to send notifications" });
   }
 });
+
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
