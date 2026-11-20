@@ -151,11 +151,15 @@ export default function SignupScreen() {
       // We assume Google emails are already verified, go to setup or app
       router.replace("/(onboarding)/profile-setup");
     } catch (error: any) {
-      console.log(error);
+      console.error("[Google Sign-In error]", error);
       if (error?.code === "auth/popup-closed-by-user") {
         return;
       }
-      setErrors({ general: "Google Sign-In failed. Please try again." });
+      if (error?.code === "auth/unauthorized-domain") {
+        setErrors({ general: "This web domain is not authorized in Firebase. Add this domain in Firebase Console > Authentication > Settings > Authorized domains." });
+        return;
+      }
+      setErrors({ general: "Google Sign-In failed: " + (error?.message || "Please try again.") });
     } finally {
       setIsLoading(false);
     }

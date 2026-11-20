@@ -62,12 +62,14 @@ export default function LoginScreen() {
   const theme = getTheme(isDark);
 
   useEffect(() => {
+    if (Platform.OS === "web") return;
     if (biometricEnabled) {
       handleBiometricAuth();
     }
   }, []);
 
   async function handleBiometricAuth() {
+    if (Platform.OS === "web") return;
     try {
       const storedEmail = await SecureStore.getItemAsync("biometric_email");
       const storedPassword = await SecureStore.getItemAsync("biometric_password");
@@ -95,6 +97,7 @@ export default function LoginScreen() {
               }
               router.replace("/");
             } catch (err: any) {
+              console.error("[Biometric Login error]", err);
               setError(getAuthErrorMessage(err?.code || ""));
             } finally {
               setIsLoading(false);
@@ -123,14 +126,25 @@ export default function LoginScreen() {
         return;
       }
 
-      // Save credentials for future biometric logins
-      await SecureStore.setItemAsync("biometric_email", email.trim());
-      await SecureStore.setItemAsync("biometric_password", password);
+      // Save credentials for future biometric logins (native only)
+      if (Platform.OS !== "web") {
+        try {
+          await SecureStore.setItemAsync("biometric_email", email.trim());
+          await SecureStore.setItemAsync("biometric_password", password);
+        } catch {
+          // Ignore SecureStore errors
+        }
+      }
 
       // Route directly to entry
       router.replace("/");
     } catch (err: any) {
-      setError(getAuthErrorMessage(err?.code || ""));
+      console.error("[Login error]", err);
+      if (err?.code === "auth/unauthorized-domain") {
+        setError("This web domain is not authorized in Firebase. Add this domain in Firebase Console > Authentication > Settings > Authorized domains.");
+      } else {
+        setError(getAuthErrorMessage(err?.code || ""));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -176,11 +190,15 @@ export default function LoginScreen() {
       // Google emails are implicitly verified
       router.replace("/");
     } catch (err: any) {
-      console.log(err);
+      console.error("[Google Sign-In error]", err);
       if (err?.code === "auth/popup-closed-by-user") {
         return;
       }
-      setError("Google Sign-In failed. Please try again.");
+      if (err?.code === "auth/unauthorized-domain") {
+        setError("This web domain is not authorized in Firebase. Add this domain in Firebase Console > Authentication > Settings > Authorized domains.");
+        return;
+      }
+      setError("Google Sign-In failed: " + (err?.message || "Please try again."));
     } finally {
       setIsLoading(false);
     }
