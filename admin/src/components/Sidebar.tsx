@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { env } from "@/lib/env";
 import {
   LayoutDashboard, FileText, Image, RotateCcw, Heart,
-  Users, Settings, LogOut, HelpCircle, MessageSquare, History, FileEdit, Bell, Activity
+  Users, Settings, LogOut, HelpCircle, MessageSquare, History, FileEdit, Bell, Activity, Dices
 } from "lucide-react";
 
 const menuGroups = [
@@ -26,6 +26,7 @@ const menuGroups = [
       { href: "/image-tasks", label: "Image Tasks", icon: Image },
       { href: "/spin-wheel", label: "Spin Wheel", icon: RotateCcw },
       { href: "/lottery", label: "Lottery", icon: Heart },
+      { href: "/ludo", label: "Ludo Tasks", icon: Dices },
     ]
   },
   {
@@ -72,13 +73,11 @@ export default function Sidebar() {
       {/* ── Brand ─────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-8 h-24 shrink-0">
         {logoUrl ? (
-          <img src={logoUrl} alt="App Logo" className="w-8 h-8 object-contain" />
+          <img src={logoUrl} alt="App Logo" className="w-8 h-8 object-contain rounded-lg" />
         ) : (
-          <div className="w-8 h-8 bg-gradient-to-tr from-[#5e51d9] to-indigo-400 rounded-xl flex items-center justify-center shadow-sm shadow-indigo-500/30">
-            <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
-          </div>
+          <img src="/logo.png" alt="Playzure Logo" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
         )}
-        <h1 className="font-extrabold text-slate-800 text-xl tracking-tight">WePlay Admin</h1>
+        <h1 className="font-extrabold text-slate-800 text-xl tracking-tight">Playzure Admin</h1>
       </div>
 
       {/* ── Navigation ────────────────────────────────── */}

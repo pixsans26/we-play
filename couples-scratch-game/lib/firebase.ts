@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, initializeAuth, Auth, Persistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -45,10 +46,16 @@ const MyReactNativePersistence = class {
 
 let auth: Auth;
 try {
-  auth = initializeAuth(app, {
-    persistence: MyReactNativePersistence as unknown as Persistence,
-  });
-  console.log("[firebase] auth initialized with robust AsyncStorage persistence");
+  if (Platform.OS === "web") {
+    // Web uses standard browser persistence natively supported by Firebase
+    auth = getAuth(app);
+    console.log("[firebase] auth initialized for Web using standard browser persistence");
+  } else {
+    auth = initializeAuth(app, {
+      persistence: MyReactNativePersistence as unknown as Persistence,
+    });
+    console.log("[firebase] auth initialized with robust AsyncStorage persistence");
+  }
 } catch (err) {
   // Fall back to getAuth if already initialized (e.g. during Hot Reload)
   console.log("[firebase] initializeAuth threw, falling back to getAuth():", err);

@@ -35,7 +35,7 @@ import { useGameStore } from "@/store/gameStore";
 import { useThemeStore } from "@/store/themeStore";
 
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, View, Text } from "react-native";
+import { Pressable, View, Text, ActivityIndicator } from "react-native";
 import packageJson from "../package.json";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { NotificationManager } from "@/components/NotificationManager";
@@ -73,7 +73,7 @@ export default function RootLayout() {
   const [timedOut, setTimedOut] = useState(false);
   const [updateRequired, setUpdateRequired] = useState(false);
   const [latestVersion, setLatestVersion] = useState("");
-  const [brandingAppName, setBrandingAppName] = useState("WePlay");
+  const [brandingAppName, setBrandingAppName] = useState("Playzure");
 
   const setUser = useAuthStore((s) => s.setUser);
   const setSessionToken = useAuthStore((s) => s.setSessionToken);
@@ -201,7 +201,11 @@ export default function RootLayout() {
   }, [appIsReady]);
 
   if (!appIsReady) {
-    return null;
+    return (
+      <View style={{ flex: 1, backgroundColor: isDark ? "#150025" : "#ffffff", alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#f953c6" />
+      </View>
+    );
   }
 
   if (updateRequired) {

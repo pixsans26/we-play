@@ -1,10 +1,30 @@
 import { env } from "@/lib/env";
 import { useAuthStore } from "@/store/authStore";
+import { auth } from "@/lib/firebase";
 
 const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
 export const apiFetch = async (url: string, options: RequestInit = {}) => {
-  const token = useAuthStore.getState().sessionToken;
+  let token = useAuthStore.getState().sessionToken;
+  const user = useAuthStore.getState().user || auth.currentUser;
+
+  // Auto-acquire sessionToken if missing but user is logged in
+  if (!token && user?.uid) {
+    try {
+      const res = await fetch(`${BASE_URL}/api/auth/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: user.uid }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        token = data.token;
+        useAuthStore.getState().setSessionToken(data.token);
+      }
+    } catch (e) {
+      console.warn("[apiFetch] Failed to auto-acquire token:", e);
+    }
+  }
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string> || {})

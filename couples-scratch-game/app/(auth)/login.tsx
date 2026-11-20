@@ -13,20 +13,23 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
-import { signInWithEmailAndPassword, signOut, sendEmailVerification, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, sendEmailVerification, GoogleAuthProvider, signInWithCredential, signInWithPopup } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import { auth } from "@/lib/firebase";
+import { env } from "@/lib/env";
 
 let GoogleSignin: any = null;
-try {
-  GoogleSignin = require('@react-native-google-signin/google-signin').GoogleSignin;
-  GoogleSignin.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "",
-  });
-} catch (error) {
-  console.warn("GoogleSignin native module not found. It will be disabled in Expo Go.");
+if (Platform.OS !== "web") {
+  try {
+    GoogleSignin = require('@react-native-google-signin/google-signin').GoogleSignin;
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "",
+    });
+  } catch (error) {
+    console.warn("GoogleSignin native module not found. It will be disabled in Expo Go.");
+  }
 }
 import { useSettingsStore } from "@/store/settingsStore";
 import { BlurView } from "@/components/CustomBlurView";
@@ -75,7 +78,7 @@ export default function LoginScreen() {
 
         if (hasHardware && isEnrolled) {
           const authResult = await LocalAuthentication.authenticateAsync({
-            promptMessage: "Sign in to WePlay",
+            promptMessage: "Sign in to Playzure",
             fallbackLabel: "Use Password",
           });
 
@@ -134,11 +137,34 @@ export default function LoginScreen() {
   }
 
   async function handleGoogleSignIn() {
-    if (!GoogleSignin) {
-      Alert.alert("Not Supported", "Google Sign-In requires a custom native build (npm run ios/android). It does not work in Expo Go.");
-      return;
-    }
+    setIsLoading(true);
+    setError(null);
     try {
+      if (Platform.OS === "web") {
+        const provider = new GoogleAuthProvider();
+        const userCredential = await signInWithPopup(auth, provider);
+        const user = userCredential.user;
+        const API_URL = env.EXPO_PUBLIC_API_URL;
+        await fetch(`${API_URL}/api/user/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || "Google User",
+            avatar: user.photoURL || null,
+          }),
+        }).catch(console.error);
+
+        router.replace("/");
+        return;
+      }
+
+      if (!GoogleSignin) {
+        Alert.alert("Not Supported", "Google Sign-In requires a custom native build (npm run ios/android). It does not work in Expo Go.");
+        return;
+      }
+
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
       const idToken = response.data?.idToken;
@@ -151,7 +177,12 @@ export default function LoginScreen() {
       router.replace("/");
     } catch (err: any) {
       console.log(err);
+      if (err?.code === "auth/popup-closed-by-user") {
+        return;
+      }
       setError("Google Sign-In failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   }
 

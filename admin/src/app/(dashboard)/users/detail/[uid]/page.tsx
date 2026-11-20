@@ -19,7 +19,7 @@ const LEVEL_BADGES: Record<number, { emoji: string; label: string }> = {
 const getAvatarUrl = (avatar: string | null) => {
   if (!avatar) return null;
   if (avatar.startsWith("http") || avatar.startsWith("data:")) return avatar;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
   return `${baseUrl}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
 };
 

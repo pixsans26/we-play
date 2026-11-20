@@ -174,7 +174,7 @@ export default function SetupPage() {
         </div>
 
         <p className="text-center text-xs text-slate-600 mt-6">
-          WePlay · Admin Panel
+          Playzure · Admin Panel
         </p>
       </div>
     </div>

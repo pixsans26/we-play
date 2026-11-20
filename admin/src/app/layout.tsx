@@ -4,8 +4,8 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "WePlay Admin",
-  description: "Content Management System for WePlay",
+  title: "Playzure Admin",
+  description: "Content Management System for Playzure",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

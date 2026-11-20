@@ -88,8 +88,8 @@ const QUILL_MODULES = {
 
 // ── Matches the app's DEFAULT_CONTENT exactly ──────────────────────────────
 const DEFAULT_CONTENT: Record<string, string> = {
-  faq: `<h2>What is WePlay?</h2>
-<p>WePlay is a fun and intimate game designed for couples. Scratch cards to reveal surprise tasks, challenges, and moments you can enjoy together!</p>
+  faq: `<h2>What is Playzure?</h2>
+<p>Playzure is a fun and intimate game designed for couples. Scratch cards to reveal surprise tasks, challenges, and moments you can enjoy together!</p>
 <h2>How does it work?</h2>
 <p>Simply scratch the card to reveal a task or image. Complete the task together before the timer runs out, then hit Done to earn points and level up!</p>
 <h2>What happens when I skip?</h2>
@@ -104,11 +104,11 @@ const DEFAULT_CONTENT: Record<string, string> = {
   support: `<h2>Contact Us</h2>
 <p>Having trouble? We're here to help! Reach out to our support team and we'll get back to you within 24 hours.</p>
 <h2>Email Support</h2>
-<p>Send us an email at <strong>support@weplay.app</strong> and describe the issue you're experiencing.</p>
+<p>Send us an email at <strong>support@playzure.app</strong> and describe the issue you're experiencing.</p>
 <h2>Report a Bug</h2>
 <p>If you've found a bug, please include: your device model, app version (found in Settings), and a description of what happened.</p>
 <h2>Feature Requests</h2>
-<p>We'd love to hear your ideas! Send your feature requests to <strong>ideas@weplay.app</strong>.</p>
+<p>We'd love to hear your ideas! Send your feature requests to <strong>ideas@playzure.app</strong>.</p>
 <h2>Common Issues</h2>
 <p><strong>App not loading?</strong> Try closing and reopening the app, or check your internet connection.</p>
 <p><strong>Tasks not appearing?</strong> Make sure you've completed your couple profile setup in Settings.</p>
@@ -127,10 +127,10 @@ const DEFAULT_CONTENT: Record<string, string> = {
 <h2>Your Rights</h2>
 <p>You can request deletion of all your data at any time through Settings → Delete Account. This permanently removes all your data from our servers.</p>
 <h2>Contact</h2>
-<p>For privacy concerns, contact us at <strong>privacy@weplay.app</strong></p>`,
+<p>For privacy concerns, contact us at <strong>privacy@playzure.app</strong></p>`,
 
   help: `<h2>Getting Started</h2>
-<p>Welcome to WePlay! Here's everything you need to know to get the most out of the app.</p>
+<p>Welcome to Playzure! Here's everything you need to know to get the most out of the app.</p>
 <h2>Playing the Games</h2>
 <p><strong>Task Scratch:</strong> Scratch the card to reveal a fun challenge. Complete it before the timer runs out!</p>
 <p><strong>Image Scratch:</strong> Scratch to reveal a surprise image. Your partner performs the task shown!</p>
@@ -145,17 +145,17 @@ const DEFAULT_CONTENT: Record<string, string> = {
 <h2>Resetting</h2>
 <p>Want a fresh start? Head to Settings → Reset Progress to clear your history and start from Level 1 again.</p>`,
 
-  about: `<h2>About WePlay</h2>
-<p>WePlay is a love game designed to bring couples closer through fun, playful, and intimate shared experiences.</p>
+  about: `<h2>About Playzure</h2>
+<p>Playzure is a love game designed to bring couples closer through fun, playful, and intimate shared experiences.</p>
 <h2>Our Mission</h2>
-<p>We believe that the best relationships are built on shared experiences, laughter, and genuine connection. WePlay is designed to help couples explore, connect, and create memories together.</p>
+<p>We believe that the best relationships are built on shared experiences, laughter, and genuine connection. Playzure is designed to help couples explore, connect, and create memories together.</p>
 <h2>The Games</h2>
 <p>From scratch cards to spin wheels, every game is crafted to spark joy, intimacy, and playfulness in your relationship.</p>
 <h2>Made with Love</h2>
-<p>WePlay is built by a small team passionate about relationship wellness and gamified connection. Every feature is designed with real couples in mind.</p>
+<p>Playzure is built by a small team passionate about relationship wellness and gamified connection. Every feature is designed with real couples in mind.</p>
 <h2>Version</h2>
-<p>App Version: 1.0.0</p>
-<p>© 2025 WePlay. All rights reserved.</p>`,
+<p>App Version: 2.0.1</p>
+<p>© 2026 Playzure. All rights reserved.</p>`,
 };
 
 export default function AppContentPage() {

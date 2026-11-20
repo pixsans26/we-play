@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { apiFetch, getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { View, Text, Pressable, ScrollView, Image, Animated, Easing, Share, StyleSheet, Alert, TextInput, ActivityIndicator } from "react-native";
+import { Platform, View, Text, Pressable, ScrollView, Image, Animated, Easing, Share, StyleSheet, Alert, TextInput, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -207,30 +207,41 @@ export default function MainGameScreen() {
           zIndex: 50,
         }}
       >
-        <MaskedView
-          style={StyleSheet.absoluteFill}
-          maskElement={
-            <LinearGradient
-              colors={["black", "black", "transparent"]}
-              locations={[0, 0.6, 1]}
-              style={{ flex: 1 }}
-            />
-          }
-        >
-          <BlurView
-            intensity={80}
-            tint={isDark ? "dark" : "light"}
-            style={StyleSheet.absoluteFill}
-          />
+        {Platform.OS === "web" ? (
           <View
             style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+                backgroundColor: isDark ? "rgba(21, 0, 37, 0.85)" : "rgba(255, 255, 255, 0.85)",
               }
             ]}
           />
-        </MaskedView>
+        ) : (
+          <MaskedView
+            style={StyleSheet.absoluteFill}
+            maskElement={
+              <LinearGradient
+                colors={["black", "black", "transparent"]}
+                locations={[0, 0.6, 1]}
+                style={{ flex: 1 }}
+              />
+            }
+          >
+            <BlurView
+              intensity={80}
+              tint={isDark ? "dark" : "light"}
+              style={StyleSheet.absoluteFill}
+            />
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+                }
+              ]}
+            />
+          </MaskedView>
+        )}
 
         <View
           style={{
@@ -316,7 +327,7 @@ export default function MainGameScreen() {
                 <Pressable
                   onPress={async () => {
                     try {
-                      const shareMessage = `Join me on WePlay using this invite code: ${coupleProfile.inviteCode || ""}`;
+                      const shareMessage = `Join me on Playzure using this invite code: ${coupleProfile.inviteCode || ""}`;
                       await Share.share({ message: shareMessage });
                     } catch (err) {
                       console.warn(err);
@@ -515,6 +526,41 @@ export default function MainGameScreen() {
               </Pressable>
             </Reanimated.View>
           </View>
+
+          {/* Couples Ludo - Featured Banner Card */}
+          <Reanimated.View entering={FadeInDown.delay(950).duration(400)} style={{ marginBottom: 24, borderRadius: 28, overflow: "hidden" }}>
+            <Pressable
+              onPress={() => router.push("/(game)/ludo" as any)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+            >
+              <LinearGradient
+                colors={isDark ? ["#7f1d1d", "#be123c", "#4c0519"] : ["#ef4444", "#f43f5e", "#fb7185"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ padding: 20, borderRadius: 28, position: "relative", overflow: "hidden" }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                  <View style={{ flex: 1, paddingRight: 12 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                      <Text style={{ fontSize: 18 }}>🎲</Text>
+                      <Text style={{ color: "#ffffff", fontSize: 18, fontFamily: "DynaPuff_700Bold" }}>
+                        Couples Ludo
+                      </Text>
+                      <View style={{ backgroundColor: "#fbbf24", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 }}>
+                        <Text style={{ color: "#000", fontSize: 9, fontFamily: "Nunito_700Bold" }}>NEW</Text>
+                      </View>
+                    </View>
+                    <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, lineHeight: 18 }}>
+                      Roll the dice, race chips to Home & complete special dares on every step! (2P, 3P & 4P)
+                    </Text>
+                  </View>
+                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(255,255,255,0.25)", alignItems: "center", justifyContent: "center" }}>
+                    <Ionicons name="play" size={20} color="#ffffff" style={{ marginLeft: 2 }} />
+                  </View>
+                </View>
+              </LinearGradient>
+            </Pressable>
+          </Reanimated.View>
 
 
         </ScrollView>

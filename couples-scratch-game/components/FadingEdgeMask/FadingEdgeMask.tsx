@@ -36,7 +36,7 @@ export function FadingEdgeMask({ children, style, fadeSize = 0.05 }: FadingEdgeM
   const topColor = isScrolledTop ? "transparent" : "black";
   const bottomColor = isScrolledBottom ? "transparent" : "black";
 
-  if (Platform.OS === 'android') {
+  if (Platform.OS === 'android' || Platform.OS === 'web') {
     return <View style={[{ flex: 1 }, style]}>{clonedChild}</View>;
   }
 

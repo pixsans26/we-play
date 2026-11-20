@@ -1,5 +1,6 @@
 import { createAudioPlayer } from "expo-audio";
 import { useSettingsStore } from "@/store/settingsStore";
+import { Platform } from "react-native";
 
 // Initialize players once at module scope to avoid re-creation on every render
 const scratchSound = createAudioPlayer(require("@/assets/sounds/scratch.mp3"));
@@ -14,6 +15,10 @@ const popupSound = createAudioPlayer(require("@/assets/sounds/popup.wav"));
 const lotterySpinSound = createAudioPlayer(require("@/assets/sounds/lottery-spin.wav"));
 const coupleLevelUpSound = createAudioPlayer(require("@/assets/sounds/couple-level-up.mp3"));
 const scratchResultSound = createAudioPlayer(require("@/assets/sounds/scratch-result.mp3"));
+
+// Ludo Sounds
+const diceRollSound = createAudioPlayer(require("@/assets/sounds/dice-roll.wav"));
+const chipStepSound = createAudioPlayer(require("@/assets/sounds/chip-step.wav"));
 
 export function useSound() {
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
@@ -39,6 +44,10 @@ export function useSound() {
     // Specific exports for components that want them
     playLotterySpin: () => playSound(lotterySpinSound),
     playCoupleLevelUp: () => playSound(coupleLevelUpSound),
-    playScratchResult: () => playSound(scratchResultSound)
+    playScratchResult: () => playSound(scratchResultSound),
+
+    // Ludo specific sounds
+    playDiceRoll: () => playSound(diceRollSound),
+    playChipStep: () => playSound(chipStepSound),
   };
 }

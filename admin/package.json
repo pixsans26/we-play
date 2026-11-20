@@ -1,10 +1,14 @@
 {
-  "name": "admin",
-  "version": "0.1.0",
+  "name": "playzure-admin",
+  "version": "2.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:local": "next dev",
+    "dev:prod": "NEXT_PUBLIC_API_URL=https://test-we-play-server.fqjdvf.easypanel.host next dev",
     "build": "next build",
+    "build:local": "NEXT_PUBLIC_API_URL=http://localhost:4001 next build",
+    "build:prod": "NEXT_PUBLIC_API_URL=https://test-we-play-server.fqjdvf.easypanel.host next build",
     "start": "next start",
     "lint": "eslint",
     "db:push": "drizzle-kit push"
@@ -24,6 +28,7 @@
     "react-hot-toast": "^2.6.0",
     "react-quill-new": "^3.8.3",
     "recharts": "^3.8.1",
+    "run-parallel": "^1.2.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

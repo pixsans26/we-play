@@ -62,11 +62,11 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md flex flex-col space-y-4 justify-center items-center">
         {/* Logo */}
         <div className="flex flex-col justify-center items-center space-y-2 mb-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl mb-2"
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl mb-2 overflow-hidden"
             style={{ background: "linear-gradient(135deg, #ec4899, #ef4444)" }}>
-            <Heart className="w-8 h-8 text-white fill-white" />
+            <img src="/logo.png" alt="Playzure" className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight text-center">WePlay</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight text-center">Playzure</h1>
           <p className="text-slate-400 mt-1 text-sm text-center">Admin Dashboard · Sign in</p>
         </div>
 
@@ -143,7 +143,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-slate-600 mt-6">
-          WePlay · Admin Panel
+          Playzure · Admin Panel
         </p>
       </div>
     </div>

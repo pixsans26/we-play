@@ -107,7 +107,7 @@ export function NotificationManager() {
 
                 if (!alreadyExists) {
                   const title = "Update Available! 🚀";
-                  const message = `A new version of WePlay (${parsed.appVersion}) is ready. Update now for new features and bug fixes!`;
+                  const message = `A new version of Playzure (${parsed.appVersion}) is ready. Update now for new features and bug fixes!`;
 
                   addNotification({
                     id: notifId,

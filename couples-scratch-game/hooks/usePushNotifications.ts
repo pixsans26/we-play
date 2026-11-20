@@ -88,7 +88,7 @@ async function registerForPushNotificationsAsync() {
   if (Platform.OS === 'android') {
     try {
       await N.setNotificationChannelAsync('default', {
-        name: 'WePlay',
+        name: 'Playzure',
         importance: N.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#ff2d6b',

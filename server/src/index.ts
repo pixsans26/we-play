@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./env";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import multer from "multer";
@@ -15,6 +15,8 @@ import { textTasks, imageTasks, spinWheelItems, lotteryItems, adminUsers, couple
   appConfig,
   appUsers,
   presetAvatars,
+  ludoTasks,
+  ludoGameSessions,
 } from "./db/schema";
 import { sql } from "drizzle-orm";
 
@@ -80,22 +82,8 @@ const broadcastAdminEvent = (data: any) => {
 };
 
 // ─── JWT Authentication Middleware ──────────────────────────────────────────
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "Access token is missing" });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: "Invalid or expired token" });
-    }
-    (req as any).user = user;
-    next();
-  });
-};
+import { authenticateToken } from "./middleware/auth";
+export { authenticateToken };
 
 // ─── Token Generation Endpoint ──────────────────────────────────────────────
 app.post("/api/auth/token", async (req: Request, res: Response) => {
@@ -1309,6 +1297,14 @@ app.post("/api/couple", authenticateToken, upload.fields([{ name: "partnerAAvata
     const dataToSave = {
       partnerAUid,
       partnerBUid: partnerBUid || null,
+      partnerAName: partnerAName || null,
+      partnerBName: partnerBName || null,
+      partnerAAge: partnerAAge ? Number(partnerAAge) : null,
+      partnerBAge: partnerBAge ? Number(partnerBAge) : null,
+      partnerAGender: partnerAGender || null,
+      partnerBGender: partnerBGender || null,
+      whatALikes: whatALikes || null,
+      whatBLikes: whatBLikes || null,
     };
 
     let targetId = id ? Number(id) : null;
@@ -2227,13 +2223,19 @@ async function seedDefaultAvatars() {
   }
 }
 
+import { ludoRouter, seedDefaultLudoTasks } from "./routes/ludo";
+
+// Mount Ludo Game Router
+app.use(ludoRouter);
+
 // ─── Start Server ─────────────────────────────────────────────────────────────
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4001;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`\n🚀 Express server running on http://0.0.0.0:${PORT}`);
   console.log(`   Health check: http://0.0.0.0:${PORT}/health`);
   console.log(`   Text tasks:   http://0.0.0.0:${PORT}/api/tasks/text`);
   console.log(`   Image tasks:  http://0.0.0.0:${PORT}/api/tasks/image\n`);
   seedDefaultAvatars();
+  seedDefaultLudoTasks();
 });
 

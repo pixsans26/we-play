@@ -85,6 +85,14 @@ export const couple = pgTable("couple", {
   id: serial("id").primaryKey(),
   partnerAUid: text("partner_a_uid").notNull(),  // → appUsers.uid (creator)
   partnerBUid: text("partner_b_uid"),             // → appUsers.uid (null until Partner B joins)
+  partnerAName: text("partner_a_name"),
+  partnerBName: text("partner_b_name"),
+  partnerAAge: integer("partner_a_age"),
+  partnerBAge: integer("partner_b_age"),
+  partnerAGender: text("partner_a_gender"),
+  partnerBGender: text("partner_b_gender"),
+  whatALikes: text("what_a_likes"),
+  whatBLikes: text("what_b_likes"),
   inviteCode: text("invite_code").unique(),        // 6-char code shared with partner
   status: text("status").notNull().default("pending"), // 'pending' | 'active'
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -138,3 +146,39 @@ export const cycleHistory = pgTable("cycle_history", {
   cycleLength: integer("cycle_length").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// ─── LUDO GAME ────────────────────────────────────────────────────────────────
+export const ludoTasks = pgTable("ludo_tasks", {
+  id: serial("id").primaryKey(),
+  stepNumber: integer("step_number"),            // 1-52 track, 101-105 home run, 999 home, or null for general
+  stepType: text("step_type").notNull().default("normal"), // 'normal' | 'star' | 'home_entry' | 'home_stretch' | 'home'
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull().default("Fun"),    // 'Romantic' | 'Fun' | 'Dares' | 'Deep' | 'Intimate' | 'Physical'
+  performer: text("performer").notNull().default("lander"), // 'lander' | 'partner' | 'both'
+  timerSeconds: integer("timer_seconds").default(0),
+  level: integer("level").notNull().default(1),
+  imageUrl: text("image_url"),
+  categoryImageUrl: text("category_image_url"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const ludoGameSessions = pgTable("ludo_game_sessions", {
+  id: serial("id").primaryKey(),
+  coupleId: integer("couple_id"),                // links to couple.id
+  creatorUid: text("creator_uid").notNull(),
+  playerCount: integer("player_count").notNull().default(2), // 2, 3, or 4
+  players: text("players").notNull(),            // JSON string of player configs
+  tokens: text("tokens").notNull(),              // JSON string of token positions
+  tokensPerPlayer: integer("tokens_per_player").notNull().default(2), // 2 or 4
+  currentTurn: integer("current_turn").notNull().default(0), // player index 0..playerCount-1
+  currentStep: text("current_step").notNull().default("roll"), // 'roll' | 'move' | 'task'
+  lastDiceRoll: integer("last_dice_roll"),
+  activeTask: text("active_task"),               // JSON string of current active task if any
+  status: text("status").notNull().default("in_progress"), // 'in_progress' | 'completed' | 'abandoned'
+  winnerId: text("winner_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+

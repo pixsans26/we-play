@@ -18,12 +18,12 @@ interface BrandingConfig {
 }
 
 const defaultConfig: BrandingConfig = {
-  appName: "WePlay",
-  appVersion: "1.0.0",
-  supportEmail: "support@weplay.app",
+  appName: "Playzure",
+  appVersion: "2.0.1",
+  supportEmail: "support@playzure.app",
   primaryColor: "#5e51d9",
   secondaryColor: "#ffffff",
-  logoUrl: "",
+  logoUrl: "/logo.png",
 };
 
 export default function BrandingSettings() {
@@ -134,7 +134,7 @@ export default function BrandingSettings() {
                 type="text" 
                 value={config.appName}
                 onChange={(e) => updateField('appName', e.target.value)}
-                placeholder="e.g. WePlay"
+                placeholder="e.g. Playzure"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#5e51d9] focus:ring-1 focus:ring-[#5e51d9] transition-all"
               />
               <p className="text-xs text-slate-400 mt-2">Appears on splash screen and headers.</p>
@@ -158,7 +158,7 @@ export default function BrandingSettings() {
                 type="email" 
                 value={config.supportEmail}
                 onChange={(e) => updateField('supportEmail', e.target.value)}
-                placeholder="e.g. support@weplay.app"
+                placeholder="e.g. support@playzure.app"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#5e51d9] focus:ring-1 focus:ring-[#5e51d9] transition-all"
               />
               <p className="text-xs text-slate-400 mt-2">Dedicated email shown on the Support page.</p>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Modal, Alert, Image, Share, StyleSheet, TextInput, ActivityIndicator } from "react-native";
+import { Platform, View, Text, Pressable, ScrollView, Modal, Alert, Image, Share, StyleSheet, TextInput, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -292,6 +292,16 @@ export default function PartnerScreen() {
             zIndex: 50,
           }}
         >
+        {Platform.OS === "web" ? (
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: isDark ? "rgba(21, 0, 37, 0.85)" : "rgba(255, 255, 255, 0.85)",
+              }
+            ]}
+          />
+        ) : (
           <MaskedView
             style={StyleSheet.absoluteFill}
             maskElement={
@@ -316,6 +326,7 @@ export default function PartnerScreen() {
               ]}
             />
           </MaskedView>
+        )}
 
           <View
             style={{
@@ -399,7 +410,7 @@ export default function PartnerScreen() {
               onPress={async () => {
                 if (!coupleProfile?.inviteCode) return;
                 try {
-                  const shareMessage = `Join me on WePlay using this invite code: ${coupleProfile.inviteCode}`;
+                  const shareMessage = `Join me on Playzure using this invite code: ${coupleProfile.inviteCode}`;
                   await Share.share({ message: shareMessage });
                 } catch (err) {
                   console.warn(err);
@@ -475,30 +486,41 @@ export default function PartnerScreen() {
           zIndex: 50,
         }}
       >
-        <MaskedView
-          style={StyleSheet.absoluteFill}
-          maskElement={
-            <LinearGradient
-              colors={["black", "black", "transparent"]}
-              locations={[0, 0.6, 1]}
-              style={{ flex: 1 }}
-            />
-          }
-        >
-          <BlurView
-            intensity={80}
-            tint={isDark ? "dark" : "light"}
-            style={StyleSheet.absoluteFill}
-          />
+        {Platform.OS === "web" ? (
           <View
             style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+                backgroundColor: isDark ? "rgba(21, 0, 37, 0.85)" : "rgba(255, 255, 255, 0.85)",
               }
             ]}
           />
-        </MaskedView>
+        ) : (
+          <MaskedView
+            style={StyleSheet.absoluteFill}
+            maskElement={
+              <LinearGradient
+                colors={["black", "black", "transparent"]}
+                locations={[0, 0.6, 1]}
+                style={{ flex: 1 }}
+              />
+            }
+          >
+            <BlurView
+              intensity={80}
+              tint={isDark ? "dark" : "light"}
+              style={StyleSheet.absoluteFill}
+            />
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+                }
+              ]}
+            />
+          </MaskedView>
+        )}
 
         <View
           style={{

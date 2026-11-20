@@ -1,4 +1,5 @@
 import React from "react";
+import { Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -18,6 +19,12 @@ export const GradientIcon: React.FC<GradientIconProps> = ({ name, size = 24, col
 
   if (color && !colors) {
      return <Ionicons name={name} size={size} color={color} style={style} />;
+  }
+
+  // On Web, react-native-masked-view is unsupported
+  if (Platform.OS === "web") {
+    const fallbackColor = (colors && colors[0]) || theme.accentGradient[0] || "#f43f5e";
+    return <Ionicons name={name} size={size} color={fallbackColor} style={style} />;
   }
 
   return (

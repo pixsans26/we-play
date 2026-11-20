@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { apiFetch, getAvatarUrl, getAvatarSource } from "@/lib/apiClient";
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Pressable, ScrollView, Animated, Easing, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { Platform, View, Text, Pressable, ScrollView, Animated, Easing, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -133,30 +133,41 @@ export default function ProfileScreen() {
           zIndex: 50,
         }}
       >
-        <MaskedView
-          style={StyleSheet.absoluteFill}
-          maskElement={
-            <LinearGradient
-              colors={["black", "black", "transparent"]}
-              locations={[0, 0.6, 1]}
-              style={{ flex: 1 }}
-            />
-          }
-        >
-          <BlurView
-            intensity={80}
-            tint={isDark ? "dark" : "light"}
-            style={StyleSheet.absoluteFill}
-          />
+        {Platform.OS === "web" ? (
           <View
             style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+                backgroundColor: isDark ? "rgba(21, 0, 37, 0.85)" : "rgba(255, 255, 255, 0.85)",
               }
             ]}
           />
-        </MaskedView>
+        ) : (
+          <MaskedView
+            style={StyleSheet.absoluteFill}
+            maskElement={
+              <LinearGradient
+                colors={["black", "black", "transparent"]}
+                locations={[0, 0.6, 1]}
+                style={{ flex: 1 }}
+              />
+            }
+          >
+            <BlurView
+              intensity={80}
+              tint={isDark ? "dark" : "light"}
+              style={StyleSheet.absoluteFill}
+            />
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor: isDark ? "rgba(21, 0, 37, 0.4)" : "rgba(255, 255, 255, 0.4)",
+                }
+              ]}
+            />
+          </MaskedView>
+        )}
 
         <View
           style={{

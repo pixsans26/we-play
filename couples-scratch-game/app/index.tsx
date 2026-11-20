@@ -134,10 +134,18 @@ export default function EntryScreen() {
     run();
   }, [run]);
 
-  // While resolving auth, show the animated splash screen
-  if (isLoading) {
-    return null; // splash.tsx is the initial route
+  // While resolving auth, show a spinner
+  if (isLoading || checkingProfile) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#150025", alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#f953c6" />
+      </View>
+    );
   }
 
-  return null;
+  return (
+    <View style={{ flex: 1, backgroundColor: "#150025", alignItems: "center", justifyContent: "center" }}>
+      <ActivityIndicator size="large" color="#f953c6" />
+    </View>
+  );
 }

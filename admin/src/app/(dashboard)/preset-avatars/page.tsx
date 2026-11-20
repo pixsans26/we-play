@@ -16,7 +16,7 @@ interface PresetAvatar {
 const getAvatarUrl = (avatar: string | null) => {
   if (!avatar) return "";
   if (avatar.startsWith("http") || avatar.startsWith("data:")) return avatar;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
   return `${baseUrl}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
 };
 
@@ -38,7 +38,7 @@ export default function PresetAvatarsPage() {
 
   const fetchPresets = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/preset-avatars`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001"}/api/preset-avatars`);
       if (res.ok) {
         const data = await res.json();
         setPresets(data);
@@ -79,7 +79,7 @@ export default function PresetAvatarsPage() {
       formData.append("name", name.trim());
       formData.append("avatar", avatarFile);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/preset-avatars`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001"}/api/preset-avatars`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -120,7 +120,7 @@ export default function PresetAvatarsPage() {
 
     setDeletingId(id);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/preset-avatars/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001"}/api/preset-avatars/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
