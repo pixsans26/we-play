@@ -25,6 +25,7 @@ import { env } from "@/lib/env";
 import { apiFetch, getAvatarSource } from "@/lib/apiClient";
 import { CustomAlertModal } from "@/components/CustomAlertModal";
 import { useSound } from "@/hooks/useSound";
+import { showConfirm, showAlert } from "@/lib/alert";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BOARD_FRAME_SIZE = Math.min(SCREEN_WIDTH - 16, 420);
@@ -975,13 +976,11 @@ export default function LudoGameScreen() {
   };
 
   const handleConfirmRestartGame = () => {
-    Alert.alert(
+    showConfirm(
       "Restart Game?",
       "Are you sure you want to start a new game? Current game progress will be reset.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Restart", style: "destructive", onPress: handleStartNewSession },
-      ]
+      handleStartNewSession,
+      { confirmText: "Restart", isDestructive: true }
     );
   };
 
@@ -1379,26 +1378,20 @@ export default function LudoGameScreen() {
   };
 
   const handleEndGame = () => {
-    Alert.alert(
+    showConfirm(
       "End Game Session?",
       "Are you sure you want to end this game? The session will be closed on the server.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "End Game",
-          style: "destructive",
-          onPress: async () => {
-            if (sessionId) {
-              await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/ludo/session/${sessionId}/end`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status: "abandoned" }),
-              });
-            }
-            router.replace("/(game)");
-          },
-        },
-      ]
+      async () => {
+        if (sessionId) {
+          await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/ludo/session/${sessionId}/end`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "abandoned" }),
+          });
+        }
+        router.replace("/(game)");
+      },
+      { confirmText: "End Game", isDestructive: true }
     );
   };
 

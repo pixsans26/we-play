@@ -27,6 +27,7 @@ import { FadingEdgeMask } from "@/components/FadingEdgeMask/FadingEdgeMask";
 import { BlurView } from "@/components/CustomBlurView";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { GradientIcon } from "@/components/GradientIcon";
+import { showConfirm, showAlert } from "@/lib/alert";
 import { GradientText } from "@/components/GradientText";
 
 // ---------------------------------------------------------------------------
@@ -121,50 +122,38 @@ export default function HistoryScreen() {
   const handleReset = useCallback(() => {
     if (!coupleProfile) return;
 
-    Alert.alert(
+    showConfirm(
       "Reset History",
       "All scratch history for both partners will be cleared and tasks will repeat. This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Confirm",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await resetHistory(coupleProfile.partnerAUid);
-              const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
-              await resetHistory(partnerBUidFallback);
-              setHistoryAll([]);
-            } catch {
-              Alert.alert("Error", "History could not be cleared. Please try again.");
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await resetHistory(coupleProfile.partnerAUid);
+          const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
+          await resetHistory(partnerBUidFallback);
+          setHistoryAll([]);
+        } catch {
+          showAlert("Error", "History could not be cleared. Please try again.");
+        }
+      },
+      { confirmText: "Reset All", isDestructive: true }
     );
   }, [coupleProfile, resetHistory, setHistoryAll]);
 
   const handleDeleteEntry = useCallback(() => {
     if (!selectedEntry || !coupleProfile) return;
-    Alert.alert(
+    showConfirm(
       "Delete Entry",
       "Are you sure you want to remove this from history?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await resetHistory(selectedEntry.userUid, selectedEntry.id);
-              setHistoryAll(historyAll.filter((h: any) => h.id !== selectedEntry.id));
-              setSelectedEntry(null);
-            } catch {
-              Alert.alert("Error", "Could not delete this entry.");
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await resetHistory(selectedEntry.userUid, selectedEntry.id);
+          setHistoryAll(historyAll.filter((h: any) => h.id !== selectedEntry.id));
+          setSelectedEntry(null);
+        } catch {
+          showAlert("Error", "Could not delete this entry.");
+        }
+      },
+      { confirmText: "Delete", isDestructive: true }
     );
   }, [selectedEntry, coupleProfile, resetHistory, historyAll, setHistoryAll]);
 

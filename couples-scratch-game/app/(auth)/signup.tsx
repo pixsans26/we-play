@@ -11,6 +11,7 @@ import { BlurView } from "@/components/CustomBlurView";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { auth } from "@/lib/firebase";
 import { env } from "@/lib/env";
+import { showAlert } from "@/lib/alert";
 
 let GoogleSignin: any = null;
 if (Platform.OS !== "web") {
@@ -84,9 +85,9 @@ export default function SignupScreen() {
       }).catch(console.error);
 
       // Alert user to verify email and redirect to login
-      Alert.alert("Account created!", "Please check your email to verify your account.", [
-        { text: "OK", onPress: () => router.replace("/(auth)/login") }
-      ]);
+      showAlert("Account created!", "Please check your email to verify your account.", () => {
+        router.replace("/(auth)/login");
+      });
     } catch (error: any) {
       if (error?.code === "auth/email-already-in-use") setErrors({ email: "Email already in use" });
       else if (error?.code === "auth/invalid-email") setErrors({ email: "Invalid email address" });

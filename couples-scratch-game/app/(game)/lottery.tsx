@@ -15,6 +15,7 @@ import { useNotificationStore } from "@/store/notificationStore";
 import { LevelUpModal } from "@/components/LevelUpModal";
 import { useScratchHistory } from "@/hooks/useScratchHistory";
 import { useSound } from "@/hooks/useSound";
+import { showConfirm, showAlert } from "@/lib/alert";
 
 const { width } = Dimensions.get("window");
 
@@ -116,24 +117,24 @@ export default function LotteryScreen() {
   };
 
   const handleResetLottery = () => {
-    Alert.alert("Reset Love Lottery?", "This will clear your Love Lottery progress and lock the higher levels.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Reset", style: "destructive", onPress: async () => {
-          if (!coupleProfile) return;
-          try {
-            await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/history/reset?uid=${coupleProfile.partnerAUid}`, { method: "DELETE" });
-            if (coupleProfile.partnerBUid) {
-              await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/history/reset?uid=${coupleProfile.partnerBUid}`, { method: "DELETE" });
-            }
-            setLvl1Count(0);
-            setLvl2Count(0);
-            setSeenCombos(new Set());
-            setSelectedLevel(1);
-          } catch { }
-        }
-      }
-    ]);
+    showConfirm(
+      "Reset Love Lottery?",
+      "This will clear your Love Lottery progress and lock the higher levels.",
+      async () => {
+        if (!coupleProfile) return;
+        try {
+          await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/history/reset?uid=${coupleProfile.partnerAUid}`, { method: "DELETE" });
+          if (coupleProfile.partnerBUid) {
+            await apiFetch(`${env.EXPO_PUBLIC_API_URL}/api/history/reset?uid=${coupleProfile.partnerBUid}`, { method: "DELETE" });
+          }
+          setLvl1Count(0);
+          setLvl2Count(0);
+          setSeenCombos(new Set());
+          setSelectedLevel(1);
+        } catch { }
+      },
+      { confirmText: "Reset", isDestructive: true }
+    );
   };
 
   const handleRoll = () => {

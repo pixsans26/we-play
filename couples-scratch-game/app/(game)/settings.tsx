@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuthStore } from "@/store/authStore";
+import { showConfirm, showAlert } from "@/lib/alert";
 import { useThemeStore, getTheme } from "@/store/themeStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useHistoryStore } from "@/store/historyStore";
@@ -78,6 +79,8 @@ function SettingRow({ icon, iconColor, label, sublabel, right, onPress, theme, d
 export default function SettingsScreen() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
+  const setSessionToken = useAuthStore((s) => s.setSessionToken);
   const coupleProfile = useAuthStore((s) => s.coupleProfile);
   const setCoupleProfile = useAuthStore((s) => s.setCoupleProfile);
   const isDark = useThemeStore((s) => s.isDark);
@@ -100,125 +103,125 @@ export default function SettingsScreen() {
   }, []);
 
   function handleLogout() {
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Log Out", style: "destructive", onPress: async () => { await signOut(auth); setCoupleProfile(null); } },
-    ]);
+    showConfirm(
+      "Log Out",
+      "Are you sure you want to log out?",
+      async () => {
+        try {
+          await signOut(auth);
+        } catch (e) {
+          console.warn("[SignOut Error]", e);
+        }
+        setUser(null);
+        setSessionToken(null);
+        setCoupleProfile(null);
+        router.replace("/(auth)/login");
+      },
+      { confirmText: "Log Out", isDestructive: true }
+    );
   }
 
   function handleResetHistory() {
     if (!user || !coupleProfile) return;
-    Alert.alert(
+    showConfirm(
       "Reset Everything",
       "This will clear all scratch history, reset scratch counts, and reset levels to 1 for both partners. This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Reset All",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              // 1. Delete all history rows using resetHistory hook
-              await resetHistory(coupleProfile.partnerAUid);
-              const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
-              await resetHistory(partnerBUidFallback);
+      async () => {
+        try {
+          // 1. Delete all history rows using resetHistory hook
+          await resetHistory(coupleProfile.partnerAUid);
+          const partnerBUidFallback = coupleProfile.partnerBUid || `partner_b_pending_${coupleProfile.id || "0"}`;
+          await resetHistory(partnerBUidFallback);
 
-              // 2. Reset progress via API
-              await apiFetch(`${BASE_URL}/api/progress`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userUid: coupleProfile.partnerAUid, scratchCount: 0, completedCount: 0, currentLevel: 1 })
-              });
+          // 2. Reset progress via API
+          await apiFetch(`${BASE_URL}/api/progress`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userUid: coupleProfile.partnerAUid, scratchCount: 0, completedCount: 0, currentLevel: 1 })
+          });
 
-              await apiFetch(`${BASE_URL}/api/progress`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userUid: partnerBUidFallback, scratchCount: 0, completedCount: 0, currentLevel: 1 })
-              });
+          await apiFetch(`${BASE_URL}/api/progress`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userUid: partnerBUidFallback, scratchCount: 0, completedCount: 0, currentLevel: 1 })
+          });
 
-              setHistoryAll([]);
-              Alert.alert("Done", "Everything has been reset.");
-            } catch {
-              Alert.alert("Error", "Could not reset. Please try again.");
-            }
-          },
-        },
-      ]
+          setHistoryAll([]);
+          showAlert("Done", "Everything has been reset.");
+        } catch {
+          showAlert("Error", "Could not reset. Please try again.");
+        }
+      },
+      { confirmText: "Reset All", isDestructive: true }
     );
   }
 
   function handleDisconnectPartner() {
     if (!user?.uid) return;
     const userUidStr = user.uid;
-    Alert.alert(
+    showConfirm(
       "Disconnect Partner",
       "Are you sure you want to disconnect? This will permanently unlink you and delete shared progress. You will need to set up a new profile or join someone else.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Disconnect",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const res = await apiFetch(`${BASE_URL}/api/couple/uid/${userUidStr}`, {
-                method: "DELETE"
-              });
-              if (res.ok) {
-                // Wipe local state
-                await resetHistory(userUidStr);
-                if (coupleProfile?.partnerBUid) await resetHistory(coupleProfile.partnerBUid);
-                setHistoryAll([]);
-                setCoupleProfile(null);
-                
-                // Go back to profile setup
-                router.replace("/(onboarding)/profile-setup");
-              } else {
-                Alert.alert("Error", "Failed to disconnect. Please try again.");
-              }
-            } catch (err) {
-              console.warn("Disconnect error:", err);
-              Alert.alert("Error", "Could not disconnect. Please try again later.");
-            }
+      async () => {
+        try {
+          const res = await apiFetch(`${BASE_URL}/api/couple/uid/${userUidStr}`, {
+            method: "DELETE"
+          });
+          if (res.ok) {
+            // Wipe local state
+            await resetHistory(userUidStr);
+            if (coupleProfile?.partnerBUid) await resetHistory(coupleProfile.partnerBUid);
+            setHistoryAll([]);
+            setCoupleProfile(null);
+            
+            // Go back to profile setup
+            router.replace("/(onboarding)/profile-setup");
+          } else {
+            showAlert("Error", "Failed to disconnect. Please try again.");
           }
+        } catch (err) {
+          console.warn("Disconnect error:", err);
+          showAlert("Error", "Could not disconnect. Please try again later.");
         }
-      ]
+      },
+      { confirmText: "Disconnect", isDestructive: true }
     );
   }
 
   function handleDeleteAccount() {
     if (!user?.uid) return;
     const userUidStr = user.uid;
-    Alert.alert(
+    showConfirm(
       "Delete Account",
       "Are you sure you want to delete your account? This will permanently delete your couple profile and all your progress. This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
+      async () => {
+        try {
+          const res = await apiFetch(`${BASE_URL}/api/couple/uid/${userUidStr}`, {
+            method: "DELETE"
+          });
+          if (res.ok) {
+            // Wipe local state
+            await resetHistory(userUidStr);
+            if (coupleProfile?.partnerBUid) await resetHistory(coupleProfile.partnerBUid);
+            setHistoryAll([]);
+            setCoupleProfile(null);
             try {
-              const res = await apiFetch(`${BASE_URL}/api/couple/uid/${userUidStr}`, {
-                method: "DELETE"
-              });
-              if (res.ok) {
-                // Wipe local state
-                await resetHistory(userUidStr);
-                if (coupleProfile?.partnerBUid) await resetHistory(coupleProfile.partnerBUid);
-                setHistoryAll([]);
-                setCoupleProfile(null);
-                await signOut(auth);
-                Alert.alert("Account Deleted", "Your account has been successfully deleted.");
-              } else {
-                Alert.alert("Error", "Failed to delete account. Please try again.");
-              }
-            } catch (err) {
-              console.warn("Delete account error:", err);
-              Alert.alert("Error", "Could not delete account. Please try again later.");
-            }
+              await signOut(auth);
+            } catch {}
+            setUser(null);
+            setSessionToken(null);
+            showAlert("Account Deleted", "Your account has been successfully deleted.", () => {
+              router.replace("/(auth)/login");
+            });
+          } else {
+            showAlert("Error", "Failed to delete account. Please try again.");
           }
+        } catch (err) {
+          console.warn("Delete account error:", err);
+          showAlert("Error", "Could not delete account. Please try again later.");
         }
-      ]
+      },
+      { confirmText: "Delete", isDestructive: true }
     );
   }
 
