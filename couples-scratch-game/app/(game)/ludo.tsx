@@ -309,8 +309,21 @@ const LudoYard: React.FC<{
   const dockRadius = dockSize / 2;
   const isRedOrYellow = color === "red" || color === "yellow";
 
-  const p1 = size * (1.75 / 6) - dockRadius;
-  const p2 = size * (4.25 / 6) - dockRadius;
+  // Exact symmetrical dock centers in yard coordinates (0 to size):
+  // Distance from edge = 1.75 * (size / 6)
+  // Distance between docks = 2.50 * (size / 6)
+  // Distance to far edge = 1.75 * (size / 6)
+  // 1.75 + 2.50 + 1.75 = 6.00 (Equal distance & perfect alignment!)
+  const c1 = size * (1.75 / 6);
+  const c2 = size * (4.25 / 6);
+
+  // Inner center card (centered)
+  const innerCardSize = size * 0.44;
+  const innerCardOffset = (size - innerCardSize) / 2;
+
+  // Middle lighter card inset (centered)
+  const inset = size * 0.045;
+  const midCardSize = size - inset * 2;
 
   return (
     <View
@@ -319,94 +332,95 @@ const LudoYard: React.FC<{
         height: size,
         borderRadius: 18,
         backgroundColor: themeC.bg,
-        padding: size * 0.05,
-        alignItems: "center",
-        justifyContent: "center",
+        position: "relative",
       }}
     >
-      {/* Lighter middle card */}
+      {/* Lighter middle card (perfectly centered) */}
       <View
         style={{
-          width: "100%",
-          height: "100%",
+          position: "absolute",
+          left: inset,
+          top: inset,
+          width: midCardSize,
+          height: midCardSize,
           borderRadius: 14,
           backgroundColor: themeC.light,
+        }}
+      />
+
+      {/* Darker inner center square (perfectly centered) */}
+      <View
+        style={{
+          position: "absolute",
+          left: innerCardOffset,
+          top: innerCardOffset,
+          width: innerCardSize,
+          height: innerCardSize,
+          borderRadius: 10,
+          backgroundColor: themeC.dark,
           alignItems: "center",
           justifyContent: "center",
-          position: "relative",
+          borderWidth: isActiveTurn ? 2 : 0,
+          borderColor: "#fbbf24",
         }}
       >
-        {/* Darker inner card */}
-        <View
-          style={{
-            width: "56%",
-            height: "56%",
-            borderRadius: 10,
-            backgroundColor: themeC.dark,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: isActiveTurn ? 2 : 0,
-            borderColor: "#fbbf24",
-          }}
-        >
-          {player && (
-            <Text
-              numberOfLines={1}
-              style={{
-                color: "#ffffff",
-                fontSize: Math.max(size * 0.08, 10),
-                fontFamily: "DynaPuff_700Bold",
-                opacity: 0.9,
-              }}
-            >
-              {(player.name || "P").substring(0, 6)}
-            </Text>
-          )}
-        </View>
-
-        {/* 4 Circular Docks */}
-        {[
-          { left: p1, top: p1 },
-          { left: p2, top: p1 },
-          { left: p1, top: p2 },
-          { left: p2, top: p2 },
-        ].map((dockPos, idx) => (
-          <View
-            key={`dock-${color}-${idx}`}
+        {player && (
+          <Text
+            numberOfLines={1}
             style={{
-              position: "absolute",
-              left: dockPos.left,
-              top: dockPos.top,
-              width: dockSize,
-              height: dockSize,
-              borderRadius: dockRadius,
-              backgroundColor: "#ffffff",
-              alignItems: "center",
-              justifyContent: "center",
-              shadowColor: "#000",
-              shadowOpacity: 0.15,
-              shadowRadius: 2,
-              elevation: 2,
+              color: "#ffffff",
+              fontSize: Math.max(size * 0.08, 10),
+              fontFamily: "DynaPuff_700Bold",
+              opacity: 0.9,
             }}
           >
-            {isRedOrYellow && (
-              <View
-                style={{
-                  width: dockSize * 0.72,
-                  height: dockSize * 0.72,
-                  borderRadius: 999,
-                  borderWidth: 1.5,
-                  borderColor: themeC.bg,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Ionicons name="flower-outline" size={dockSize * 0.45} color={themeC.bg} />
-              </View>
-            )}
-          </View>
-        ))}
+            {(player.name || "P").substring(0, 6)}
+          </Text>
+        )}
       </View>
+
+      {/* 4 Circular Docks (Positioned with exact equal distances and dead-center aligned with base chips) */}
+      {[
+        { cx: c1, cy: c1 },
+        { cx: c2, cy: c1 },
+        { cx: c1, cy: c2 },
+        { cx: c2, cy: c2 },
+      ].map((dock, idx) => (
+        <View
+          key={`dock-${color}-${idx}`}
+          style={{
+            position: "absolute",
+            left: dock.cx - dockRadius,
+            top: dock.cy - dockRadius,
+            width: dockSize,
+            height: dockSize,
+            borderRadius: dockRadius,
+            backgroundColor: "#ffffff",
+            alignItems: "center",
+            justifyContent: "center",
+            shadowColor: "#000",
+            shadowOpacity: 0.15,
+            shadowRadius: 2,
+            elevation: 2,
+          }}
+        >
+          {isRedOrYellow && (
+            <View
+              style={{
+                width: dockSize * 0.72,
+                height: dockSize * 0.72,
+                borderRadius: 999,
+                borderWidth: 1.5,
+                borderColor: themeC.bg,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="flower-outline" size={dockSize * 0.45} color={themeC.bg} />
+            </View>
+          )}
+        </View>
+      ))}
     </View>
   );
 };
